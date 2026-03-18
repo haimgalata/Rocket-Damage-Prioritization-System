@@ -5,7 +5,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Importing the updated function that calculates the capped priority score
-from server.src.core.priority_logic import get_final_priority_score
+from server.src.services.final_priority_score_logic import get_final_priority_score
 
 
 def run_priority_tests():

@@ -95,9 +95,9 @@ def run_integration_test():
     damage_input = 8.5
     final_score, multiplier = get_final_priority_score(damage_input, features)
 
-    print(f"\nResults for Location ({lat}, {lon}):")
+    print(f"\nResults for Location ({lat}, {lon})- Sheeba tel hashomer:")
     print(f" - Multiplier (1 + S): {multiplier}")
-    print(f" - AI Damage: {damage_input}")
+    print(f" - Damage score: {damage_input}")
     print(f" - FINAL PRIORITY SCORE: {final_score}")
 
     if final_score >= 10.0:

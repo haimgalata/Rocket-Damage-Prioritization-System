@@ -1,3 +1,11 @@
+"""
+Nearest-school proximity service.
+
+Queries OpenStreetMap via OSMnx for features tagged ``amenity=school``
+within progressive search radii centred on a given coordinate. Distance is
+measured in the EPSG:3857 projected CRS for metric accuracy.
+"""
+
 import geopandas as gpd
 import osmnx as ox
 from shapely.geometry import Point
@@ -5,10 +13,35 @@ from osmnx._errors import InsufficientResponseError
 
 
 def distance_to_closest_school(lat: float, lon: float):
-    """
-    Computes the distance (in meters) to the closest school
-    using progressive search radii: 5 km, 10 km, 15 km
-    Returns -1 if no school is found within 15km.
+    """Compute the straight-line distance to the nearest school.
+
+    Expands the search radius in three steps (5 km → 10 km → 15 km) and
+    returns as soon as at least one school is found.  Progressive radii keep
+    OSM queries lean for urban areas while providing fallback coverage for
+    suburban and rural locations.
+
+    Distance measurement:
+
+    1. Input coordinate is given in WGS-84 (EPSG:4326).
+    2. School geometries and the event point are reprojected to EPSG:3857
+       (Web Mercator) for distance calculations in metres.
+    3. The centroid of the closest school geometry is used as the
+       representative point (handles Polygon and Point features equally).
+
+    Args:
+        lat (float): Latitude of the damage event in decimal degrees
+            (WGS-84). Valid range: -90 to 90.
+        lon (float): Longitude of the damage event in decimal degrees
+            (WGS-84). Valid range: -180 to 180.
+
+    Returns:
+        tuple[int, float, float] | int:
+            - On success: ``(distance_m, found_lat, found_lon)`` where
+              ``distance_m`` is the integer-rounded distance in metres, and
+              ``found_lat`` / ``found_lon`` are the WGS-84 coordinates of the
+              closest school's centroid.
+            - On failure (no school within 15 km or OSM error on all
+              radii): the integer ``-1``.
     """
 
     search_radii = [5000, 10000, 15000]
@@ -44,5 +77,5 @@ def distance_to_closest_school(lat: float, lon: float):
 
         return int(round(distances.min())), found_lat, found_lon
 
-    # No school found within 15km
+    # No school found within 15 km
     return -1
