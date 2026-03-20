@@ -1,12 +1,3 @@
-/**
- * Core Type Definitions for PrioritAI
- * Comprehensive interfaces for Users, Organizations, and Damage Events
- */
-
-// ============================================================================
-// ENUMS
-// ============================================================================
-
 export const UserRole = {
   SUPER_ADMIN: 'SUPER_ADMIN',
   ADMIN: 'ADMIN',
@@ -27,27 +18,19 @@ export const DamageClassification = {
 } as const;
 export type DamageClassification = (typeof DamageClassification)[keyof typeof DamageClassification];
 
-// ============================================================================
-// ORGANIZATION TYPES
-// ============================================================================
-
 export interface Organization {
   id: string;
   name: string;
   settlement_code: string;
   description?: string;
   region?: string;
-  adminId?: string; // Mandatory admin for this org
-  logoUrl?: string; // Optional org logo
+  adminId?: string;
+  logoUrl?: string;
   createdAt: Date;
   updatedAt?: Date;
   totalEvents?: number;
   totalUsers?: number;
 }
-
-// ============================================================================
-// USER TYPES
-// ============================================================================
 
 export interface User {
   id: string;
@@ -62,10 +45,6 @@ export interface User {
   isActive: boolean;
 }
 
-// ============================================================================
-// LOCATION & COORDINATES
-// ============================================================================
-
 export interface Location {
   lat: number;
   lng: number;
@@ -74,51 +53,40 @@ export interface Location {
   postalCode?: string;
 }
 
-// ============================================================================
-// GIS DETAILS
-// ============================================================================
-
 export interface GisDetails {
-  distHospitalM: number;       // Distance to nearest hospital in meters
-  distSchoolM: number;         // Distance to nearest school in meters
-  distRoadM: number;           // Distance to nearest road in meters
-  distStrategicM: number;      // Distance to nearest strategic/military site in meters
-  populationDensity: number;   // Population density (persons/km²)
-  geoMultiplier: number;       // Calculated geographic multiplier
+  distHospitalM: number;
+  distSchoolM: number;
+  distRoadM: number;
+  distStrategicM: number;
+  populationDensity: number;
+  geoMultiplier: number;
 }
-
-// ============================================================================
-// DAMAGE EVENT TYPES
-// ============================================================================
 
 export interface DamageEvent {
   id: string;
   organizationId: string;
-  name?: string;           // Short event name/title
+  name?: string;
   location: Location;
   imageUrl: string;
   imageUrls?: string[];
   description: string;
-  damageClassification?: DamageClassification; // 'Light' or 'Heavy'
-  damageScore: number;    // 0-10: Raw AI damage score (Light=3, Heavy=7)
-  priorityScore: number;  // 0-10: Final score = damageScore * geoMultiplier
+  damageClassification?: DamageClassification;
+  damageScore: number;
+  priorityScore: number;
   gisDetails?: GisDetails;
+  gisStatus?: 'pending' | 'done';
   status: EventStatus;
-  hidden?: boolean;       // For hide/show toggle
-  llmExplanation: string; // AI model explanation of damage
-  aiModel?: string;       // Model name used for assessment
-  createdBy: string;      // User ID
+  hidden?: boolean;
+  llmExplanation: string;
+  aiModel?: string;
+  createdBy: string;
   createdAt: Date;
   updatedAt?: Date;
   resolvedAt?: Date;
   estimatedRepairCost?: number;
-  assignedTo?: string;    // User ID of assigned operator/admin
+  assignedTo?: string;
   tags?: string[];
 }
-
-// ============================================================================
-// NOTIFICATIONS
-// ============================================================================
 
 export interface Notification {
   id: string;
@@ -130,10 +98,6 @@ export interface Notification {
   eventId?: string;
 }
 
-// ============================================================================
-// STATISTICS & ANALYTICS
-// ============================================================================
-
 export interface DashboardStats {
   totalEvents: number;
   pendingEvents: number;
@@ -141,9 +105,9 @@ export interface DashboardStats {
   completedEvents: number;
   averageDamageScore: number;
   averagePriorityScore: number;
-  highPriorityCount: number;   // priorityScore >= 7.5
-  mediumPriorityCount: number; // 5.0 <= priorityScore < 7.5
-  lowPriorityCount: number;    // priorityScore < 5.0
+  highPriorityCount: number;
+  mediumPriorityCount: number;
+  lowPriorityCount: number;
 }
 
 export interface EventsOverviewData {
@@ -152,10 +116,6 @@ export interface EventsOverviewData {
   completed: number;
   pending: number;
 }
-
-// ============================================================================
-// AUTH CONTEXT & SESSION
-// ============================================================================
 
 export interface AuthState {
   user: User | null;
@@ -168,10 +128,6 @@ export interface AuthCredentials {
   email: string;
   password: string;
 }
-
-// ============================================================================
-// API RESPONSES
-// ============================================================================
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -187,10 +143,6 @@ export interface PaginatedResponse<T> {
   totalCount: number;
   totalPages: number;
 }
-
-// ============================================================================
-// FORM TYPES
-// ============================================================================
 
 export interface NewEventFormData {
   description: string;
@@ -215,10 +167,6 @@ export interface UserFormData {
   role: UserRole;
   organizationId: string;
 }
-
-// ============================================================================
-// FILTER & SORT TYPES
-// ============================================================================
 
 export interface EventFilterOptions {
   status?: EventStatus[];

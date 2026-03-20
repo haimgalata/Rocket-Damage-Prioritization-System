@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Leaflet overrides */
 .leaflet-container {
   height: 100%;
   width: 100%;
@@ -8,7 +7,10 @@
   z-index: 0;
 }
 
-/* Custom scrollbar */
+button, a, [role="button"], select, label[for] {
+  cursor: pointer;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

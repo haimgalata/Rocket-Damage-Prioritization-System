@@ -8,6 +8,7 @@ import { UserManagement } from './pages/admin/UserManagement';
 import { ModelRunner } from './pages/admin/ModelRunner';
 import { NewEventForm } from './pages/operator/NewEventForm';
 import { FieldMapView } from './pages/operator/FieldMapView';
+import { OperatorDashboard } from './pages/operator/OperatorDashboard';
 import { OrgManagement } from './pages/super-admin/OrgManagement';
 import { UserProfile } from './pages/UserProfile';
 import { useAuthStore } from './store/authStore';
@@ -37,7 +38,7 @@ const RootRedirect: React.FC = () => {
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (user?.role === UserRole.SUPER_ADMIN) return <Navigate to="/super-admin/organizations" replace />;
   if (user?.role === UserRole.ADMIN) return <Navigate to="/admin/dashboard" replace />;
-  return <Navigate to="/operator/new-event" replace />;
+  return <Navigate to="/operator/dashboard" replace />;
 };
 
 const AppRoutes: React.FC = () => {
@@ -92,6 +93,11 @@ const AppRoutes: React.FC = () => {
       <Route path="/admin/models" element={
         <ProtectedRoute allowedRoles={[UserRole.ADMIN, UserRole.SUPER_ADMIN]}>
           <AppLayout><ModelRunner /></AppLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/operator/dashboard" element={
+        <ProtectedRoute allowedRoles={[UserRole.OPERATOR, UserRole.ADMIN]}>
+          <AppLayout><OperatorDashboard /></AppLayout>
         </ProtectedRoute>
       } />
       <Route path="/operator/new-event" element={

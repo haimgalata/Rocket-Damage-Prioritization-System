@@ -34,7 +34,6 @@ export const FieldMapView: React.FC = () => {
   return (
     <PageContainer title="Field Map View">
       <div className="max-w-6xl mx-auto space-y-4">
-        {/* Critical Alert Banner */}
         {criticalEvents.length > 0 && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-5 py-3 flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
@@ -45,7 +44,6 @@ export const FieldMapView: React.FC = () => {
           </div>
         )}
 
-        {/* View Toggle */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500">{orgEvents.length} events in your organization</p>
           <div className="flex items-center bg-gray-100 rounded-lg p-1 gap-1">
@@ -76,7 +74,6 @@ export const FieldMapView: React.FC = () => {
                 height="520px"
                 onEventClick={handleSelectEvent}
               />
-              {/* Priority Legend */}
               <div className="flex flex-wrap items-center gap-4 mt-3">
                 {[
                   { color: 'bg-red-500', label: 'Critical (≥7.5)', count: orgEvents.filter((e) => e.priorityScore >= 7.5).length },
@@ -101,7 +98,7 @@ export const FieldMapView: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={selectedEvent ? selectedEvent.location.address : 'Event Detail'}
+        title={selectedEvent ? selectedEvent.name : 'Event Detail'}
         size="lg"
       >
         {selectedEvent && <EventDetailView event={selectedEvent} />}

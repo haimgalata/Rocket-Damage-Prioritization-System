@@ -1,49 +1,37 @@
 services:
 
-  # ── FastAPI Backend ───────────────────────────────────────────────────────────
   backend:
     build:
-      # Build context is the project root so the Dockerfile can COPY the entire
-      # `server/` package (including CBS data and the Keras model) into the image.
       context: .
       dockerfile: server/Dockerfile
     container_name: prioritai-backend
     restart: unless-stopped
     ports:
-      - "8000:8000"           # Exposed directly for API testing / curl / Swagger UI
+      - "8000:8000"
     env_file:
-      - .env                  # Optional — loaded only when the file exists
+      - .env
     environment:
-      - PYTHONUNBUFFERED=1    # Ensure Python logs appear in `docker-compose logs`
+      - PYTHONUNBUFFERED=1
     volumes:
-      # Persist uploaded images across container restarts.
-      - uploads_data:/app/server/uploads
+      - ./uploads:/app/uploads
+      - ./server/cache:/app/server/cache
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15s
 
-
-  # ── React Frontend (Nginx) ────────────────────────────────────────────────────
   frontend:
     build:
       context: ./client
       dockerfile: Dockerfile
       args:
-        # At build time, Vite bakes VITE_API_URL into the JS bundle.
-        # `/api` is a relative path → Nginx proxies `/api/*` → backend:8000/*.
-        # Change to `http://localhost:8000` to call the backend directly (no proxy).
         VITE_API_URL: /api
     container_name: prioritai-frontend
     restart: unless-stopped
     ports:
-      - "80:80"               # Access the app at http://localhost
+      - "80:80"
     depends_on:
       backend:
         condition: service_healthy
-
-
-volumes:
-  uploads_data:

@@ -1,8 +1,3 @@
-/**
- * Zustand Auth & Event Store
- * Global state management for authentication, user session, and event data
- */
-
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { UserRole, EventStatus } from '../types';
@@ -14,10 +9,6 @@ import type {
   DashboardStats,
   Notification,
 } from '../types';
-
-// ============================================================================
-// STORE STATE INTERFACES
-// ============================================================================
 
 interface AuthStoreState extends AuthState {
   organization: Organization | null;
@@ -37,7 +28,6 @@ interface EventStoreState {
   isLoading: boolean;
   error: string | null;
 
-  // Actions
   setEvents: (events: DamageEvent[]) => void;
   setSelectedEvent: (event: DamageEvent | null) => void;
   addEvent: (event: DamageEvent) => void;
@@ -52,7 +42,6 @@ interface EventStoreState {
   setError: (error: string | null) => void;
   clearFilters: () => void;
 
-  // Stats
   getStats: (currentUser: User) => DashboardStats;
   getOrganizationStats: (orgId: string) => DashboardStats;
 }
@@ -65,10 +54,6 @@ interface NotificationStoreState {
   markAllAsRead: () => void;
   unreadCount: () => number;
 }
-
-// ============================================================================
-// AUTH STORE
-// ============================================================================
 
 export const useAuthStore = create<AuthStoreState>()(
   devtools(
@@ -134,10 +119,6 @@ export const useAuthStore = create<AuthStoreState>()(
     }
   )
 );
-
-// ============================================================================
-// EVENT STORE
-// ============================================================================
 
 export const useEventStore = create<EventStoreState>()(
   devtools(
@@ -332,10 +313,6 @@ export const useEventStore = create<EventStoreState>()(
     }
   )
 );
-
-// ============================================================================
-// NOTIFICATION STORE
-// ============================================================================
 
 export const useNotificationStore = create<NotificationStoreState>()(
   devtools(

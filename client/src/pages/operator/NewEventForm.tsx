@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CheckCircle, X, Navigation, Search, ImageIcon, Brain, Loader2, WifiOff } from 'lucide-react';
+import { CheckCircle, X, Navigation, Search, ImageIcon, Brain, Loader2, WifiOff, FlaskConical } from 'lucide-react';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -13,6 +13,7 @@ import { useAuth } from '../../hooks';
 import { EventStatus } from '../../types';
 import type { Location, DamageEvent, GisDetails } from '../../types';
 import { API_BASE_URL } from '../../config/api';
+import { TEST_TEMPLATES } from '../../config/testTemplates';
 
 const schema = z.object({
   name: z.string().min(3, 'Event name must be at least 3 characters').max(80),
@@ -21,31 +22,23 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-// ── Simulate AI classification ──────────────────────────────────────────────
 function simulateAIClassification(): { classification: 'Light' | 'Heavy'; damageScore: number } {
-  // Randomly pick Light or Heavy (in production this would call the Keras model)
-  const isHeavy = Math.random() > 0.4; // 60% chance Heavy for demo realism
+  const isHeavy = Math.random() > 0.4;
   return {
     classification: isHeavy ? 'Heavy' : 'Light',
     damageScore: isHeavy ? 7 : 3,
   };
 }
 
-// ── Simulate GIS multiplier calculation ────────────────────────────────────
 function simulateGISMultiplier(lat: number, lng: number): GisDetails {
-  // In production: calls the FastAPI GIS services
-  // Here we simulate realistic values near Tel Aviv
   const baseLat = 32.0853;
   const baseLng = 34.7818;
   const dist = Math.sqrt(Math.pow(lat - baseLat, 2) + Math.pow(lng - baseLng, 2));
-
   const density = Math.max(1000, Math.round(15000 - dist * 150000));
   const hospitalDist = Math.max(400, Math.round(800 + dist * 60000));
   const schoolDist = Math.max(200, Math.round(500 + dist * 40000));
   const roadDist = Math.max(30, Math.round(80 + dist * 5000));
   const strategicDist = Math.max(1000, Math.round(2000 + dist * 80000));
-
-  // Simplified multiplier calculation
   let s = 0;
   s += 0.25 * (hospitalDist <= 5000 ? 1.0 : hospitalDist <= 10000 ? 0 : -1.0);
   s += 0.15 * (schoolDist <= 5000 ? 1.0 : schoolDist <= 10000 ? 0 : -1.0);
@@ -67,7 +60,7 @@ function simulateGISMultiplier(lat: number, lng: number): GisDetails {
 
 export const NewEventForm: React.FC = () => {
   const { user } = useAuth();
-  const { addEvent } = useEventStore();
+  const { addEvent, updateEvent } = useEventStore();
   const { addNotification } = useNotificationStore();
 
   const [location, setLocation] = useState<Location | null>(null);
@@ -84,10 +77,11 @@ export const NewEventForm: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [apiError, setApiError] = useState('');
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } =
+  const [templateImagePath, setTemplateImagePath] = useState<string | null>(null);
+
+  const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } =
     useForm<FormData>({ resolver: zodResolver(schema) });
 
-  // ── Image handlers ─────────────────────────────────────────────────────────
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -106,7 +100,6 @@ export const NewEventForm: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // ── Location handlers ───────────────────────────────────────────────────────
   const handleAddressSearch = async () => {
     const query = addressInput.trim();
     if (!query) return;
@@ -165,7 +158,63 @@ export const NewEventForm: React.FC = () => {
     );
   };
 
-  // ── Submit: call backend API, fall back to local simulation on error ─────────
+  const loadTemplate = async (tplId: string) => {
+    const tpl = TEST_TEMPLATES.find((t) => t.id === tplId);
+    if (!tpl) return;
+
+    setValue('name', tpl.name, { shouldValidate: true });
+    setValue('description', tpl.description, { shouldValidate: true });
+    setValue('tags', tpl.tags, { shouldValidate: true });
+
+    setLocation({ lat: tpl.lat, lng: tpl.lng, address: tpl.address, city: tpl.city });
+    setAddressInput(tpl.address);
+
+    clearImage();
+    setTemplateImagePath(tpl.imagePath);
+    try {
+      const res = await fetch(tpl.imagePath);
+      if (res.ok) {
+        const blob = await res.blob();
+        const filename = tpl.imagePath.split('/').pop() || 'test-image.jpg';
+        const file = new File([blob], filename, { type: blob.type || 'image/jpeg' });
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
+        setTemplateImagePath(null);
+      }
+    } catch {
+    }
+  };
+
+  const pollForGis = async (eventId: string) => {
+    const MAX_ATTEMPTS = 20;
+    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+      await new Promise(r => setTimeout(r, 4000));
+      try {
+        const resp = await fetch(`${API_BASE_URL}/events/${eventId}`);
+        if (!resp.ok) continue;
+        const evt = await resp.json();
+        if (evt.gisStatus === 'done') {
+          const gisDetails: GisDetails = {
+            distHospitalM:     evt.gisDetails?.distHospitalM    ?? -1,
+            distSchoolM:       evt.gisDetails?.distSchoolM      ?? -1,
+            distRoadM:         evt.gisDetails?.distRoadM        ?? -1,
+            distStrategicM:    evt.gisDetails?.distStrategicM   ?? -1,
+            populationDensity: evt.gisDetails?.populationDensity ?? 0,
+            geoMultiplier:     evt.gisDetails?.geoMultiplier    ?? 1,
+          };
+          updateEvent(eventId, {
+            gisDetails,
+            priorityScore: evt.priorityScore,
+            llmExplanation: evt.llmExplanation,
+            gisStatus: 'done',
+          });
+          return;
+        }
+      } catch {
+      }
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
     const loc = location || { lat: 32.0853, lng: 34.7818, address: 'Unspecified', city: 'Tel Aviv' };
 
@@ -175,7 +224,6 @@ export const NewEventForm: React.FC = () => {
     let newEvent: DamageEvent | null = null;
     let usedFallback = false;
 
-    // ── Try real backend first ─────────────────────────────────────────────────
     try {
       const formData = new window.FormData();
       formData.append('lat', String(loc.lat));
@@ -190,8 +238,6 @@ export const NewEventForm: React.FC = () => {
       if (!resp.ok) throw new Error(`Server error ${resp.status}`);
 
       const evt = await resp.json();
-
-      // Map backend response → DamageEvent
       const gisDetails: GisDetails = {
         distHospitalM:    evt.gisDetails?.distHospitalM    ?? -1,
         distSchoolM:      evt.gisDetails?.distSchoolM      ?? -1,
@@ -206,7 +252,7 @@ export const NewEventForm: React.FC = () => {
         organizationId:       evt.organizationId,
         name:                 data.name,
         location:             { lat: loc.lat, lng: loc.lng, address: evt.location?.address ?? loc.address, city: evt.location?.city ?? loc.city },
-        imageUrl:             imagePreview || '',
+        imageUrl:             evt.imageUrl || imagePreview || '',
         description:          evt.description,
         damageClassification: evt.damageClassification as 'Light' | 'Heavy',
         damageScore:          evt.damageScore,
@@ -219,9 +265,9 @@ export const NewEventForm: React.FC = () => {
         createdBy:            evt.createdBy,
         createdAt:            new Date(evt.createdAt),
         tags:                 evt.tags ?? [],
+        gisStatus:            evt.gisStatus as 'pending' | 'done' | undefined,
       };
     } catch (_err) {
-      // ── Backend unavailable → local simulation fallback ──────────────────────
       usedFallback = true;
       setApiError('Backend unavailable — scoring locally (offline mode).');
       const { classification, damageScore } = simulateAIClassification();
@@ -262,7 +308,10 @@ export const NewEventForm: React.FC = () => {
 
     addEvent(newEvent);
 
-    // ── Priority notifications ────────────────────────────────────────────────
+    if (!usedFallback && newEvent.gisStatus === 'pending') {
+      pollForGis(newEvent.id);
+    }
+
     const score = newEvent.priorityScore;
     const eventId = newEvent.id;
     if (score >= 7.5) {
@@ -312,7 +361,6 @@ export const NewEventForm: React.FC = () => {
     }, 3000);
   };
 
-  // ── AI analyzing overlay ────────────────────────────────────────────────────
   if (aiStatus === 'analyzing') {
     return (
       <PageContainer title="Report New Damage Event">
@@ -336,7 +384,6 @@ export const NewEventForm: React.FC = () => {
     );
   }
 
-  // ── Success screen ──────────────────────────────────────────────────────────
   if (submitted) {
     return (
       <PageContainer title="New Damage Event">
@@ -361,9 +408,34 @@ export const NewEventForm: React.FC = () => {
           </p>
         </div>
 
+        <div className="mb-4 border border-amber-200 bg-amber-50 rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <FlaskConical className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <span className="text-sm font-semibold text-amber-800">Quick Load Test Template</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {TEST_TEMPLATES.map((tpl) => (
+              <button
+                key={tpl.id}
+                type="button"
+                onClick={() => loadTemplate(tpl.id)}
+                className="px-3 py-1.5 text-xs font-medium rounded-md bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 transition"
+              >
+                {tpl.expected.aiClassification === 'Heavy' ? '🔴' : '🟡'} {tpl.city}
+              </button>
+            ))}
+          </div>
+          {templateImagePath && (
+            <div className="mt-2 p-2 bg-white border border-amber-300 rounded text-xs text-amber-700">
+              <strong>📂 Manual image required:</strong> Please click the photo upload area and select:
+              <br />
+              <code className="bg-amber-100 px-1 rounded">{templateImagePath.replace('/test-images/', 'client/public/test-images/')}</code>
+            </div>
+          )}
+        </div>
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
-          {/* Description */}
           <Card title="Event Description">
             <div className="space-y-4">
               <div>
@@ -401,7 +473,6 @@ export const NewEventForm: React.FC = () => {
             </div>
           </Card>
 
-          {/* Location */}
           <Card title="Location">
             <div className="space-y-3">
               <div>
@@ -450,7 +521,6 @@ export const NewEventForm: React.FC = () => {
             </div>
           </Card>
 
-          {/* Photo Evidence */}
           <Card title="Photo Evidence">
             {imagePreview ? (
               <div className="relative">

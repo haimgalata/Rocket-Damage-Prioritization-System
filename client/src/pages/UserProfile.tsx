@@ -82,7 +82,6 @@ export const UserProfile: React.FC = () => {
     <PageContainer title="My Profile">
       <div className="max-w-2xl mx-auto space-y-6">
 
-        {/* Profile header */}
         <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl p-6 text-white flex items-center gap-5">
           <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold flex-shrink-0">
             {getInitials(user.name)}
@@ -103,7 +102,6 @@ export const UserProfile: React.FC = () => {
           </div>
         </div>
 
-        {/* Edit Profile */}
         <Card title="Edit Profile" subtitle="Update your personal information">
           <form onSubmit={handleProfile(onSaveProfile)} className="space-y-4">
             <div className="relative">
@@ -153,7 +151,6 @@ export const UserProfile: React.FC = () => {
           </form>
         </Card>
 
-        {/* Change Password */}
         <Card title="Change Password" subtitle="Update your account password">
           <form onSubmit={handlePassword(onChangePassword)} className="space-y-4">
             <div>

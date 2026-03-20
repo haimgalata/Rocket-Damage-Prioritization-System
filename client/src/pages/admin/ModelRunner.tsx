@@ -78,7 +78,6 @@ export const ModelRunner: React.FC = () => {
   return (
     <PageContainer title="AI Model Runner">
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Model Info */}
         <Card>
           <div className="flex items-start gap-5">
             <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -111,7 +110,6 @@ export const ModelRunner: React.FC = () => {
           </div>
         </Card>
 
-        {/* Run Panel */}
         <Card title="Run Assessment" subtitle={`${pendingEvents.length} events awaiting scoring`}>
           {isRunning ? (
             <div className="space-y-4">
@@ -152,7 +150,6 @@ export const ModelRunner: React.FC = () => {
           )}
         </Card>
 
-        {/* Run History */}
         {runs.length > 0 && (
           <Card title="Run History" subtitle="Previous model executions">
             <div className="space-y-3">

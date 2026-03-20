@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Building2, Plus, Search, Users, AlertTriangle, Calendar, Shield, X, BarChart3, ExternalLink, ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../../components/layout/PageContainer';
@@ -6,14 +6,15 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
-import { MOCK_ORGANIZATIONS, MOCK_USERS } from '../../data/mockData';
-import type { Organization, User } from '../../types';
+import { MOCK_ORGANIZATIONS, MOCK_USERS, MOCK_EVENTS } from '../../data/mockData';
+import type { Organization, User, DamageEvent } from '../../types';
 import { UserRole } from '../../types';
 import { formatDate, formatScore } from '../../utils/helpers';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useEventStore } from '../../store/authStore';
+import { API_BASE_URL } from '../../config/api';
 
 const REGIONS = ['North', 'Center', 'South', 'Jerusalem', 'Tel Aviv', 'Haifa'];
 
@@ -43,14 +44,13 @@ type FormData = z.infer<typeof schema>;
 
 export const OrgManagement: React.FC = () => {
   const navigate = useNavigate();
-  const { getOrganizationStats } = useEventStore();
+  const { getOrganizationStats, events, setEvents } = useEventStore();
   const [orgs, setOrgs] = useState<Organization[]>(MOCK_ORGANIZATIONS);
   const [allUsers, setAllUsers] = useState<User[]>(MOCK_USERS);
   const [search, setSearch] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [briefOrg, setBriefOrg] = useState<Organization | null>(null);
 
-  // Logo upload state
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -127,31 +127,51 @@ export const OrgManagement: React.FC = () => {
     setIsCreateOpen(false);
   };
 
-  // Brief stats for a clicked org
   const getBriefStats = (org: Organization) => {
     const stats = getOrganizationStats(org.id);
-    // Fallback to org.totalEvents if event store is empty
     const total = stats.totalEvents || org.totalEvents || 0;
     const avg = stats.averagePriorityScore || 0;
     return { total, avg };
   };
 
-  const totalEvents = orgs.reduce((s, o) => s + (o.totalEvents || 0), 0);
-  const totalUsers = allUsers.length;
+  const totalEvents = events.length;
+  const userCountByOrg = orgs.reduce<Record<string, number>>((acc, o) => {
+    acc[o.id] = allUsers.filter(u => u.organizationId === o.id).length;
+    return acc;
+  }, {});
+  const totalUsers = Object.values(userCountByOrg).reduce((s, c) => s + c, 0);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/events`);
+        if (res.ok) {
+          const data: DamageEvent[] = await res.json();
+          if (data.length > 0) { setEvents(data); return; }
+        }
+      } catch { /* backend unavailable */ }
+      if (events.length === 0) setEvents(MOCK_EVENTS);
+    };
+    load();
+  }, []);
 
   return (
     <PageContainer title="Organization Management">
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-4 gap-4">
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <p className="text-sm text-gray-500 mb-1">Total Organizations</p>
+            <p className="text-sm text-gray-500 mb-1">Organizations</p>
             <p className="text-3xl font-bold text-gray-900">{orgs.length}</p>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <p className="text-sm text-gray-500 mb-1">Total Events</p>
             <p className="text-3xl font-bold text-gray-900">{totalEvents}</p>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <p className="text-sm text-gray-500 mb-1">Pending</p>
+            <p className="text-3xl font-bold text-yellow-600">{events.filter(e => e.status === 'PENDING').length}</p>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <p className="text-sm text-gray-500 mb-1">Total Users</p>
@@ -201,7 +221,6 @@ export const OrgManagement: React.FC = () => {
                     <tr key={org.id} className="border-b border-gray-100 hover:bg-gray-50 transition">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          {/* Logo or default icon */}
                           {org.logoUrl ? (
                             <img src={org.logoUrl} alt={org.name} className="w-9 h-9 rounded-lg object-cover border border-gray-200" />
                           ) : (
@@ -210,7 +229,6 @@ export const OrgManagement: React.FC = () => {
                             </div>
                           )}
                           <div>
-                            {/* Clickable org name → quick brief */}
                             <button
                               onClick={() => setBriefOrg(org)}
                               className="text-sm font-semibold text-blue-700 hover:underline text-left"
@@ -247,13 +265,13 @@ export const OrgManagement: React.FC = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1.5 text-sm text-gray-700">
                           <AlertTriangle className="w-3.5 h-3.5 text-orange-400" />
-                          {org.totalEvents ?? 0}
+                          {getOrganizationStats(org.id).totalEvents || org.totalEvents || 0}
                         </div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1.5 text-sm text-gray-700">
                           <Users className="w-3.5 h-3.5 text-blue-400" />
-                          {org.totalUsers ?? 0}
+                          {userCountByOrg[org.id] ?? 0}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
@@ -297,7 +315,6 @@ export const OrgManagement: React.FC = () => {
               </button>
             </div>
 
-            {/* Stats */}
             {(() => {
               const { total, avg } = getBriefStats(briefOrg);
               return (
@@ -372,7 +389,6 @@ export const OrgManagement: React.FC = () => {
             />
           </div>
 
-          {/* Logo upload */}
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-1">Organization Logo (optional)</label>
             {logoPreview ? (
@@ -405,7 +421,6 @@ export const OrgManagement: React.FC = () => {
             />
           </div>
 
-          {/* Admin assignment */}
           <div className="border-t border-gray-200 pt-3">
             <p className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-1.5">
               <Shield className="w-4 h-4 text-purple-500" />

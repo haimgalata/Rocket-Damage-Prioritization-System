@@ -37,7 +37,6 @@ export const Login: React.FC = () => {
     const org = MOCK_ORGANIZATIONS.find((o) => o.id === user.organizationId);
     loginUser(user, org || MOCK_ORGANIZATIONS[0]);
 
-    // Route based on role
     if (user.role === 'SUPER_ADMIN') navigate('/super-admin/organizations');
     else if (user.role === 'ADMIN') navigate('/admin/dashboard');
     else navigate('/operator/map');
@@ -45,13 +44,11 @@ export const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center p-4">
-      {/* Background grid */}
       <div className="absolute inset-0 opacity-10"
         style={{ backgroundImage: 'radial-gradient(circle, #60a5fa 1px, transparent 1px)', backgroundSize: '40px 40px' }}
       />
 
       <div className="relative w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl shadow-lg shadow-blue-900/50 mb-4">
             <Shield className="w-8 h-8 text-white" />
@@ -60,7 +57,6 @@ export const Login: React.FC = () => {
           <p className="text-blue-300 mt-1 text-sm">Professional Damage Assessment System</p>
         </div>
 
-        {/* Card */}
         <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl">
           <h2 className="text-xl font-semibold text-white mb-6">Sign in to your account</h2>
 
@@ -119,7 +115,6 @@ export const Login: React.FC = () => {
             </button>
           </form>
 
-          {/* Demo credentials */}
           <div className="mt-6 pt-6 border-t border-white/10">
             <p className="text-xs text-blue-300 mb-3 flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5" /> Demo accounts — click to fill

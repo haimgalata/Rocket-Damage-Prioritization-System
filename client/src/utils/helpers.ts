@@ -1,14 +1,5 @@
-/**
- * Utility functions for formatting, colors, and helpers
- * Centralized helper functions used throughout the application
- */
-
 import { EventStatus } from '../types';
 import type { DamageEvent, DashboardStats } from '../types';
-
-// ============================================================================
-// COLOR UTILITIES
-// ============================================================================
 
 export const getStatusColor = (status: EventStatus): string => {
   switch (status) {
@@ -37,10 +28,10 @@ export const getStatusBgColor = (status: EventStatus): string => {
 };
 
 export const getPriorityColor = (score: number): string => {
-  if (score >= 7.5) return 'bg-red-100 text-red-800 border-red-300';    // Critical
-  if (score >= 5.0) return 'bg-orange-100 text-orange-800 border-orange-300'; // High
-  if (score >= 2.5) return 'bg-yellow-100 text-yellow-800 border-yellow-300'; // Medium
-  return 'bg-green-100 text-green-800 border-green-300'; // Low
+  if (score >= 7.5) return 'bg-red-100 text-red-800 border-red-300';
+  if (score >= 5.0) return 'bg-orange-100 text-orange-800 border-orange-300';
+  if (score >= 2.5) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+  return 'bg-green-100 text-green-800 border-green-300';
 };
 
 export const getPriorityTextColor = (score: number): string => {
@@ -58,14 +49,10 @@ export const getPriorityLabel = (score: number): string => {
 };
 
 export const getMarkerColor = (score: number): string => {
-  if (score >= 7.5) return '#dc2626'; // Red for critical
-  if (score >= 5.0) return '#f97316'; // Orange for high
-  return '#16a34a'; // Green for low/medium
+  if (score >= 7.5) return '#dc2626';
+  if (score >= 5.0) return '#f97316';
+  return '#16a34a';
 };
-
-// ============================================================================
-// DATE UTILITIES
-// ============================================================================
 
 export const formatDate = (date: Date | string): string => {
   const d = new Date(date);
@@ -99,13 +86,9 @@ export const formatTimeAgo = (date: Date | string): string => {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}d ago`;
-  
+
   return formatDate(d);
 };
-
-// ============================================================================
-// STRING UTILITIES
-// ============================================================================
 
 export const truncateText = (text: string, length: number = 100): string => {
   return text.length > length ? text.substring(0, length) + '...' : text;
@@ -132,10 +115,6 @@ export const getInitials = (name: string): string => {
     .slice(0, 2);
 };
 
-// ============================================================================
-// NUMBER UTILITIES
-// ============================================================================
-
 export const formatScore = (score: number): string => {
   return `${Number(score).toFixed(1)}/10`;
 };
@@ -153,10 +132,6 @@ export const formatNumber = (num: number): string => {
   return num.toLocaleString('en-US');
 };
 
-// ============================================================================
-// LOCATION UTILITIES
-// ============================================================================
-
 export const formatAddress = (
   address: string,
   city?: string,
@@ -172,8 +147,7 @@ export const calculateDistance = (
   lat2: number,
   lon2: number
 ): number => {
-  // Haversine formula for distance calculation (in km)
-  const R = 6371; // Earth's radius in km
+  const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
   const a =
@@ -185,10 +159,6 @@ export const calculateDistance = (
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return Math.round((R * c) * 100) / 100;
 };
-
-// ============================================================================
-// EVENT UTILITIES
-// ============================================================================
 
 export const sortEventsByPriority = (events: DamageEvent[]): DamageEvent[] => {
   return [...events].sort((a, b) => b.priorityScore - a.priorityScore);
@@ -255,10 +225,6 @@ export const calculateEventStats = (events: DamageEvent[]): DashboardStats => {
   };
 };
 
-// ============================================================================
-// VALIDATION UTILITIES
-// ============================================================================
-
 export const isValidEmail = (email: string): boolean => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
@@ -266,10 +232,6 @@ export const isValidEmail = (email: string): boolean => {
 export const isValidCoordinates = (lat: number, lng: number): boolean => {
   return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
 };
-
-// ============================================================================
-// EXPORT ALL UTILITIES
-// ============================================================================
 
 export default {
   getStatusColor,

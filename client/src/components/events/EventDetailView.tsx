@@ -1,8 +1,9 @@
-import React from 'react';
-import { MapPin, Calendar, User, Tag, DollarSign, Activity, Navigation2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { MapPin, Calendar, User, Tag, DollarSign, Activity, Navigation2, X } from 'lucide-react';
 import type { DamageEvent } from '../../types';
 import { Badge } from '../ui/Badge';
 import { AIExplanationBox } from './AIExplanationBox';
+import { API_BASE_URL } from '../../config/api';
 import {
   getStatusColor,
   getPriorityLabel,
@@ -11,16 +12,24 @@ import {
   formatCurrency,
 } from '../../utils/helpers';
 
+const resolveImageUrl = (url: string): string => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  return `${API_BASE_URL}${url}`;
+};
+
 interface EventDetailViewProps {
   event: DamageEvent;
 }
 
-const formatMeters = (m: number): string => {
+const formatMeters = (m: number | null | undefined): string => {
+  if (m === undefined || m === null || m === -1) return 'Not found';
   if (m >= 1000) return `${(m / 1000).toFixed(1)} km`;
   return `${Math.round(m)} m`;
 };
 
 export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const priorityLabel = getPriorityLabel(event.priorityScore);
   const priorityColorMap: Record<string, 'danger' | 'warning' | 'info' | 'success'> = {
     Critical: 'danger',
@@ -31,28 +40,58 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
 
   return (
     <div className="space-y-5">
-      {/* Event Name */}
       {event.name && (
         <h3 className="text-lg font-bold text-gray-900">{event.name}</h3>
       )}
 
-      {/* Image */}
       {event.imageUrl ? (
-        <img
-          src={event.imageUrl}
-          alt={event.name || 'Damage'}
-          className="w-full h-48 object-cover rounded-xl border border-gray-200"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://placehold.co/400x300/1e3a5f/white?text=No+Image';
-          }}
-        />
+        <>
+          <div
+            className="cursor-pointer block w-full mb-4"
+            onClick={() => setLightboxOpen(true)}
+            title="Click to enlarge"
+          >
+            <img
+              src={resolveImageUrl(event.imageUrl)}
+              alt={event.name || 'Damage'}
+              className="w-full h-48 object-cover rounded-lg border border-gray-200 hover:opacity-80 transition-opacity"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://placehold.co/800x600/1e3a5f/white?text=No+Image';
+              }}
+            />
+            <p className="text-xs text-gray-400 mt-1 text-center">Click to enlarge</p>
+          </div>
+
+          {lightboxOpen && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/75"
+              onClick={() => setLightboxOpen(false)}
+            >
+              <div
+                className="relative max-w-3xl max-h-[90vh] mx-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => setLightboxOpen(false)}
+                  className="absolute -top-3 -right-3 z-10 bg-white rounded-full p-1 shadow-lg hover:bg-gray-100"
+                >
+                  <X className="w-5 h-5 text-gray-700" />
+                </button>
+                <img
+                  src={resolveImageUrl(event.imageUrl)}
+                  alt={event.name || 'Damage'}
+                  className="max-h-[85vh] max-w-full rounded-xl object-contain"
+                />
+              </div>
+            </div>
+          )}
+        </>
       ) : (
-        <div className="w-full h-48 rounded-xl border border-gray-200 bg-gray-100 flex items-center justify-center">
+        <div className="w-full h-28 rounded-xl border border-gray-200 bg-gray-100 flex items-center justify-center">
           <p className="text-sm text-gray-400">No image provided</p>
         </div>
       )}
 
-      {/* Status & Priority */}
       <div className="flex items-center gap-3 flex-wrap">
         <span
           className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(event.status)}`}
@@ -75,7 +114,6 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         ))}
       </div>
 
-      {/* Score Summary */}
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-gray-50 rounded-lg p-3 text-center">
           <p className="text-xs text-gray-500 mb-1">Damage Score</p>
@@ -104,13 +142,11 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         </div>
       </div>
 
-      {/* Description */}
       <div>
         <h4 className="text-sm font-semibold text-gray-700 mb-1">Description</h4>
         <p className="text-sm text-gray-600">{event.description}</p>
       </div>
 
-      {/* Meta */}
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div className="flex items-center gap-2 text-gray-500">
           <MapPin className="w-4 h-4 text-gray-400" />
@@ -132,13 +168,21 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         </div>
       </div>
 
-      {/* GIS Details */}
       {event.gisDetails && (
         <div>
           <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1.5">
             <Navigation2 className="w-4 h-4 text-blue-500" />
             GIS Proximity Analysis
           </h4>
+          {event.gisStatus === 'pending' && (
+            <div className="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 mb-2">
+              <svg className="animate-spin w-4 h-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+              </svg>
+              <p className="text-xs text-blue-700 font-medium">GIS analysis in progress — scores will update automatically...</p>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-2">
             {[
               { label: 'Nearest Hospital', value: formatMeters(event.gisDetails.distHospitalM), icon: '🏥' },
@@ -166,7 +210,6 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         </div>
       )}
 
-      {/* AI Explanation */}
       <AIExplanationBox
         explanation={event.llmExplanation}
         model={event.aiModel}

@@ -6,7 +6,8 @@ WORKDIR /app
 
 # Install dependencies first (cached layer — only re-runs when package files change).
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install --network-timeout=100000 --no-package-lock
+
 
 # Copy source and build.
 # VITE_API_URL is injected at build time via --build-arg in docker-compose.yml.

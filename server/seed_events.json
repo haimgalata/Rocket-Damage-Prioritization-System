@@ -1,0 +1,727 @@
+[
+  {
+    "id": "seed-e9210708",
+    "organizationId": "org-1",
+    "createdBy": "user-op-1",
+    "name": "Dizengoff Center Strike",
+    "description": "Direct rocket impact on the northern facade of Dizengoff Center shopping mall. Structural columns on floors 2–4 show visible shear cracks. Glass facade collapsed across a 30-metre section. Multiple utility lines severed. Surrounding area heavily populated; evacuation in progress.",
+    "location": {
+      "lat": 32.0785,
+      "lng": 34.774,
+      "address": "Dizengoff Center Strike",
+      "city": "Tel Aviv"
+    },
+    "imageUrl": "/uploads/tel_aviv_heavy_1.jpg",
+    "damageClassification": "Heavy",
+    "damageScore": 7,
+    "priorityScore": 10.0,
+    "gisDetails": {
+      "distHospitalM": 1629.0,
+      "distSchoolM": 329.0,
+      "distRoadM": 8.0,
+      "distStrategicM": 1184.0,
+      "populationDensity": 9545.35,
+      "geoMultiplier": 1.791
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Heavy damage classification detected by vision AI model. Structural characteristics are consistent with heavy damage patterns — immediate structural assessment recommended. Geographic context: nearest hospital 1.6 km, nearest school 329 m, nearest road 8 m, nearest strategic site 1.2 km, population density 9,545 persons/km². Geographic multiplier: ×1.79. Final priority score: 10.0/10 (critical priority). Score formula: damage(7) × geo_multiplier(1.79) = 10.0.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "structural",
+      "evacuation",
+      "commercial"
+    ],
+    "createdAt": "2026-03-19T03:25:16Z"
+  },
+  {
+    "id": "seed-dd2bb0ea",
+    "organizationId": "org-1",
+    "createdBy": "user-op-2",
+    "name": "Rothschild Boulevard Building Collapse",
+    "description": "Residential tower on Rothschild Blvd sustained a near-miss that caused partial collapse of the eastern stairwell. Three upper floors compromised. Gas leak detected on ground floor. Boutique district highly accessible — emergency vehicles on scene. Building is a registered heritage structure.",
+    "location": {
+      "lat": 32.0627,
+      "lng": 34.7739,
+      "address": "Rothschild Boulevard Building Collapse",
+      "city": "Tel Aviv"
+    },
+    "imageUrl": "/uploads/tel_aviv_heavy_2.jpg",
+    "damageClassification": "Heavy",
+    "damageScore": 7,
+    "priorityScore": 10.0,
+    "gisDetails": {
+      "distHospitalM": 2462.0,
+      "distSchoolM": 302.0,
+      "distRoadM": 46.0,
+      "distStrategicM": 1271.0,
+      "populationDensity": 9545.35,
+      "geoMultiplier": 1.745
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Heavy damage classification detected by vision AI model. Structural characteristics are consistent with heavy damage patterns — immediate structural assessment recommended. Geographic context: nearest hospital 2.5 km, nearest school 302 m, nearest road 46 m, nearest strategic site 1.3 km, population density 9,545 persons/km². Geographic multiplier: ×1.75. Final priority score: 10.0/10 (critical priority). Score formula: damage(7) × geo_multiplier(1.75) = 10.0.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "gas-leak",
+      "heritage",
+      "residential"
+    ],
+    "createdAt": "2026-03-20T03:25:16Z"
+  },
+  {
+    "id": "seed-83219aa5",
+    "organizationId": "org-1",
+    "createdBy": "user-op-1",
+    "name": "Jaffa Port Warehouse Fire",
+    "description": "Rocket strike ignited a warehouse on the Jaffa Port waterfront. Fire has spread to two adjacent storage units containing flammable materials. Port operations suspended. Fire brigade and hazmat team deployed. Historic old city structures within 200 m at risk of thermal damage.",
+    "location": {
+      "lat": 32.053,
+      "lng": 34.751,
+      "address": "Jaffa Port Warehouse Fire",
+      "city": "Tel Aviv"
+    },
+    "imageUrl": "/uploads/tel_aviv_heavy_3.jpg",
+    "damageClassification": "Heavy",
+    "damageScore": 7,
+    "priorityScore": 10.0,
+    "gisDetails": {
+      "distHospitalM": 2448.0,
+      "distSchoolM": 264.0,
+      "distRoadM": 20.0,
+      "distStrategicM": 607.0,
+      "populationDensity": 9545.35,
+      "geoMultiplier": 1.774
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Heavy damage classification detected by vision AI model. Structural characteristics are consistent with heavy damage patterns — immediate structural assessment recommended. Geographic context: nearest hospital 2.4 km, nearest school 264 m, nearest road 20 m, nearest strategic site 607 m, population density 9,545 persons/km². Geographic multiplier: ×1.77. Final priority score: 10.0/10 (critical priority). Score formula: damage(7) × geo_multiplier(1.77) = 10.0.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "fire",
+      "hazmat",
+      "port",
+      "heritage"
+    ],
+    "createdAt": "2026-03-18T03:25:16Z"
+  },
+  {
+    "id": "seed-ebb6ad2b",
+    "organizationId": "org-1",
+    "createdBy": "user-op-2",
+    "name": "Florentin Workshop Roof Damage",
+    "description": "Rocket fragment landed on the flat roof of a two-story artisan workshop in Florentin neighbourhood. Roof membrane punctured; minor structural cracks on parapet wall. No injuries. Power supply interrupted for 12 units in the block. Area accessible via main roads.",
+    "location": {
+      "lat": 32.0555,
+      "lng": 34.766,
+      "address": "Florentin Workshop Roof Damage",
+      "city": "Tel Aviv"
+    },
+    "imageUrl": "/uploads/tel_aviv_light_1.jpg",
+    "damageClassification": "Light",
+    "damageScore": 3,
+    "priorityScore": 5.25,
+    "gisDetails": {
+      "distHospitalM": 2513.0,
+      "distSchoolM": 127.0,
+      "distRoadM": 33.0,
+      "distStrategicM": 1235.0,
+      "populationDensity": 9545.35,
+      "geoMultiplier": 1.749
+    },
+    "gisStatus": "done",
+    "status": "COMPLETED",
+    "hidden": false,
+    "llmExplanation": "Light damage classification detected by vision AI model. Structural characteristics are consistent with light damage patterns — standard repair scheduling is appropriate. Geographic context: nearest hospital 2.5 km, nearest school 127 m, nearest road 33 m, nearest strategic site 1.2 km, population density 9,545 persons/km². Geographic multiplier: ×1.75. Final priority score: 5.2/10 (high priority). Score formula: damage(3) × geo_multiplier(1.75) = 5.2.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "roof",
+      "power-outage"
+    ],
+    "createdAt": "2026-03-17T03:25:16Z"
+  },
+  {
+    "id": "seed-aae50b8a",
+    "organizationId": "org-1",
+    "createdBy": "user-op-1",
+    "name": "Ramat Aviv Residential Shrapnel",
+    "description": "Shrapnel from an intercepted rocket scattered across a residential courtyard in Ramat Aviv. Light facade damage on three apartment buildings — cracked plaster and broken windows. No structural risk identified. Residents allowed to return after initial safety check.",
+    "location": {
+      "lat": 32.11,
+      "lng": 34.805,
+      "address": "Ramat Aviv Residential Shrapnel",
+      "city": "Tel Aviv"
+    },
+    "imageUrl": "/uploads/tel_aviv_light_2.jpg",
+    "damageClassification": "Light",
+    "damageScore": 3,
+    "priorityScore": 5.09,
+    "gisDetails": {
+      "distHospitalM": 3622.0,
+      "distSchoolM": 693.0,
+      "distRoadM": 26.0,
+      "distStrategicM": 719.0,
+      "populationDensity": 9545.35,
+      "geoMultiplier": 1.698
+    },
+    "gisStatus": "done",
+    "status": "COMPLETED",
+    "hidden": false,
+    "llmExplanation": "Light damage classification detected by vision AI model. Structural characteristics are consistent with light damage patterns — standard repair scheduling is appropriate. Geographic context: nearest hospital 3.6 km, nearest school 693 m, nearest road 26 m, nearest strategic site 719 m, population density 9,545 persons/km². Geographic multiplier: ×1.70. Final priority score: 5.1/10 (high priority). Score formula: damage(3) × geo_multiplier(1.70) = 5.1.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "shrapnel",
+      "residential",
+      "windows"
+    ],
+    "createdAt": "2026-03-16T03:25:16Z"
+  },
+  {
+    "id": "seed-199f8309",
+    "organizationId": "org-1",
+    "createdBy": "user-op-2",
+    "name": "HaYarkon Park Infrastructure Hit",
+    "description": "Rocket struck an open area in HaYarkon Park near the sports facilities. Irrigation pipes ruptured; electrical box serving the tennis courts destroyed. No casualties. Footpaths and one footbridge show surface cratering. Park temporarily closed to the public.",
+    "location": {
+      "lat": 32.0982,
+      "lng": 34.7962,
+      "address": "HaYarkon Park Infrastructure Hit",
+      "city": "Tel Aviv"
+    },
+    "imageUrl": "/uploads/tel_aviv_light_3.jpg",
+    "damageClassification": "Light",
+    "damageScore": 3,
+    "priorityScore": 5.31,
+    "gisDetails": {
+      "distHospitalM": 2240.0,
+      "distSchoolM": 545.0,
+      "distRoadM": 104.0,
+      "distStrategicM": 679.0,
+      "populationDensity": 9545.35,
+      "geoMultiplier": 1.77
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Light damage classification detected by vision AI model. Structural characteristics are consistent with light damage patterns — standard repair scheduling is appropriate. Geographic context: nearest hospital 2.2 km, nearest school 545 m, nearest road 104 m, nearest strategic site 679 m, population density 9,545 persons/km². Geographic multiplier: ×1.77. Final priority score: 5.3/10 (high priority). Score formula: damage(3) × geo_multiplier(1.77) = 5.3.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "infrastructure",
+      "park",
+      "electrical"
+    ],
+    "createdAt": "2026-03-20T03:25:16Z"
+  },
+  {
+    "id": "seed-5c5dd460",
+    "organizationId": "org-2",
+    "createdBy": "user-admin-2",
+    "name": "Beer Sheva Central Bus Station Impact",
+    "description": "Direct hit on the upper deck of Beer Sheva Central Bus Station. Reinforced concrete slab over terminal 3 partially collapsed. Heavy debris on platforms. Water and power severed for the northern wing. Hospital 1.2 km away — access roads partially blocked by debris.",
+    "location": {
+      "lat": 31.2432,
+      "lng": 34.7925,
+      "address": "Beer Sheva Central Bus Station Impact",
+      "city": "South"
+    },
+    "imageUrl": "/uploads/south_heavy_1.jpg",
+    "damageClassification": "Heavy",
+    "damageScore": 7,
+    "priorityScore": 10.0,
+    "gisDetails": {
+      "distHospitalM": 548.0,
+      "distSchoolM": 289.0,
+      "distRoadM": 5.0,
+      "distStrategicM": 369.0,
+      "populationDensity": 1882.57,
+      "geoMultiplier": 1.749
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Heavy damage classification detected by vision AI model. Structural characteristics are consistent with heavy damage patterns — immediate structural assessment recommended. Geographic context: nearest hospital 548 m, nearest school 289 m, nearest road 5 m, nearest strategic site 369 m, population density 1,882 persons/km². Geographic multiplier: ×1.75. Final priority score: 10.0/10 (critical priority). Score formula: damage(7) × geo_multiplier(1.75) = 10.0.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "transport",
+      "structural",
+      "debris"
+    ],
+    "createdAt": "2026-03-19T03:25:16Z"
+  },
+  {
+    "id": "seed-d9486094",
+    "organizationId": "org-2",
+    "createdBy": "user-admin-2",
+    "name": "Dimona Industrial Zone Strike",
+    "description": "Rocket impacted the perimeter fence of the Dimona industrial zone. Two factory units sustained heavy structural damage — roof collapse on unit B. Chemical storage proximity requires hazmat assessment before access. Road access from south available; northern approach blocked.",
+    "location": {
+      "lat": 31.0676,
+      "lng": 35.0333,
+      "address": "Dimona Industrial Zone Strike",
+      "city": "South"
+    },
+    "imageUrl": "/uploads/south_heavy_2.jpg",
+    "damageClassification": "Heavy",
+    "damageScore": 7,
+    "priorityScore": 10.0,
+    "gisDetails": {
+      "distHospitalM": 399.0,
+      "distSchoolM": 240.0,
+      "distRoadM": 16.0,
+      "distStrategicM": 2356.0,
+      "populationDensity": 176.99,
+      "geoMultiplier": 1.478
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Heavy damage classification detected by vision AI model. Structural characteristics are consistent with heavy damage patterns — immediate structural assessment recommended. Geographic context: nearest hospital 399 m, nearest school 240 m, nearest road 16 m, nearest strategic site 2.4 km, population density 176 persons/km². Geographic multiplier: ×1.48. Final priority score: 10.0/10 (critical priority). Score formula: damage(7) × geo_multiplier(1.48) = 10.0.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "industrial",
+      "hazmat",
+      "structural"
+    ],
+    "createdAt": "2026-03-20T03:25:16Z"
+  },
+  {
+    "id": "seed-70ccdcae",
+    "organizationId": "org-2",
+    "createdBy": "user-admin-2",
+    "name": "Kibbutz Nir Oz Residential Block",
+    "description": "Multiple rocket hits on the residential quarter of Kibbutz Nir Oz. Four homes suffered direct impacts with roof and wall collapse. Communal dining hall partially destroyed. Community of ~400 residents evacuated. Access via Route 232 is clear. Nearest hospital in Sderot (8 km).",
+    "location": {
+      "lat": 31.3667,
+      "lng": 34.4333,
+      "address": "Kibbutz Nir Oz Residential Block",
+      "city": "South"
+    },
+    "imageUrl": "/uploads/south_heavy_3.jpg",
+    "damageClassification": "Heavy",
+    "damageScore": 7,
+    "priorityScore": 7.64,
+    "gisDetails": {
+      "distHospitalM": 9182.0,
+      "distSchoolM": 7784.0,
+      "distRoadM": 1356.0,
+      "distStrategicM": 1342.0,
+      "populationDensity": 0.0,
+      "geoMultiplier": 1.092
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Heavy damage classification detected by vision AI model. Structural characteristics are consistent with heavy damage patterns — immediate structural assessment recommended. Geographic context: nearest hospital 9.2 km, nearest school 7.8 km, nearest road 1.4 km, nearest strategic site 1.3 km, population density 0 persons/km². Geographic multiplier: ×1.09. Final priority score: 7.6/10 (critical priority). Score formula: damage(7) × geo_multiplier(1.09) = 7.6.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "residential",
+      "evacuation",
+      "kibbutz"
+    ],
+    "createdAt": "2026-03-18T03:25:16Z"
+  },
+  {
+    "id": "seed-20f1b578",
+    "organizationId": "org-2",
+    "createdBy": "user-admin-2",
+    "name": "Ofakim School Perimeter Damage",
+    "description": "Rocket landed in the schoolyard of an elementary school in Ofakim. Perimeter wall destroyed over 15 m; two portable classrooms have shrapnel holes. No injuries — school was evacuated before impact. Main structure intact. Repairs estimated at 2–3 days.",
+    "location": {
+      "lat": 31.3193,
+      "lng": 34.6222,
+      "address": "Ofakim School Perimeter Damage",
+      "city": "South"
+    },
+    "imageUrl": "/uploads/south_light_1.jpg",
+    "damageClassification": "Light",
+    "damageScore": 3,
+    "priorityScore": 4.3,
+    "gisDetails": {
+      "distHospitalM": 2927.0,
+      "distSchoolM": 624.0,
+      "distRoadM": 29.0,
+      "distStrategicM": 5758.0,
+      "populationDensity": 2296.05,
+      "geoMultiplier": 1.434
+    },
+    "gisStatus": "done",
+    "status": "COMPLETED",
+    "hidden": false,
+    "llmExplanation": "Light damage classification detected by vision AI model. Structural characteristics are consistent with light damage patterns — standard repair scheduling is appropriate. Geographic context: nearest hospital 2.9 km, nearest school 624 m, nearest road 29 m, nearest strategic site 5.8 km, population density 2,296 persons/km². Geographic multiplier: ×1.43. Final priority score: 4.3/10 (moderate priority). Score formula: damage(3) × geo_multiplier(1.43) = 4.3.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "school",
+      "shrapnel",
+      "perimeter"
+    ],
+    "createdAt": "2026-03-17T03:25:16Z"
+  },
+  {
+    "id": "seed-8048bed0",
+    "organizationId": "org-2",
+    "createdBy": "user-admin-2",
+    "name": "Kibbutz Revivim Perimeter Fence",
+    "description": "Rocket struck the agricultural perimeter of Kibbutz Revivim in the central Negev. Fence line destroyed over 80 m; irrigation pump station damaged. No injuries. Kibbutz is a small community (~350 residents) in an isolated desert area. Nearest paved road 4 km; nearest hospital over 40 km (Beer Sheva).",
+    "location": {
+      "lat": 31.0,
+      "lng": 34.8833,
+      "address": "Kibbutz Revivim Perimeter Fence",
+      "city": "South"
+    },
+    "imageUrl": "/uploads/south_isolated_light_1.jpg",
+    "damageClassification": "Light",
+    "damageScore": 3,
+    "priorityScore": 2.65,
+    "gisDetails": {
+      "distHospitalM": 19207.0,
+      "distSchoolM": 5031.0,
+      "distRoadM": 1674.0,
+      "distStrategicM": 0.0,
+      "populationDensity": 197.55,
+      "geoMultiplier": 0.883
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Light damage classification detected by vision AI model. Structural characteristics are consistent with light damage patterns — standard repair scheduling is appropriate. Geographic context: nearest hospital 19.2 km, nearest school 5.0 km, nearest road 1.7 km, nearest strategic site 0 m, population density 197 persons/km². Geographic multiplier: ×0.88. Final priority score: 2.6/10 (moderate priority). Score formula: damage(3) × geo_multiplier(0.88) = 2.6.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "isolated",
+      "agricultural",
+      "fence"
+    ],
+    "createdAt": "2026-03-20T03:25:16Z"
+  },
+  {
+    "id": "seed-e5369966",
+    "organizationId": "org-2",
+    "createdBy": "user-admin-2",
+    "name": "Mitzpe Ramon Visitor Center Strike",
+    "description": "Rocket impacted the parking area of the Mitzpe Ramon Ramon Crater visitor center. Asphalt surface cratered; one vehicle destroyed. Visitor center glass facade cracked. Remote location — 25 km from nearest hospital in Yeruham. Population density near zero. Access via Route 40 only.",
+    "location": {
+      "lat": 30.61,
+      "lng": 34.801,
+      "address": "Mitzpe Ramon Visitor Center Strike",
+      "city": "South"
+    },
+    "imageUrl": "/uploads/south_isolated_light_2.jpg",
+    "damageClassification": "Light",
+    "damageScore": 3,
+    "priorityScore": 3.07,
+    "gisDetails": {
+      "distHospitalM": -1.0,
+      "distSchoolM": 304.0,
+      "distRoadM": 0.0,
+      "distStrategicM": 1686.0,
+      "populationDensity": 74.77,
+      "geoMultiplier": 1.023
+    },
+    "gisStatus": "done",
+    "status": "COMPLETED",
+    "hidden": false,
+    "llmExplanation": "Light damage classification detected by vision AI model. Structural characteristics are consistent with light damage patterns — standard repair scheduling is appropriate. Geographic context: nearest hospital not found within 15 km, nearest school 304 m, nearest road 0 m, nearest strategic site 1.7 km, population density 74 persons/km². Geographic multiplier: ×1.02. Final priority score: 3.1/10 (moderate priority). Score formula: damage(3) × geo_multiplier(1.02) = 3.1.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "isolated",
+      "tourism",
+      "remote"
+    ],
+    "createdAt": "2026-03-15T03:25:16Z"
+  },
+  {
+    "id": "seed-6ae68221",
+    "organizationId": "org-2",
+    "createdBy": "user-admin-2",
+    "name": "Sde Boker Research Station Damage",
+    "description": "Shrapnel from intercepted rocket damaged a research greenhouse at the Sde Boker academic campus (Ben-Gurion University desert research). Three greenhouse panels destroyed; experimental crops lost. Minimal infrastructure — no roads within 3 km, nearest hospital 35 km away. Staff evacuated safely.",
+    "location": {
+      "lat": 30.8517,
+      "lng": 34.7861,
+      "address": "Sde Boker Research Station Damage",
+      "city": "South"
+    },
+    "imageUrl": "/uploads/south_isolated_light_3.jpg",
+    "damageClassification": "Light",
+    "damageScore": 3,
+    "priorityScore": 3.44,
+    "gisDetails": {
+      "distHospitalM": -1.0,
+      "distSchoolM": 21.0,
+      "distRoadM": 16.0,
+      "distStrategicM": 844.0,
+      "populationDensity": 900.99,
+      "geoMultiplier": 1.145
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Light damage classification detected by vision AI model. Structural characteristics are consistent with light damage patterns — standard repair scheduling is appropriate. Geographic context: nearest hospital not found within 15 km, nearest school 21 m, nearest road 16 m, nearest strategic site 844 m, population density 900 persons/km². Geographic multiplier: ×1.15. Final priority score: 3.4/10 (moderate priority). Score formula: damage(3) × geo_multiplier(1.15) = 3.4.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "isolated",
+      "academic",
+      "greenhouse",
+      "remote"
+    ],
+    "createdAt": "2026-03-19T03:25:16Z"
+  },
+  {
+    "id": "seed-71ef391f",
+    "organizationId": "org-3",
+    "createdBy": "user-admin-3",
+    "name": "Mahane Yehuda Market Direct Hit",
+    "description": "Rocket impacted the covered section of Mahane Yehuda market during morning hours. Iron roof over 40 stalls collapsed. Two support columns fractured. Market is in the heart of West Jerusalem — densely populated neighbourhood. Hadassah Ein Kerem hospital 4 km away. Main access roads partially blocked.",
+    "location": {
+      "lat": 31.7845,
+      "lng": 35.2133,
+      "address": "Mahane Yehuda Market Direct Hit",
+      "city": "Jerusalem"
+    },
+    "imageUrl": "/uploads/jerusalem_heavy_1.jpg",
+    "damageClassification": "Heavy",
+    "damageScore": 7,
+    "priorityScore": 10.0,
+    "gisDetails": {
+      "distHospitalM": 503.0,
+      "distSchoolM": 297.0,
+      "distRoadM": 42.0,
+      "distStrategicM": 1119.0,
+      "populationDensity": 8171.02,
+      "geoMultiplier": 1.81
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Heavy damage classification detected by vision AI model. Structural characteristics are consistent with heavy damage patterns — immediate structural assessment recommended. Geographic context: nearest hospital 503 m, nearest school 297 m, nearest road 42 m, nearest strategic site 1.1 km, population density 8,171 persons/km². Geographic multiplier: ×1.81. Final priority score: 10.0/10 (critical priority). Score formula: damage(7) × geo_multiplier(1.81) = 10.0.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "market",
+      "structural",
+      "collapse",
+      "urban"
+    ],
+    "createdAt": "2026-03-19T03:25:16Z"
+  },
+  {
+    "id": "seed-ac879366",
+    "organizationId": "org-3",
+    "createdBy": "user-admin-3",
+    "name": "Givat Shaul Apartment Tower",
+    "description": "Rocket struck floors 8–10 of a 14-storey apartment tower in Givat Shaul. Three floors structurally compromised; exterior wall breach on eastern face. Building evacuated — 120 residents displaced. Shaare Zedek hospital 2 km away. Access via Begin Highway clear.",
+    "location": {
+      "lat": 31.795,
+      "lng": 35.1872,
+      "address": "Givat Shaul Apartment Tower",
+      "city": "Jerusalem"
+    },
+    "imageUrl": "/uploads/jerusalem_heavy_2.jpg",
+    "damageClassification": "Heavy",
+    "damageScore": 7,
+    "priorityScore": 10.0,
+    "gisDetails": {
+      "distHospitalM": 46.0,
+      "distSchoolM": 818.0,
+      "distRoadM": 11.0,
+      "distStrategicM": 2881.0,
+      "populationDensity": 8171.02,
+      "geoMultiplier": 1.748
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Heavy damage classification detected by vision AI model. Structural characteristics are consistent with heavy damage patterns — immediate structural assessment recommended. Geographic context: nearest hospital 46 m, nearest school 818 m, nearest road 11 m, nearest strategic site 2.9 km, population density 8,171 persons/km². Geographic multiplier: ×1.75. Final priority score: 10.0/10 (critical priority). Score formula: damage(7) × geo_multiplier(1.75) = 10.0.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "residential",
+      "high-rise",
+      "structural",
+      "evacuation"
+    ],
+    "createdAt": "2026-03-20T03:25:16Z"
+  },
+  {
+    "id": "seed-191bb2ca",
+    "organizationId": "org-3",
+    "createdBy": "user-admin-3",
+    "name": "Talpiot Industrial Building Collapse",
+    "description": "Heavy rocket hit on a 3-storey industrial building in Talpiot industrial zone. Complete roof collapse on top floor; walls of second floor partially failed. Electrical substation serving the zone destroyed — 800 units without power. Nearest hospital 3 km. Good road access via Hebron Road.",
+    "location": {
+      "lat": 31.7483,
+      "lng": 35.2236,
+      "address": "Talpiot Industrial Building Collapse",
+      "city": "Jerusalem"
+    },
+    "imageUrl": "/uploads/jerusalem_heavy_3.jpg",
+    "damageClassification": "Heavy",
+    "damageScore": 7,
+    "priorityScore": 10.0,
+    "gisDetails": {
+      "distHospitalM": 2154.0,
+      "distSchoolM": 236.0,
+      "distRoadM": 5.0,
+      "distStrategicM": 3519.0,
+      "populationDensity": 8171.02,
+      "geoMultiplier": 1.635
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Heavy damage classification detected by vision AI model. Structural characteristics are consistent with heavy damage patterns — immediate structural assessment recommended. Geographic context: nearest hospital 2.2 km, nearest school 236 m, nearest road 5 m, nearest strategic site 3.5 km, population density 8,171 persons/km². Geographic multiplier: ×1.64. Final priority score: 10.0/10 (critical priority). Score formula: damage(7) × geo_multiplier(1.64) = 10.0.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "industrial",
+      "power-outage",
+      "structural",
+      "collapse"
+    ],
+    "createdAt": "2026-03-18T03:25:16Z"
+  },
+  {
+    "id": "seed-75f1c48d",
+    "organizationId": "org-3",
+    "createdBy": "user-admin-3",
+    "name": "Pisgat Ze'ev Northern Tower Strike",
+    "description": "Rocket impacted a residential block in Pisgat Ze'ev northern suburb. Floors 3–5 of a 7-storey building show severe wall cracking and partial floor collapse. Gas supply severed for entire block. ~60 residents evacuated. French Hill hospital 6 km; access via Route 60 available.",
+    "location": {
+      "lat": 31.8391,
+      "lng": 35.2369,
+      "address": "Pisgat Ze'ev Northern Tower Strike",
+      "city": "Jerusalem"
+    },
+    "imageUrl": "/uploads/jerusalem_heavy_4.jpg",
+    "damageClassification": "Heavy",
+    "damageScore": 7,
+    "priorityScore": 10.0,
+    "gisDetails": {
+      "distHospitalM": 842.0,
+      "distSchoolM": 230.0,
+      "distRoadM": 18.0,
+      "distStrategicM": 0.0,
+      "populationDensity": 8171.02,
+      "geoMultiplier": 1.841
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Heavy damage classification detected by vision AI model. Structural characteristics are consistent with heavy damage patterns — immediate structural assessment recommended. Geographic context: nearest hospital 842 m, nearest school 230 m, nearest road 18 m, nearest strategic site 0 m, population density 8,171 persons/km². Geographic multiplier: ×1.84. Final priority score: 10.0/10 (critical priority). Score formula: damage(7) × geo_multiplier(1.84) = 10.0.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "residential",
+      "gas-leak",
+      "suburban",
+      "evacuation"
+    ],
+    "createdAt": "2026-03-20T03:25:16Z"
+  },
+  {
+    "id": "seed-854c51b3",
+    "organizationId": "org-3",
+    "createdBy": "user-admin-3",
+    "name": "German Colony Garden Wall Damage",
+    "description": "Rocket fragment destroyed a garden wall and vehicle carport in the German Colony neighbourhood. Shrapnel caused surface damage to nearby facade. No structural risk to the building. One parked car destroyed. Emek Refaim street remains accessible.",
+    "location": {
+      "lat": 31.7624,
+      "lng": 35.2181,
+      "address": "German Colony Garden Wall Damage",
+      "city": "Jerusalem"
+    },
+    "imageUrl": "/uploads/jerusalem_light_1.jpg",
+    "damageClassification": "Light",
+    "damageScore": 3,
+    "priorityScore": 5.22,
+    "gisDetails": {
+      "distHospitalM": 766.0,
+      "distSchoolM": 362.0,
+      "distRoadM": 2.0,
+      "distStrategicM": 2574.0,
+      "populationDensity": 8171.02,
+      "geoMultiplier": 1.739
+    },
+    "gisStatus": "done",
+    "status": "COMPLETED",
+    "hidden": false,
+    "llmExplanation": "Light damage classification detected by vision AI model. Structural characteristics are consistent with light damage patterns — standard repair scheduling is appropriate. Geographic context: nearest hospital 766 m, nearest school 362 m, nearest road 2 m, nearest strategic site 2.6 km, population density 8,171 persons/km². Geographic multiplier: ×1.74. Final priority score: 5.2/10 (high priority). Score formula: damage(3) × geo_multiplier(1.74) = 5.2.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "residential",
+      "shrapnel",
+      "low-severity"
+    ],
+    "createdAt": "2026-03-16T03:25:16Z"
+  },
+  {
+    "id": "seed-a3bf8352",
+    "organizationId": "org-3",
+    "createdBy": "user-admin-3",
+    "name": "Hadassah Mount Scopus Perimeter",
+    "description": "Shrapnel from intercepted missile struck the outer parking area of Hadassah Mount Scopus hospital campus. Five vehicles damaged; perimeter fence breached. Hospital operations unaffected — internal structures intact. Hebrew University campus nearby. Road access fully open.",
+    "location": {
+      "lat": 31.7936,
+      "lng": 35.2453,
+      "address": "Hadassah Mount Scopus Perimeter",
+      "city": "Jerusalem"
+    },
+    "imageUrl": "/uploads/jerusalem_light_2.jpg",
+    "damageClassification": "Light",
+    "damageScore": 3,
+    "priorityScore": 5.54,
+    "gisDetails": {
+      "distHospitalM": 376.0,
+      "distSchoolM": 122.0,
+      "distRoadM": 56.0,
+      "distStrategicM": 445.0,
+      "populationDensity": 8171.02,
+      "geoMultiplier": 1.848
+    },
+    "gisStatus": "done",
+    "status": "COMPLETED",
+    "hidden": false,
+    "llmExplanation": "Light damage classification detected by vision AI model. Structural characteristics are consistent with light damage patterns — standard repair scheduling is appropriate. Geographic context: nearest hospital 376 m, nearest school 122 m, nearest road 56 m, nearest strategic site 445 m, population density 8,171 persons/km². Geographic multiplier: ×1.85. Final priority score: 5.5/10 (high priority). Score formula: damage(3) × geo_multiplier(1.85) = 5.5.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "hospital-perimeter",
+      "shrapnel",
+      "vehicles"
+    ],
+    "createdAt": "2026-03-17T03:25:16Z"
+  },
+  {
+    "id": "seed-4b00e9d8",
+    "organizationId": "org-3",
+    "createdBy": "user-admin-3",
+    "name": "Ramot Residential Shrapnel Scatter",
+    "description": "Intercepted rocket debris scattered across a residential street in Ramot Allon. Windows and balcony railings on 6 apartments damaged. One ground-floor unit sustained minor wall penetration. No injuries. Infrastructure intact. Main road access via Golda Meir Boulevard available.",
+    "location": {
+      "lat": 31.8289,
+      "lng": 35.1946,
+      "address": "Ramot Residential Shrapnel Scatter",
+      "city": "Jerusalem"
+    },
+    "imageUrl": "/uploads/jerusalem_light_3.jpg",
+    "damageClassification": "Light",
+    "damageScore": 3,
+    "priorityScore": 4.0,
+    "gisDetails": {
+      "distHospitalM": 1361.0,
+      "distSchoolM": 465.0,
+      "distRoadM": 452.0,
+      "distStrategicM": 4164.0,
+      "populationDensity": 0.0,
+      "geoMultiplier": 1.333
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "Light damage classification detected by vision AI model. Structural characteristics are consistent with light damage patterns — standard repair scheduling is appropriate. Geographic context: nearest hospital 1.4 km, nearest school 465 m, nearest road 452 m, nearest strategic site 4.2 km, population density 0 persons/km². Geographic multiplier: ×1.33. Final priority score: 4.0/10 (moderate priority). Score formula: damage(3) × geo_multiplier(1.33) = 4.0.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "residential",
+      "shrapnel",
+      "windows"
+    ],
+    "createdAt": "2026-03-19T03:25:16Z"
+  }
+]

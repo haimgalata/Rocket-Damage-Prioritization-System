@@ -82,3 +82,15 @@ logs/
 
 # ── Docker runtime volumes (if stored locally) ────────────────────────────────
 docker-volumes/
+
+# ── Uploads (user content — not committed) ────────────────────────────────────
+uploads/*
+!uploads/.gitkeep
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.cache
+*.env
+dist/
+.next/
+backend.log
+*.iml

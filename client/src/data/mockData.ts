@@ -2,8 +2,6 @@ import type { Organization, User, DamageEvent, Notification } from '../types';
 import { UserRole, EventStatus, DamageClassification } from '../types';
 
 
-// מידע דמה כדי להציג באתר
-
 export const MOCK_ORGANIZATIONS: Organization[] = [
   {
     id: 'org-1',
@@ -18,10 +16,10 @@ export const MOCK_ORGANIZATIONS: Organization[] = [
   },
   {
     id: 'org-2',
-    name: 'Haifa District Authority',
-    settlement_code: 'HFA-002',
-    description: 'Northern coastal district authority',
-    region: 'North',
+    name: 'South Authority',
+    settlement_code: 'STH-002',
+    description: 'Southern district covering Beer Sheva, Negev and surrounding areas',
+    region: 'South',
     adminId: 'user-admin-2',
     createdAt: new Date('2024-02-10'),
     totalEvents: 17,
@@ -87,7 +85,7 @@ export const MOCK_USERS: User[] = [
     email: 'rachel@haifa.gov',
     role: UserRole.ADMIN,
     organizationId: 'org-2',
-    jobTitle: 'Haifa Operations Manager',
+    jobTitle: 'South Operations Manager',
     createdAt: new Date('2024-02-10'),
     isActive: true,
   },
@@ -344,7 +342,6 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
   },
 ];
 
-// Demo login presets
 export const DEMO_CREDENTIALS = [
   { email: 'sarah@prioritai.gov', password: 'demo1234', label: 'Super Admin' },
   { email: 'david@tel-aviv.gov', password: 'demo1234', label: 'Admin' },

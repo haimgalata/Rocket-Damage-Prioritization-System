@@ -12,16 +12,11 @@ import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
 L.Icon.Default.mergeOptions({ iconRetinaUrl, iconUrl, shadowUrl });
 
-// ============================================================================
-// FLY-TO CONTROLLER — zooms the map to focusEvent when it changes
-// ============================================================================
-
 const FlyToEvent: React.FC<{ event: DamageEvent | null }> = ({ event }) => {
   const map = useMap();
   useEffect(() => {
     if (!event) return;
     map.flyTo([event.location.lat, event.location.lng], 16, { duration: 1.4 });
-    // Open the popup after flyTo completes
     const timer = setTimeout(() => {
       map.eachLayer((layer) => {
         if (layer instanceof L.Marker) {
@@ -39,10 +34,6 @@ const FlyToEvent: React.FC<{ event: DamageEvent | null }> = ({ event }) => {
   }, [event]);
   return null;
 };
-
-// ============================================================================
-// CANVAS HEATMAP LAYER
-// ============================================================================
 
 interface HeatmapPoint { lat: number; lng: number; intensity: number }
 
@@ -107,10 +98,6 @@ const CanvasHeatmapLayer: React.FC<{ points: HeatmapPoint[] }> = ({ points }) =>
 
   return null;
 };
-
-// ============================================================================
-// EVENT MAP
-// ============================================================================
 
 interface EventMapProps {
   events: DamageEvent[];

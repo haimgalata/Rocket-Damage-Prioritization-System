@@ -1,14 +1,21 @@
 """
 POST /events — Create a new damage event.
-Runs AI classification → GIS extraction → priority score.
+GET  /events/{event_id} — Fetch current state (used for polling until GIS is done).
 """
 
 import logging
+import os
 import uuid
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
+
+UPLOADS_DIR = os.environ.get(
+    "UPLOADS_DIR",
+    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "uploads")
+)
+os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 from server.src.schemas.event import EventResponse
 from server.src.services.ai_service import run_classification
@@ -19,9 +26,47 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/events", tags=["events"])
 
+_event_store: dict[str, dict] = {}
+
+
+def _run_gis_and_update(event_id: str, lat: float, lon: float, damage_score: int) -> None:
+    """Background task: compute GIS features and update the stored event."""
+    try:
+        logger.info(f"[GIS Async] Starting GIS for event {event_id} at ({lat}, {lon})")
+        gis_features = get_gis_features(lat, lon)
+        final_score, multiplier = compute_priority(damage_score, gis_features)
+
+        if event_id not in _event_store:
+            logger.warning(f"[GIS Async] Event {event_id} no longer in store, skipping update")
+            return
+
+        event = _event_store[event_id]
+        classification = event["damageClassification"]
+        explanation = build_explanation(classification, damage_score, gis_features, final_score, multiplier)
+
+        event.update({
+            "priorityScore": final_score,
+            "llmExplanation": explanation,
+            "gisDetails": {
+                "distHospitalM":     gis_features.get("dist_hospital_m",      -1),
+                "distSchoolM":       gis_features.get("dist_school_m",        -1),
+                "distRoadM":         gis_features.get("dist_roads_m",         -1),
+                "distStrategicM":    gis_features.get("dist_military_base_m", -1),
+                "populationDensity": gis_features.get("population_density",    0),
+                "geoMultiplier":     multiplier,
+            },
+            "gisStatus": "done",
+        })
+        logger.info(f"[GIS Async] Event {event_id} updated — score={final_score:.2f}, multiplier={multiplier:.2f}")
+    except Exception:
+        logger.exception(f"[GIS Async] GIS failed for event {event_id}")
+        if event_id in _event_store:
+            _event_store[event_id]["gisStatus"] = "done"
+
 
 @router.post("", response_model=EventResponse)
 async def create_event(
+    background_tasks: BackgroundTasks,
     lat:             float          = Form(...),
     lon:             float          = Form(...),
     description:     str            = Form(...),
@@ -30,71 +75,23 @@ async def create_event(
     tags:            Optional[str]  = Form(default=""),
     image:           Optional[UploadFile] = File(default=None),
 ) -> EventResponse:
-    """Create a new damage event by running the full AI + GIS pipeline.
-
-    Accepts a ``multipart/form-data`` request containing location
-    coordinates, metadata, and an optional damage image.  Executes
-    three sequential pipeline stages and assembles the result into a
-    complete ``EventResponse`` object.
-
-    Pipeline stages:
-
-    1. **AI classification** (:func:`~server.src.services.ai_service.run_classification`):
-       Decodes the image bytes and runs CNN inference to produce a
-       damage label (``"Light"`` / ``"Heavy"``), base score, and
-       confidence value.  Falls back gracefully when no image is
-       supplied or the model is unavailable.
-
-    2. **GIS extraction** (:func:`~server.src.services.gis_service.get_gis_features`):
-       Queries OSM for proximity distances (hospital, school, military/
-       helipad, road) and the Israeli CBS dataset for population density
-       at the supplied coordinates.
-
-    3. **Priority scoring** (:func:`~server.src.services.priority_service.compute_priority`):
-       Applies the weighted GIS formula to produce a clamped final score
-       in [0.1, 10.0] and a human-readable explanation narrative.
-
-    Args:
-        lat (float): WGS-84 latitude of the damage event.
-            Required ``multipart/form-data`` field.
-        lon (float): WGS-84 longitude of the damage event.
-            Required ``multipart/form-data`` field.
-        description (str): Free-text description of the event.
-            Required ``multipart/form-data`` field.
-        organization_id (str): ID of the submitting organisation.
-            Required ``multipart/form-data`` field.
-        created_by (str): ID of the submitting user.
-            Required ``multipart/form-data`` field.
-        tags (str, optional): Comma-separated tag string
-            (e.g. ``"gas,structural,urgent"``).  Defaults to ``""``.
-        image (UploadFile, optional): Damage photo upload.
-            Supported formats: JPEG, PNG, WebP.  When omitted, the AI
-            pipeline uses its fallback scoring path.
-
-    Returns:
-        EventResponse: Fully assembled event object including the
-            generated ``id``, ``priorityScore``, ``gisDetails``,
-            ``llmExplanation``, and all submitted metadata.
-
-    Raises:
-        HTTPException: Status ``500`` if any unhandled exception
-            propagates from the pipeline stages.  The ``detail`` field
-            contains the exception message for debugging.
-    """
+    """Create event: run AI immediately, defer GIS to background."""
     try:
         image_bytes = await image.read() if image else b""
 
-        # ── Pipeline ──────────────────────────────────────────────────────────
-        ai_result    = run_classification(image_bytes)
-        gis_features = get_gis_features(lat, lon)
-        final_score, multiplier = compute_priority(ai_result["damage_score"], gis_features)
-        explanation  = build_explanation(
-            ai_result["classification"], ai_result["damage_score"],
-            gis_features, final_score, multiplier,
-        )
+        logger.info(f"[Event] New event at lat={lat}, lon={lon}")
+        ai_result = run_classification(image_bytes)
 
         tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
         event_id = f"evt-{uuid.uuid4().hex[:8]}"
+
+        image_url = ""
+        if image and image_bytes:
+            ext = os.path.splitext(image.filename)[1] if image.filename else ".jpg"
+            filename = f"{event_id}{ext}"
+            with open(os.path.join(UPLOADS_DIR, filename), "wb") as f:
+                f.write(image_bytes)
+            image_url = f"/uploads/{filename}"
 
         event = {
             "id":                   event_id,
@@ -107,29 +104,48 @@ async def create_event(
                 "address": f"GPS {lat:.5f}, {lon:.5f}",
                 "city":    "Israel",
             },
-            "imageUrl":              "",
+            "imageUrl":              image_url,
             "damageClassification":  ai_result["classification"],
             "damageScore":           ai_result["damage_score"],
-            "priorityScore":         final_score,
+            "priorityScore":         float(ai_result["damage_score"]),
             "gisDetails": {
-                "distHospitalM":     gis_features.get("dist_hospital_m",     -1),
-                "distSchoolM":       gis_features.get("dist_school_m",       -1),
-                "distRoadM":         gis_features.get("dist_roads_m",        -1),
-                "distStrategicM":    gis_features.get("dist_military_base_m", -1),
-                "populationDensity": gis_features.get("population_density",   0),
-                "geoMultiplier":     multiplier,
+                "distHospitalM":     -1,
+                "distSchoolM":       -1,
+                "distRoadM":         -1,
+                "distStrategicM":    -1,
+                "populationDensity": 0,
+                "geoMultiplier":     1.0,
             },
+            "gisStatus":    "pending",
             "status":       "pending",
             "hidden":       False,
-            "llmExplanation": explanation,
+            "llmExplanation": f"{ai_result['classification']} damage detected. GIS analysis in progress...",
             "aiModel":      "PrioritAI-v2.1",
             "tags":         tag_list,
             "createdAt":    datetime.utcnow().isoformat() + "Z",
         }
 
-        logger.info(f"Event created: {event_id} | score={final_score:.2f}")
+        _event_store[event_id] = event
+
+        background_tasks.add_task(_run_gis_and_update, event_id, lat, lon, ai_result["damage_score"])
+
+        logger.info(f"[Event] Created {event_id} — GIS queued as background task")
         return event
 
     except Exception as e:
         logger.exception("Event creation failed")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("")
+async def list_events() -> list:
+    """Return all events in the store, sorted by priorityScore descending."""
+    return sorted(_event_store.values(), key=lambda e: e.get("priorityScore", 0), reverse=True)
+
+
+@router.get("/{event_id}")
+async def get_event(event_id: str) -> dict:
+    """Return current event state. Frontend polls this until gisStatus='done'."""
+    if event_id not in _event_store:
+        raise HTTPException(status_code=404, detail=f"Event {event_id} not found")
+    return _event_store[event_id]

@@ -42,7 +42,7 @@ export const EventMarker: React.FC<EventMarkerProps> = ({ event, onClick }) => {
     >
       <Popup>
         <div className="min-w-[180px] py-1">
-          <p className="font-semibold text-gray-900 text-sm">{event.location.address}</p>
+          <p className="font-semibold text-gray-900 text-sm">{event.name}</p>
           <p className="text-xs text-gray-500 mb-2">{event.location.city}</p>
           <div className="flex gap-2 mb-2">
             <span className="text-xs font-medium" style={{ color }}>

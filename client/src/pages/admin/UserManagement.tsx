@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,8 +14,7 @@ import { UserRole } from '../../types';
 import type { User as UserType } from '../../types';
 import { formatDate, getInitials } from '../../utils/helpers';
 import { useAuth } from '../../hooks';
-
-// ── Password generator ──────────────────────────────────────────────────────
+import { useEventStore } from '../../store/authStore';
 
 function generateStrongPassword(): string {
   const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -32,8 +31,6 @@ function generateStrongPassword(): string {
   return pass.split('').sort(() => Math.random() - 0.5).join('');
 }
 
-// ── Form schema ────────────────────────────────────────────────────────────────
-
 const makeSchema = (isSuperAdmin: boolean) =>
   z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -49,21 +46,16 @@ const makeSchema = (isSuperAdmin: boolean) =>
 
 type UserFormData = z.infer<ReturnType<typeof makeSchema>>;
 
-// ── Role config ────────────────────────────────────────────────────────────────
-
 const roleConfig: Record<UserRole, { label: string; variant: 'danger' | 'warning' | 'info'; icon: React.ReactNode }> = {
   [UserRole.SUPER_ADMIN]: { label: 'Technical Team', variant: 'danger',  icon: <Shield className="w-3 h-3" /> },
   [UserRole.ADMIN]:       { label: 'Admin',           variant: 'warning', icon: <User className="w-3 h-3" /> },
   [UserRole.OPERATOR]:    { label: 'Operator',        variant: 'info',    icon: <Wrench className="w-3 h-3" /> },
 };
 
-// ── Component ──────────────────────────────────────────────────────────────────
-
 export const UserManagement: React.FC = () => {
   const { user: currentUser } = useAuth();
   const isSuperAdmin = currentUser?.role === UserRole.SUPER_ADMIN;
 
-  // SuperAdmin must first select an org
   const [selectedOrgId, setSelectedOrgId] = useState<string>(
     isSuperAdmin ? '' : (currentUser?.organizationId || '')
   );
@@ -72,7 +64,6 @@ export const UserManagement: React.FC = () => {
 
   const [users, setUsers] = useState<UserType[]>(() => {
     if (isSuperAdmin) return [...allUsers];
-    // Admins see only their org users, and never see Super Admins
     return [...allUsers.filter(
       (u) => u.organizationId === currentUser?.organizationId && u.role !== UserRole.SUPER_ADMIN
     )];
@@ -83,19 +74,38 @@ export const UserManagement: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [passwordCopied, setPasswordCopied] = useState(false);
+  const { events } = useEventStore();
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
+
+  const userEventCount = useMemo(() => {
+    const map: Record<string, number> = {};
+    events.forEach(e => {
+      if (e.createdBy) map[e.createdBy] = (map[e.createdBy] || 0) + 1;
+    });
+    return map;
+  }, [events]);
+
+  const userEventList = useMemo(() => {
+    const map: Record<string, { name: string; createdAt: string }[]> = {};
+    events.forEach(e => {
+      if (e.createdBy) {
+        if (!map[e.createdBy]) map[e.createdBy] = [];
+        map[e.createdBy].push({ name: e.name ?? `Event #${e.id.slice(-3)}`, createdAt: e.createdAt as string });
+      }
+    });
+    return map;
+  }, [events]);
 
   const schema = makeSchema(isSuperAdmin);
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } =
     useForm<UserFormData>({ resolver: zodResolver(schema) });
 
-  // Filter users by selected org (SuperAdmin) or their org (Admin)
   const orgFilteredUsers = isSuperAdmin && selectedOrgId
     ? users.filter((u) => u.organizationId === selectedOrgId)
     : isSuperAdmin
     ? []  // SuperAdmin must select org first
     : users;
 
-  // Sort: admin first, then operators
   const sortedUsers = [...orgFilteredUsers].sort((a, b) => {
     const order = { [UserRole.SUPER_ADMIN]: 0, [UserRole.ADMIN]: 1, [UserRole.OPERATOR]: 2 };
     return order[a.role] - order[b.role];
@@ -106,8 +116,6 @@ export const UserManagement: React.FC = () => {
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase())
   );
-
-  // ── Open modals ──────────────────────────────────────────────────────────────
 
   const openCreate = () => {
     reset({
@@ -143,8 +151,6 @@ export const UserManagement: React.FC = () => {
     setPasswordCopied(false);
     reset();
   };
-
-  // ── CRUD actions ─────────────────────────────────────────────────────────────
 
   const onCreate = (data: UserFormData) => {
     const password = generateStrongPassword();
@@ -191,8 +197,6 @@ export const UserManagement: React.FC = () => {
       setTimeout(() => setPasswordCopied(false), 2000);
     });
   };
-
-  // ── Form fields ───────────────────────────────────────────────────────────────
 
   watch('organizationId');
 
@@ -250,15 +254,12 @@ export const UserManagement: React.FC = () => {
     </div>
   );
 
-  // ── Summary stats ─────────────────────────────────────────────────────────────
-
   const displayUsers = isSuperAdmin && selectedOrgId ? orgFilteredUsers : isSuperAdmin ? [] : orgFilteredUsers;
 
   return (
     <PageContainer title="User Management">
       <div className="max-w-5xl mx-auto space-y-6">
 
-        {/* SuperAdmin: org selector */}
         {isSuperAdmin && (
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-4">
             <div className="flex-1">
@@ -281,7 +282,6 @@ export const UserManagement: React.FC = () => {
           </div>
         )}
 
-        {/* Summary strip */}
         {(!isSuperAdmin || selectedOrgId) && (
           <div className="grid grid-cols-3 gap-4">
             {[
@@ -297,7 +297,6 @@ export const UserManagement: React.FC = () => {
           </div>
         )}
 
-        {/* Table card */}
         {isSuperAdmin && !selectedOrgId ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
             <p className="text-gray-400 text-sm">Select an organization above to view its users.</p>
@@ -331,6 +330,7 @@ export const UserManagement: React.FC = () => {
                   <tr className="border-b border-gray-100 bg-gray-50">
                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Events</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Joined</th>
                     <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
@@ -339,7 +339,7 @@ export const UserManagement: React.FC = () => {
                 <tbody>
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="text-center py-10 text-gray-400 text-sm">
+                      <td colSpan={6} className="text-center py-10 text-gray-400 text-sm">
                         No users found.
                       </td>
                     </tr>
@@ -348,17 +348,21 @@ export const UserManagement: React.FC = () => {
                     const rc = roleConfig[u.role];
                     const isSelf = u.id === currentUser?.id;
                     return (
-                      <tr key={u.id} className={`border-b border-gray-100 transition ${u.isActive ? 'hover:bg-gray-50' : 'bg-gray-50 opacity-60'}`}>
+                      <React.Fragment key={u.id}>
+                      <tr className={`border-b border-gray-100 transition ${u.isActive ? 'hover:bg-gray-50' : 'bg-gray-50 opacity-60'}`}>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm ${u.isActive ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-500'}`}>
                               {getInitials(u.name)}
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-gray-900">
+                              <button
+                                onClick={() => setExpandedUserId(expandedUserId === u.id ? null : u.id)}
+                                className="text-sm font-medium text-gray-900 hover:text-blue-700 hover:underline text-left"
+                              >
                                 {u.name}
                                 {isSelf && <span className="ml-1.5 text-xs text-blue-500 font-normal">(you)</span>}
-                              </p>
+                              </button>
                               <p className="text-xs text-gray-500">{u.email}</p>
                               {u.jobTitle && <p className="text-xs text-gray-400 italic">{u.jobTitle}</p>}
                             </div>
@@ -368,6 +372,18 @@ export const UserManagement: React.FC = () => {
                           <Badge variant={rc.variant}>
                             <span className="flex items-center gap-1">{rc.icon}{rc.label}</span>
                           </Badge>
+                        </td>
+                        <td className="px-6 py-4">
+                          {(userEventCount[u.id] || 0) > 0 ? (
+                            <button
+                              onClick={() => setExpandedUserId(expandedUserId === u.id ? null : u.id)}
+                              className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-full transition"
+                            >
+                              {userEventCount[u.id]} event{userEventCount[u.id] !== 1 ? 's' : ''}
+                            </button>
+                          ) : (
+                            <span className="text-xs text-gray-400">—</span>
+                          )}
                         </td>
                         <td className="px-6 py-4">
                           <button
@@ -405,6 +421,31 @@ export const UserManagement: React.FC = () => {
                           </div>
                         </td>
                       </tr>
+                      {expandedUserId === u.id && (
+                        <tr className="bg-blue-50 border-b border-blue-100">
+                          <td colSpan={6} className="px-6 py-3">
+                            {(userEventList[u.id] || []).length === 0 ? (
+                              <p className="text-xs text-gray-400 italic">No events created yet.</p>
+                            ) : (
+                              <div>
+                                <p className="text-xs font-semibold text-gray-600 mb-2">
+                                  Events created by {u.name}:
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {(userEventList[u.id] || []).map((ev, idx) => (
+                                    <div key={idx} className="flex items-center gap-1.5 bg-white border border-blue-200 rounded-lg px-2.5 py-1.5 text-xs">
+                                      <span className="font-medium text-gray-800">{ev.name}</span>
+                                      <span className="text-gray-400">·</span>
+                                      <span className="text-gray-500">{formatDate(ev.createdAt)}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                      </React.Fragment>
                     );
                   })}
                 </tbody>
@@ -414,7 +455,6 @@ export const UserManagement: React.FC = () => {
         )}
       </div>
 
-      {/* Create Modal */}
       <Modal isOpen={modalMode === 'create'} onClose={closeModal} title="Add New User" size="sm"
         footer={
           <div className="flex gap-2 justify-end">
@@ -426,7 +466,6 @@ export const UserManagement: React.FC = () => {
         <UserFormFields />
       </Modal>
 
-      {/* Password Display Modal */}
       <Modal isOpen={modalMode === 'password'} onClose={closeModal} title="User Created Successfully" size="sm">
         <div className="space-y-4">
           <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg p-3">
@@ -470,7 +509,6 @@ export const UserManagement: React.FC = () => {
         </div>
       </Modal>
 
-      {/* Edit Modal */}
       <Modal isOpen={modalMode === 'edit'} onClose={closeModal} title={`Edit: ${selectedUser?.name}`} size="sm"
         footer={
           <div className="flex gap-2 justify-end">
@@ -482,7 +520,6 @@ export const UserManagement: React.FC = () => {
         <UserFormFields />
       </Modal>
 
-      {/* Delete Confirmation Modal */}
       <Modal isOpen={modalMode === 'delete'} onClose={closeModal} title="Delete User" size="sm"
         footer={
           <div className="flex gap-2 justify-end">
