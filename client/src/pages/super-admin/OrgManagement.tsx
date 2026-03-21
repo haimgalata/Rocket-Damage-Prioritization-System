@@ -171,7 +171,7 @@ export const OrgManagement: React.FC = () => {
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <p className="text-sm text-gray-500 mb-1">Pending</p>
-            <p className="text-3xl font-bold text-yellow-600">{events.filter(e => e.status === 'PENDING').length}</p>
+            <p className="text-3xl font-bold text-yellow-600">{events.filter(e => e.status === 'pending').length}</p>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <p className="text-sm text-gray-500 mb-1">Total Users</p>
