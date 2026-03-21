@@ -15,6 +15,7 @@
 7. [Priority Score Formula](#7-priority-score-formula)
 8. [How to Add a New Feature](#8-how-to-add-a-new-feature)
 9. [Running the Project](#9-running-the-project)
+10. [Database Architecture](#10-database-architecture)
 
 ---
 
@@ -361,3 +362,99 @@ python -m server.src.seed_data
 | Super Admin | sarah@prioritai.gov | demo1234 |
 | Admin | david@tel-aviv.gov | demo1234 |
 | Operator | miriam@tel-aviv.gov | demo1234 |
+
+---
+
+## 10. Database Architecture
+
+### 10.1 Overview
+
+PrioritAI is a **rocket damage prioritization system** used by municipal authorities. The database persists all damage events, organizations, users, and associated metadata.
+
+**What the database is used for:**
+
+- Stores damage events with geographic coordinates, descriptions, and status
+- Holds AI classification results (damage score, priority score, explanations)
+- Stores GIS-derived features (distances to hospitals, schools, roads, military sites; population density)
+- Maintains organizations, users, and their relationships
+- Records status change history for audit purposes
+
+The database replaces the previous in-memory store and provides persistence across restarts.
+
+### 10.2 Database Structure
+
+| Table | Purpose | Main Columns | PK | FKs |
+|-------|---------|--------------|-----|-----|
+| `settlements` | Geographic areas (cities/regions) | id, name, settlement_code | id | — |
+| `roles` | User role lookup (super_admin, admin, operator) | id, name | id | — |
+| `event_status` | Event lifecycle (new, in_progress, done) | id, name | id | — |
+| `organizations` | Municipal authorities | id, name, settlement_id, external_id, created_at | id | settlements.id |
+| `users` | System users | id, name, email, password, role_id, organization_id, external_id, created_at | id | roles.id, organizations.id |
+| `events` | Damage event records | id, lat, lon, address, city, description, organization_id, created_by, status_id, hidden, created_at | id | organizations.id, users.id, event_status.id |
+| `event_images` | Event image URLs | id, event_id, image_url | id | events.id |
+| `event_gis` | GIS features per event (1:1) | id, event_id, distance_hospital, distance_school, distance_road, distance_military, population_density, geo_multiplier, created_at | id | events.id |
+| `event_analysis` | AI damage score and explanation | id, event_id, damage_score, damage_classification, priority_score, explanation, ai_model, created_at | id | events.id |
+| `event_tags` | Event tags/categories | id, event_id, tag | id | events.id |
+| `event_history` | Status change audit log | id, event_id, old_status_id, new_status_id, changed_by, changed_at | id | events.id, event_status.id (×2), users.id |
+
+### 10.3 Relationships Between Tables
+
+**Reference tables** (no foreign keys): `settlements`, `roles`, `event_status` — used as lookups for other entities.
+
+**Core hierarchy:**
+
+- **Settlement** → one-to-many **Organizations** (each org belongs to one settlement)
+- **Organization** → one-to-many **Users** (employs); one-to-many **Events** (owns)
+- **Role** → one-to-many **Users** (each user has one role)
+- **User** → one-to-many **Events** (as creator via `created_by`)
+
+**Event detail tables** (all reference `events`):
+
+- **Event** → one-to-many **EventImages**
+- **Event** → one-to-one **EventGIS**
+- **Event** → one-to-many **EventAnalysis** (typically one active analysis per event)
+- **Event** → one-to-many **EventTags**
+- **Event** → one-to-many **EventHistory**
+
+**EventHistory** links to `event_status` (old and new status) and `users` (who made the change).
+
+### 10.4 ERD Diagram
+
+```mermaid
+erDiagram
+    settlements ||--o{ organizations : "belongs_to"
+    roles ||--o{ users : "has"
+    organizations ||--o{ users : "employs"
+    organizations ||--o{ events : "owns"
+    users ||--o{ events : "creates"
+    event_status ||--o{ events : "tracks"
+    events ||--o{ event_images : "has"
+    events ||--|| event_gis : "has"
+    events ||--o{ event_analysis : "has"
+    events ||--o{ event_tags : "has"
+    events ||--o{ event_history : "records"
+    event_status ||--o{ event_history : "old_status"
+    event_status ||--o{ event_history : "new_status"
+    users ||--o{ event_history : "changed_by"
+```
+
+### 10.5 Example Flow
+
+**Creating an organization, admin, and events:**
+
+1. Insert a **Settlement** (e.g. "Tel Aviv", TAV-001).
+2. Insert an **Organization** linked to that settlement (e.g. "Tel Aviv Municipality", external_id: org-1).
+3. Insert a **User** with role admin and organization_id → that org (e.g. external_id: user-admin-1).
+4. Operator creates an **Event** via `POST /events`: lat, lon, description, organization_id, created_by.
+5. Backend inserts **Event**, **EventAnalysis** (AI damage score), **EventImages** (if any), **EventTags**.
+6. Background task runs GIS and inserts **EventGIS**, updates **EventAnalysis** with priority score and explanation.
+7. When status changes (e.g. new → in_progress), a row is added to **EventHistory**.
+
+### 10.6 Technologies
+
+| Technology | Purpose |
+|------------|---------|
+| **PostgreSQL 16** | Relational database |
+| **SQLAlchemy 2.x** | ORM; models in `server/src/db/models.py` |
+| **psycopg2** | PostgreSQL driver |
+| **Migration script** | `server/migrations/001_init_schema.sql` — creates tables and seed reference data |
