@@ -90,7 +90,7 @@ export const UserManagement: React.FC = () => {
     events.forEach(e => {
       if (e.createdBy) {
         if (!map[e.createdBy]) map[e.createdBy] = [];
-        map[e.createdBy].push({ name: e.name ?? `Event #${e.id.slice(-3)}`, createdAt: e.createdAt as string });
+        map[e.createdBy].push({ name: e.name ?? `Event #${e.id.slice(-3)}`, createdAt: e.createdAt instanceof Date ? e.createdAt.toISOString() : String(e.createdAt) });
       }
     });
     return map;
