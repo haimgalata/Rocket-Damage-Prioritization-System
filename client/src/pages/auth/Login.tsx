@@ -5,13 +5,24 @@ import { z } from 'zod';
 import { Shield, Eye, EyeOff, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks';
-import { MOCK_USERS, MOCK_ORGANIZATIONS, DEMO_CREDENTIALS } from '../../data/mockData';
+import { API_BASE_URL } from '../../config/api';
+import type { User, Organization } from '../../types';
+import { parseOrganization, parseUser } from '../../api/parsers';
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string().min(4, 'Password must be at least 4 characters'),
 });
 type FormData = z.infer<typeof schema>;
+
+/** Quick-fill buttons for demo accounts (all use password: 1234) */
+const DEMO_ACCOUNTS = [
+  { email: 'haimgalata@gmail.com', password: '1234', label: 'Super Admin' },
+  { email: 'linoysahalo@gmail.com', password: '1234', label: 'Super Admin' },
+  { email: 'sarah@prioritai.gov', password: '1234', label: 'Super Admin' },
+  { email: 'david@tel-aviv.gov', password: '1234', label: 'Admin' },
+  { email: 'miriam@tel-aviv.gov', password: '1234', label: 'Operator' },
+];
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -28,18 +39,37 @@ export const Login: React.FC = () => {
 
   const onSubmit = async (data: FormData) => {
     setLoginError('');
-    await new Promise((r) => setTimeout(r, 600));
-    const user = MOCK_USERS.find((u) => u.email === data.email);
-    if (!user || data.password !== 'demo1234') {
-      setLoginError('Invalid credentials. Use one of the demo accounts below.');
-      return;
-    }
-    const org = MOCK_ORGANIZATIONS.find((o) => o.id === user.organizationId);
-    loginUser(user, org || MOCK_ORGANIZATIONS[0]);
+    try {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email, password: data.password }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setLoginError(err.detail ?? 'Invalid credentials. Use one of the demo accounts below.');
+        return;
+      }
+      const { user, organization } = await res.json();
+      const u = parseUser(user as Record<string, unknown>);
+      const o: Organization =
+        organization && (organization as Record<string, unknown>).id != null
+          ? parseOrganization(organization as Record<string, unknown>)
+          : {
+              id: 0,
+              name: '',
+              settlementId: 0,
+              settlement_code: '',
+              createdAt: new Date(),
+            };
+      loginUser(u, o);
 
-    if (user.role === 'SUPER_ADMIN') navigate('/super-admin/organizations');
-    else if (user.role === 'ADMIN') navigate('/admin/dashboard');
-    else navigate('/operator/map');
+      if (u.role === 'SUPER_ADMIN') navigate('/super-admin/organizations');
+      else if (u.role === 'ADMIN') navigate('/admin/dashboard');
+      else navigate('/operator/map');
+    } catch {
+      setLoginError('Network error. Is the API server running?');
+    }
   };
 
   return (
@@ -117,10 +147,10 @@ export const Login: React.FC = () => {
 
           <div className="mt-6 pt-6 border-t border-white/10">
             <p className="text-xs text-blue-300 mb-3 flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5" /> Demo accounts — click to fill
+              <Zap className="w-3.5 h-3.5" /> Demo accounts — click to fill (password: 1234)
             </p>
             <div className="space-y-2">
-              {DEMO_CREDENTIALS.map((cred) => (
+              {DEMO_ACCOUNTS.map((cred) => (
                 <button
                   key={cred.email}
                   type="button"
@@ -131,7 +161,7 @@ export const Login: React.FC = () => {
                     <p className="text-xs font-semibold text-blue-200">{cred.label}</p>
                     <p className="text-xs text-blue-400">{cred.email}</p>
                   </div>
-                  <span className="text-xs text-slate-500">demo1234</span>
+                  <span className="text-xs text-slate-500">1234</span>
                 </button>
               ))}
             </div>

@@ -9,10 +9,10 @@ import { EventMap } from '../../components/maps/MapContainer';
 import { EventDetailView } from '../../components/events/EventDetailView';
 import { useEventStore } from '../../store/authStore';
 import { useAuth } from '../../hooks';
-import { MOCK_EVENTS, MOCK_USERS } from '../../data/mockData';
+import { fetchUsers } from '../../api/auth';
 import { EventStatus } from '../../types';
 import type { DamageEvent } from '../../types';
-import { API_BASE_URL } from '../../config/api';
+import { fetchEvents } from '../../api/events';
 
 export const OperatorDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -24,28 +24,29 @@ export const OperatorDashboard: React.FC = () => {
   const [isEditOpen,    setIsEditOpen]    = useState(false);
   const [mapFocusEvent, setMapFocusEvent] = useState<DamageEvent | null>(null);
 
+  const [users, setUsers] = useState<{ id: number; name: string }[]>([]);
+  const userNameMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    users.forEach((u) => { map[u.id] = u.name; });
+    return map;
+  }, [users]);
+
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/events`);
-        if (res.ok) {
-          const data: DamageEvent[] = await res.json();
-          if (data.length > 0) { setEvents(data); return; }
-        }
-      } catch { /* backend unavailable — fall through to mock */ }
-      if (events.length === 0) setEvents(MOCK_EVENTS);
+        const [eventsData, usersRes] = await Promise.all([
+          fetchEvents(),
+          fetchUsers(),
+        ]);
+        setEvents(eventsData);
+        setUsers(usersRes.map(u => ({ id: u.id, name: u.name })));
+      } catch { /* backend unavailable */ }
     };
     load();
   }, []);
 
-  const userNameMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    MOCK_USERS.forEach((u) => { map[u.id] = u.name; });
-    return map;
-  }, []);
-
   const orgEvents = events.filter(
-    (e) => e.organizationId === user?.organizationId && !e.hidden,
+    (e) => user?.organizationId != null && e.organizationId === user.organizationId && !e.hidden,
   );
 
   const total      = orgEvents.length;
@@ -65,7 +66,7 @@ export const OperatorDashboard: React.FC = () => {
     setIsEditOpen(true);
   };
 
-  const handleSaveEdit = (id: string, updates: Partial<DamageEvent>) => {
+  const handleSaveEdit = (id: number, updates: Partial<DamageEvent>) => {
     updateEvent(id, updates);
     if (selectedEvent?.id === id) {
       setSelectedEvent((prev) => prev ? { ...prev, ...updates } : prev);

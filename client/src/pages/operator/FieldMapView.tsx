@@ -8,7 +8,7 @@ import { EventDetailView } from '../../components/events/EventDetailView';
 import { EventTable } from '../../components/events/EventTable';
 import { useEventStore } from '../../store/authStore';
 import { useAuth } from '../../hooks';
-import { MOCK_EVENTS } from '../../data/mockData';
+import { fetchEvents } from '../../api/events';
 import { EventStatus } from '../../types';
 import type { DamageEvent } from '../../types';
 
@@ -20,10 +20,18 @@ export const FieldMapView: React.FC = () => {
   const [view, setView] = useState<'map' | 'list'>('map');
 
   useEffect(() => {
-    if (events.length === 0) setEvents(MOCK_EVENTS);
+    const load = async () => {
+      try {
+        const data = await fetchEvents();
+        setEvents(data);
+      } catch { /* backend unavailable */ }
+    };
+    load();
   }, []);
 
-  const orgEvents = events.filter((e) => e.organizationId === user?.organizationId);
+  const orgEvents = events.filter(
+    (e) => user?.organizationId != null && e.organizationId === user.organizationId,
+  );
   const criticalEvents = orgEvents.filter((e) => e.priorityScore >= 7.5 && e.status !== EventStatus.COMPLETED);
 
   const handleSelectEvent = (event: DamageEvent) => {

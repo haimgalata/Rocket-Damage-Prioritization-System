@@ -10,4 +10,11 @@ Exports:
     analyze_router: ``POST /analyze`` — legacy analysis endpoint.
 """
 
-from .routes import health_router, events_router, analyze_router
+from .routes import (
+    health_router,
+    auth_router,
+    organizations_router,
+    settlements_router,
+    events_router,
+    analyze_router,
+)

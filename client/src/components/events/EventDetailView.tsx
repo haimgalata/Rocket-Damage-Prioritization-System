@@ -164,7 +164,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         )}
         <div className="flex items-center gap-2 text-gray-500">
           <User className="w-4 h-4 text-gray-400" />
-          <span>Event #{event.id.slice(-3)}</span>
+          <span>Event #{String(event.id).slice(-3)}</span>
         </div>
       </div>
 

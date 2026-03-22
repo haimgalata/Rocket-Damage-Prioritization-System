@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,7 +9,8 @@ import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
-import { MOCK_USERS, MOCK_ORGANIZATIONS } from '../../data/mockData';
+import { fetchOrganizations } from '../../api/organizations';
+import { fetchUsers } from '../../api/auth';
 import { UserRole } from '../../types';
 import type { User as UserType } from '../../types';
 import { formatDate, getInitials } from '../../utils/helpers';
@@ -30,6 +31,12 @@ function generateStrongPassword(): string {
 
   return pass.split('').sort(() => Math.random() - 0.5).join('');
 }
+
+const ROLE_DB_ID: Record<UserRole, number> = {
+  [UserRole.SUPER_ADMIN]: 1,
+  [UserRole.ADMIN]: 2,
+  [UserRole.OPERATOR]: 3,
+};
 
 const makeSchema = (isSuperAdmin: boolean) =>
   z.object({
@@ -56,18 +63,17 @@ export const UserManagement: React.FC = () => {
   const { user: currentUser } = useAuth();
   const isSuperAdmin = currentUser?.role === UserRole.SUPER_ADMIN;
 
-  const [selectedOrgId, setSelectedOrgId] = useState<string>(
-    isSuperAdmin ? '' : (currentUser?.organizationId || '')
+  const [selectedOrgId, setSelectedOrgId] = useState<number | null>(
+    isSuperAdmin ? null : currentUser?.organizationId ?? null,
   );
 
-  const allUsers = MOCK_USERS;
-
-  const [users, setUsers] = useState<UserType[]>(() => {
-    if (isSuperAdmin) return [...allUsers];
-    return [...allUsers.filter(
-      (u) => u.organizationId === currentUser?.organizationId && u.role !== UserRole.SUPER_ADMIN
-    )];
-  });
+  const [allUsers, setAllUsers] = useState<UserType[]>([]);
+  const [organizations, setOrganizations] = useState<{ id: number; name: string }[]>([]);
+  const users = isSuperAdmin
+    ? allUsers
+    : allUsers.filter(
+        (u) => u.organizationId === currentUser?.organizationId && u.role !== UserRole.SUPER_ADMIN
+      );
 
   const [search, setSearch] = useState('');
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'delete' | 'password' | null>(null);
@@ -75,10 +81,10 @@ export const UserManagement: React.FC = () => {
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [passwordCopied, setPasswordCopied] = useState(false);
   const { events } = useEventStore();
-  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
+  const [expandedUserId, setExpandedUserId] = useState<number | null>(null);
 
   const userEventCount = useMemo(() => {
-    const map: Record<string, number> = {};
+    const map: Record<number, number> = {};
     events.forEach(e => {
       if (e.createdBy) map[e.createdBy] = (map[e.createdBy] || 0) + 1;
     });
@@ -86,11 +92,14 @@ export const UserManagement: React.FC = () => {
   }, [events]);
 
   const userEventList = useMemo(() => {
-    const map: Record<string, { name: string; createdAt: string }[]> = {};
+    const map: Record<number, { name: string; createdAt: string }[]> = {};
     events.forEach(e => {
       if (e.createdBy) {
         if (!map[e.createdBy]) map[e.createdBy] = [];
-        map[e.createdBy].push({ name: e.name ?? `Event #${e.id.slice(-3)}`, createdAt: e.createdAt instanceof Date ? e.createdAt.toISOString() : String(e.createdAt) });
+        map[e.createdBy].push({
+          name: e.name ?? `Event #${String(e.id).slice(-3)}`,
+          createdAt: e.createdAt instanceof Date ? e.createdAt.toISOString() : String(e.createdAt),
+        });
       }
     });
     return map;
@@ -100,11 +109,26 @@ export const UserManagement: React.FC = () => {
   const { register, handleSubmit, reset, setValue, watch, formState: { errors } } =
     useForm<UserFormData>({ resolver: zodResolver(schema) });
 
-  const orgFilteredUsers = isSuperAdmin && selectedOrgId
-    ? users.filter((u) => u.organizationId === selectedOrgId)
-    : isSuperAdmin
-    ? []  // SuperAdmin must select org first
-    : users;
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [orgsRes, usersRes] = await Promise.all([
+          fetchOrganizations(),
+          fetchUsers(),
+        ]);
+        setOrganizations(orgsRes.map(o => ({ id: o.id, name: o.name })));
+        setAllUsers(usersRes);
+      } catch { /* backend unavailable */ }
+    };
+    load();
+  }, []);
+
+  const orgFilteredUsers =
+    isSuperAdmin && selectedOrgId != null
+      ? users.filter((u) => u.organizationId === selectedOrgId)
+      : isSuperAdmin
+        ? []
+        : users;
 
   const sortedUsers = [...orgFilteredUsers].sort((a, b) => {
     const order = { [UserRole.SUPER_ADMIN]: 0, [UserRole.ADMIN]: 1, [UserRole.OPERATOR]: 2 };
@@ -123,7 +147,12 @@ export const UserManagement: React.FC = () => {
       email: '',
       jobTitle: '',
       role: UserRole.OPERATOR,
-      organizationId: selectedOrgId || currentUser?.organizationId || '',
+      organizationId:
+        selectedOrgId != null
+          ? String(selectedOrgId)
+          : currentUser?.organizationId != null
+            ? String(currentUser.organizationId)
+            : '',
     });
     setSelectedUser(null);
     setModalMode('create');
@@ -135,7 +164,7 @@ export const UserManagement: React.FC = () => {
     setValue('email', u.email);
     setValue('jobTitle', u.jobTitle || '');
     setValue('role', u.role);
-    setValue('organizationId', u.organizationId);
+    setValue('organizationId', u.organizationId != null ? String(u.organizationId) : '');
     setModalMode('edit');
   };
 
@@ -156,37 +185,57 @@ export const UserManagement: React.FC = () => {
     const password = generateStrongPassword();
     setGeneratedPassword(password);
 
+    const organizationId = Number(data.organizationId);
     const newUser: UserType = {
-      id: `user-${Date.now()}`,
+      id: Date.now(),
+      externalId: null,
       name: data.name,
       email: data.email,
       role: data.role,
+      roleId: ROLE_DB_ID[data.role],
       jobTitle: data.jobTitle,
-      organizationId: data.organizationId || currentUser?.organizationId || 'org-1',
+      organizationId: Number.isFinite(organizationId) && organizationId > 0
+        ? organizationId
+        : currentUser?.organizationId ?? 1,
       createdAt: new Date(),
       isActive: true,
     };
-    setUsers((prev) => [newUser, ...prev]);
+    setAllUsers((prev: UserType[]) => [newUser, ...prev]);
     setSelectedUser(newUser);
     setModalMode('password');
   };
 
   const onEdit = (data: UserFormData) => {
     if (!selectedUser) return;
-    setUsers((prev) =>
-      prev.map((u) => u.id === selectedUser.id ? { ...u, ...data } : u)
+    const organizationId = Number(data.organizationId);
+    setAllUsers((prev: UserType[]) =>
+      prev.map((u) =>
+        u.id === selectedUser.id
+          ? {
+              ...u,
+              name: data.name,
+              email: data.email,
+              jobTitle: data.jobTitle,
+              role: data.role,
+              roleId: ROLE_DB_ID[data.role],
+              organizationId: Number.isFinite(organizationId) && organizationId > 0
+                ? organizationId
+                : u.organizationId,
+            }
+          : u,
+      ),
     );
     closeModal();
   };
 
   const onDelete = () => {
     if (!selectedUser) return;
-    setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
+    setAllUsers((prev: UserType[]) => prev.filter((u) => u.id !== selectedUser.id));
     closeModal();
   };
 
-  const toggleActive = (id: string) => {
-    setUsers((prev) =>
+  const toggleActive = (id: number) => {
+    setAllUsers((prev: UserType[]) =>
       prev.map((u) => u.id === id ? { ...u, isActive: !u.isActive } : u)
     );
   };
@@ -228,7 +277,7 @@ export const UserManagement: React.FC = () => {
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">Select organization...</option>
-            {MOCK_ORGANIZATIONS.map((org) => (
+            {organizations.map((org) => (
               <option key={org.id} value={org.id}>{org.name}</option>
             ))}
           </select>
@@ -254,7 +303,8 @@ export const UserManagement: React.FC = () => {
     </div>
   );
 
-  const displayUsers = isSuperAdmin && selectedOrgId ? orgFilteredUsers : isSuperAdmin ? [] : orgFilteredUsers;
+  const displayUsers =
+    isSuperAdmin && selectedOrgId != null ? orgFilteredUsers : isSuperAdmin ? [] : orgFilteredUsers;
 
   return (
     <PageContainer title="User Management">
@@ -268,12 +318,14 @@ export const UserManagement: React.FC = () => {
             </div>
             <div className="relative">
               <select
-                value={selectedOrgId}
-                onChange={(e) => setSelectedOrgId(e.target.value)}
+                value={selectedOrgId != null ? String(selectedOrgId) : ''}
+                onChange={(e) =>
+                  setSelectedOrgId(e.target.value === '' ? null : Number(e.target.value))
+                }
                 className="appearance-none border border-blue-300 bg-white rounded-lg px-4 py-2 pr-8 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]"
               >
                 <option value="">Choose organization...</option>
-                {MOCK_ORGANIZATIONS.map((org) => (
+                {organizations.map((org) => (
                   <option key={org.id} value={org.id}>{org.name}</option>
                 ))}
               </select>
@@ -282,7 +334,7 @@ export const UserManagement: React.FC = () => {
           </div>
         )}
 
-        {(!isSuperAdmin || selectedOrgId) && (
+        {(!isSuperAdmin || selectedOrgId != null) && (
           <div className="grid grid-cols-3 gap-4">
             {[
               { label: 'Total Users',    value: displayUsers.length },
@@ -297,7 +349,7 @@ export const UserManagement: React.FC = () => {
           </div>
         )}
 
-        {isSuperAdmin && !selectedOrgId ? (
+        {isSuperAdmin && selectedOrgId == null ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
             <p className="text-gray-400 text-sm">Select an organization above to view its users.</p>
           </div>

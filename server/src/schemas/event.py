@@ -27,9 +27,9 @@ class LocationSchema(BaseModel):
 class EventResponse(BaseModel):
     """Full damage event object returned by POST /events."""
 
-    id:                   str
-    organizationId:       str
-    createdBy:            str
+    id:                   int
+    organizationId:       int
+    createdBy:            int
     description:          str
     location:             LocationSchema
     imageUrl:             str

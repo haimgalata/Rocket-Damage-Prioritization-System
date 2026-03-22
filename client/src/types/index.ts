@@ -18,13 +18,16 @@ export const DamageClassification = {
 } as const;
 export type DamageClassification = (typeof DamageClassification)[keyof typeof DamageClassification];
 
+/** Organization — IDs match PostgreSQL (organizations.id, settlement_id). */
 export interface Organization {
-  id: string;
+  id: number;
+  externalId?: string | null;
   name: string;
+  settlementId: number;
   settlement_code: string;
   description?: string;
   region?: string;
-  adminId?: string;
+  adminId?: number | null;
   logoUrl?: string;
   createdAt: Date;
   updatedAt?: Date;
@@ -32,12 +35,15 @@ export interface Organization {
   totalUsers?: number;
 }
 
+/** User — IDs match PostgreSQL (users.id, role_id, organization_id). */
 export interface User {
-  id: string;
+  id: number;
+  externalId?: string | null;
   name: string;
   email: string;
   role: UserRole;
-  organizationId: string;
+  roleId: number;
+  organizationId: number | null;
   jobTitle?: string;
   profileImage?: string;
   lastLogin?: Date;
@@ -62,9 +68,10 @@ export interface GisDetails {
   geoMultiplier: number;
 }
 
+/** Damage event — IDs match PostgreSQL (events.id, organization_id, created_by). */
 export interface DamageEvent {
-  id: string;
-  organizationId: string;
+  id: number;
+  organizationId: number;
   name?: string;
   location: Location;
   imageUrl: string;
@@ -79,7 +86,7 @@ export interface DamageEvent {
   hidden?: boolean;
   llmExplanation: string;
   aiModel?: string;
-  createdBy: string;
+  createdBy: number;
   createdAt: Date;
   updatedAt?: Date;
   resolvedAt?: Date;
@@ -95,7 +102,7 @@ export interface Notification {
   type: 'info' | 'warning' | 'critical' | 'success';
   read: boolean;
   createdAt: Date;
-  eventId?: string;
+  eventId?: number;
 }
 
 export interface DashboardStats {
@@ -157,7 +164,7 @@ export interface OrganizationFormData {
   settlement_code: string;
   description?: string;
   region?: string;
-  adminId?: string;
+  adminId?: number;
 }
 
 export interface UserFormData {
@@ -165,7 +172,7 @@ export interface UserFormData {
   email: string;
   jobTitle?: string;
   role: UserRole;
-  organizationId: string;
+  organizationId: number;
 }
 
 export interface EventFilterOptions {
@@ -174,7 +181,7 @@ export interface EventFilterOptions {
   priorityScoreMax?: number;
   startDate?: Date;
   endDate?: Date;
-  organizationId?: string;
+  organizationId?: number;
   assignedTo?: string;
 }
 

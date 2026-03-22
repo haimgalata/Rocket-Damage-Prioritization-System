@@ -1,66 +1,70 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Building2, Plus, Search, Users, AlertTriangle, Calendar, Shield, X, BarChart3, ExternalLink, ImageIcon } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Building2, Plus, Search, Users, AlertTriangle, Calendar, Shield, X, BarChart3, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Modal } from '../../components/ui/Modal';
 import { Input } from '../../components/ui/Input';
-import { MOCK_ORGANIZATIONS, MOCK_USERS, MOCK_EVENTS } from '../../data/mockData';
-import type { Organization, User, DamageEvent } from '../../types';
+import { fetchUsers } from '../../api/auth';
+import {
+  fetchOrganizations,
+  fetchSettlements,
+  createOrganization,
+  type SettlementOption,
+} from '../../api/organizations';
+import type { Organization, User } from '../../types';
 import { UserRole } from '../../types';
 import { formatDate, formatScore } from '../../utils/helpers';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useEventStore } from '../../store/authStore';
-import { API_BASE_URL } from '../../config/api';
+import { fetchEvents } from '../../api/events';
 
-const REGIONS = ['North', 'Center', 'South', 'Jerusalem', 'Tel Aviv', 'Haifa'];
+const regionColor = (_region?: string) => 'bg-gray-100 text-gray-700';
 
-const regionColor = (region?: string) => {
-  switch (region) {
-    case 'North':      return 'bg-blue-100 text-blue-700';
-    case 'South':      return 'bg-orange-100 text-orange-700';
-    case 'Jerusalem':  return 'bg-purple-100 text-purple-700';
-    case 'Tel Aviv':   return 'bg-cyan-100 text-cyan-700';
-    case 'Haifa':      return 'bg-teal-100 text-teal-700';
-    default:           return 'bg-green-100 text-green-700';
-  }
-};
-
-const schema = z.object({
+const orgCreateSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
-  settlement_code: z.string().min(3, 'Code must be at least 3 characters'),
-  region: z.string().min(1, 'Region is required'),
-  description: z.string().optional(),
-  adminMode: z.enum(['existing', 'new']),
+  settlement_id: z.string().min(1, 'Select a settlement'),
   existingAdminId: z.string().optional(),
-  newAdminName: z.string().optional(),
-  newAdminEmail: z.string().optional(),
-  newAdminJobTitle: z.string().optional(),
 });
-type FormData = z.infer<typeof schema>;
+type OrgCreateFormValues = z.infer<typeof orgCreateSchema>;
 
 export const OrgManagement: React.FC = () => {
   const navigate = useNavigate();
   const { getOrganizationStats, events, setEvents } = useEventStore();
-  const [orgs, setOrgs] = useState<Organization[]>(MOCK_ORGANIZATIONS);
-  const [allUsers, setAllUsers] = useState<User[]>(MOCK_USERS);
+  const [orgs, setOrgs] = useState<Organization[]>([]);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const [search, setSearch] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [briefOrg, setBriefOrg] = useState<Organization | null>(null);
 
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [settlements, setSettlements] = useState<SettlementOption[]>([]);
+  const [createSubmitting, setCreateSubmitting] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: { adminMode: 'existing' },
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<OrgCreateFormValues>({
+    resolver: zodResolver(orgCreateSchema),
+    defaultValues: { name: '', settlement_id: '', existingAdminId: '' },
   });
 
-  const adminMode = watch('adminMode');
   const existingAdmins = allUsers.filter((u) => u.role === UserRole.ADMIN);
+
+  const loadData = useCallback(async () => {
+    try {
+      const [eventsData, orgsRes, usersRes, settlementsRes] = await Promise.all([
+        fetchEvents(),
+        fetchOrganizations(),
+        fetchUsers(),
+        fetchSettlements(),
+      ]);
+      setEvents(eventsData);
+      setOrgs(orgsRes);
+      setAllUsers(usersRes);
+      setSettlements(settlementsRes);
+    } catch { /* backend unavailable */ }
+  }, [setEvents]);
 
   const filtered = orgs.filter(
     (o) =>
@@ -71,60 +75,29 @@ export const OrgManagement: React.FC = () => {
 
   const getOrgAdmin = (org: Organization) => allUsers.find((u) => u.id === org.adminId);
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setLogoPreview(URL.createObjectURL(file));
-  };
-
-  const onSubmit = (data: FormData) => {
-    let adminId: string | undefined;
-
-    if (data.adminMode === 'existing' && data.existingAdminId) {
-      adminId = data.existingAdminId;
-    } else if (data.adminMode === 'new' && data.newAdminName && data.newAdminEmail) {
-      const newAdmin: User = {
-        id: `user-admin-${Date.now()}`,
-        name: data.newAdminName,
-        email: data.newAdminEmail,
-        role: UserRole.ADMIN,
-        organizationId: `org-${Date.now()}`,
-        jobTitle: data.newAdminJobTitle || 'Operations Manager',
-        createdAt: new Date(),
-        isActive: true,
-      };
-      adminId = newAdmin.id;
-      setAllUsers((prev) => [...prev, newAdmin]);
+  const onSubmit = async (data: OrgCreateFormValues) => {
+    setCreateError(null);
+    setCreateSubmitting(true);
+    try {
+      const settlement_id = Number(data.settlement_id);
+      if (!Number.isFinite(settlement_id) || settlement_id < 1) {
+        setCreateError('Select a valid settlement');
+        setCreateSubmitting(false);
+        return;
+      }
+      await createOrganization({
+        name: data.name.trim(),
+        settlement_id,
+        assign_admin_external_id: data.existingAdminId?.trim() || null,
+      });
+      await loadData();
+      reset({ name: '', settlement_id: '', existingAdminId: '' });
+      setIsCreateOpen(false);
+    } catch (e) {
+      setCreateError(e instanceof Error ? e.message : 'Failed to create organization');
+    } finally {
+      setCreateSubmitting(false);
     }
-
-    if (!adminId) {
-      alert('Please assign an admin to this organization.');
-      return;
-    }
-
-    const newOrg: Organization = {
-      id: `org-${Date.now()}`,
-      name: data.name,
-      settlement_code: data.settlement_code,
-      region: data.region,
-      description: data.description,
-      adminId,
-      logoUrl: logoPreview || undefined,
-      createdAt: new Date(),
-      totalEvents: 0,
-      totalUsers: 1,
-    };
-
-    if (data.adminMode === 'new') {
-      setAllUsers((prev) =>
-        prev.map((u) => u.id === adminId ? { ...u, organizationId: newOrg.id } : u)
-      );
-    }
-
-    setOrgs((prev) => [...prev, newOrg]);
-    reset();
-    setLogoPreview(null);
-    setIsCreateOpen(false);
   };
 
   const getBriefStats = (org: Organization) => {
@@ -135,25 +108,15 @@ export const OrgManagement: React.FC = () => {
   };
 
   const totalEvents = events.length;
-  const userCountByOrg = orgs.reduce<Record<string, number>>((acc, o) => {
+  const userCountByOrg = orgs.reduce<Record<number, number>>((acc, o) => {
     acc[o.id] = allUsers.filter(u => u.organizationId === o.id).length;
     return acc;
   }, {});
   const totalUsers = Object.values(userCountByOrg).reduce((s, c) => s + c, 0);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}/events`);
-        if (res.ok) {
-          const data: DamageEvent[] = await res.json();
-          if (data.length > 0) { setEvents(data); return; }
-        }
-      } catch { /* backend unavailable */ }
-      if (events.length === 0) setEvents(MOCK_EVENTS);
-    };
-    load();
-  }, []);
+    loadData();
+  }, [loadData]);
 
   return (
     <PageContainer title="Organization Management">
@@ -352,116 +315,88 @@ export const OrgManagement: React.FC = () => {
       )}
 
       {/* Create Org Modal */}
-      <Modal isOpen={isCreateOpen} onClose={() => { setIsCreateOpen(false); reset(); setLogoPreview(null); }} title="Create Organization" size="sm">
+      <Modal
+        isOpen={isCreateOpen}
+        onClose={() => {
+          setIsCreateOpen(false);
+          setCreateError(null);
+          reset({ name: '', settlement_id: '', existingAdminId: '' });
+        }}
+        title="Create Organization"
+        size="sm"
+      >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <p className="text-xs text-gray-500">
+            Organizations are saved in PostgreSQL. Choose a settlement that already exists (seed or migrations).
+          </p>
           <Input
             label="Organization Name"
             placeholder="City Municipality"
             error={errors.name?.message}
             {...register('name')}
           />
-          <Input
-            label="Settlement Code"
-            placeholder="71005"
-            error={errors.settlement_code?.message}
-            {...register('settlement_code')}
-          />
-
           <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">Region <span className="text-red-500">*</span></label>
+            <label className="text-sm font-medium text-gray-700 block mb-1">
+              Settlement <span className="text-red-500">*</span>
+            </label>
             <select
-              {...register('region')}
+              {...register('settlement_id')}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Select region...</option>
-              {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+              <option value="">Select settlement...</option>
+              {settlements.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} ({s.settlement_code})
+                </option>
+              ))}
             </select>
-            {errors.region && <p className="text-xs text-red-600 mt-1">{errors.region.message}</p>}
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">Description</label>
-            <textarea
-              {...register('description')}
-              rows={2}
-              placeholder="Brief description..."
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-gray-700 block mb-1">Organization Logo (optional)</label>
-            {logoPreview ? (
-              <div className="flex items-center gap-3">
-                <img src={logoPreview} alt="Logo preview" className="w-12 h-12 rounded-lg object-cover border border-gray-200" />
-                <button
-                  type="button"
-                  onClick={() => { setLogoPreview(null); if (logoInputRef.current) logoInputRef.current.value = ''; }}
-                  className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1"
-                >
-                  <X className="w-3.5 h-3.5" /> Remove
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => logoInputRef.current?.click()}
-                className="flex items-center gap-2 px-3 py-2 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600 transition w-full"
-              >
-                <ImageIcon className="w-4 h-4" />
-                Upload logo image
-              </button>
+            {errors.settlement_id && (
+              <p className="text-xs text-red-600 mt-1">{errors.settlement_id.message}</p>
             )}
-            <input
-              ref={logoInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleLogoChange}
-            />
           </div>
 
           <div className="border-t border-gray-200 pt-3">
             <p className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-1.5">
               <Shield className="w-4 h-4 text-purple-500" />
-              Assign Admin <span className="text-red-500">*</span>
+              Assign admin (optional)
             </p>
-
-            <div className="flex gap-4 mb-3">
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <input type="radio" value="existing" {...register('adminMode')} className="accent-blue-600" />
-                Existing user
-              </label>
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                <input type="radio" value="new" {...register('adminMode')} className="accent-blue-600" />
-                Create new admin
-              </label>
-            </div>
-
-            {adminMode === 'existing' && (
-              <select
-                {...register('existingAdminId')}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select existing admin...</option>
-                {existingAdmins.map((u) => (
-                  <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
-                ))}
-              </select>
-            )}
-
-            {adminMode === 'new' && (
-              <div className="space-y-2">
-                <Input label="Admin Name" placeholder="Jane Smith" {...register('newAdminName')} />
-                <Input label="Admin Email" type="email" placeholder="admin@authority.gov" {...register('newAdminEmail')} />
-                <Input label="Job Title" placeholder="Operations Manager" {...register('newAdminJobTitle')} />
-              </div>
-            )}
+            <p className="text-xs text-gray-500 mb-2">
+              If you pick an admin, their account is updated to belong to the new organization.
+            </p>
+            <select
+              {...register('existingAdminId')}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">No reassignment</option>
+              {existingAdmins.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name} ({u.email})
+                </option>
+              ))}
+            </select>
           </div>
 
+          {createError && (
+            <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+              {createError}
+            </div>
+          )}
+
           <div className="flex gap-2 justify-end pt-1">
-            <Button variant="outline" type="button" onClick={() => { setIsCreateOpen(false); reset(); setLogoPreview(null); }}>Cancel</Button>
-            <Button type="submit">Create Organization</Button>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => {
+                setIsCreateOpen(false);
+                setCreateError(null);
+                reset({ name: '', settlement_id: '', existingAdminId: '' });
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={createSubmitting}>
+              {createSubmitting ? 'Saving…' : 'Create Organization'}
+            </Button>
           </div>
         </form>
       </Modal>

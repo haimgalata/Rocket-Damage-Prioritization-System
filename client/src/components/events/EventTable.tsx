@@ -20,14 +20,14 @@ interface EventTableProps {
   events:          DamageEvent[];
   onSelectEvent?:  (event: DamageEvent) => void;
   onEditEvent?:    (event: DamageEvent) => void;
-  onToggleHide?:   (id: string) => void;
-  onUpdateStatus?: (id: string, status: EventStatus) => void;
-  selectedEventId?: string;
+  onToggleHide?:   (id: number) => void;
+  onUpdateStatus?: (id: number, status: EventStatus) => void;
+  selectedEventId?: number;
   compact?:        boolean;
-  currentUserId?:  string;
+  currentUserId?:  number;
   currentUserRole?: string;
-  userNameMap?:    Record<string, string>;
-  orgMap?:         Record<string, string>;
+  userNameMap?:    Record<number, string>;
+  orgMap?:         Record<number, string>;
 }
 
 const statusVariantMap: Record<EventStatus, 'warning' | 'info' | 'success'> = {
@@ -160,7 +160,7 @@ export const EventTable: React.FC<EventTableProps> = ({
 
               let creatorLine: React.ReactNode = null;
               if (isAdmin) {
-                const name = userNameMap[event.createdBy] ?? event.createdBy;
+                const name = userNameMap[event.createdBy] ?? String(event.createdBy);
                 creatorLine = <span className="text-gray-400 text-xs">By: {name}</span>;
               } else if (isOperator && isOwner) {
                 creatorLine = <span className="text-blue-500 text-xs font-medium">(You)</span>;
@@ -181,7 +181,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                           onClick={() => onSelectEvent?.(event)}
                           className="font-medium text-blue-700 hover:text-blue-900 hover:underline text-xs text-left cursor-pointer transition"
                         >
-                          {event.name ?? `Event #${event.id.slice(-3)}`}
+                          {event.name ?? `Event #${String(event.id).slice(-3)}`}
                         </button>
                         <p className="text-gray-500 text-xs">{event.location.address}</p>
                         {orgMap[event.organizationId] && (

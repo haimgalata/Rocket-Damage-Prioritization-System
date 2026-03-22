@@ -18,7 +18,7 @@ interface AuthStoreState extends AuthState {
   setError: (error: string | null) => void;
   updateUserProfile: (updates: Partial<User>) => void;
   hasRole: (...roles: UserRole[]) => boolean;
-  canAccessOrganization: (orgId: string) => boolean;
+  canAccessOrganization: (orgId: number) => boolean;
 }
 
 interface EventStoreState {
@@ -31,11 +31,11 @@ interface EventStoreState {
   setEvents: (events: DamageEvent[]) => void;
   setSelectedEvent: (event: DamageEvent | null) => void;
   addEvent: (event: DamageEvent) => void;
-  updateEvent: (id: string, updates: Partial<DamageEvent>) => void;
-  deleteEvent: (id: string) => void;
-  toggleHideEvent: (id: string) => void;
+  updateEvent: (id: number, updates: Partial<DamageEvent>) => void;
+  deleteEvent: (id: number) => void;
+  toggleHideEvent: (id: number) => void;
   filterEventsByStatus: (status: EventStatus) => void;
-  filterEventsByOrganization: (orgId: string) => void;
+  filterEventsByOrganization: (orgId: number) => void;
   sortEventsByPriority: () => void;
   sortEventsByDate: (order: 'asc' | 'desc') => void;
   setLoading: (loading: boolean) => void;
@@ -43,7 +43,7 @@ interface EventStoreState {
   clearFilters: () => void;
 
   getStats: (currentUser: User) => DashboardStats;
-  getOrganizationStats: (orgId: string) => DashboardStats;
+  getOrganizationStats: (orgId: number) => DashboardStats;
 }
 
 interface NotificationStoreState {
@@ -108,7 +108,7 @@ export const useAuthStore = create<AuthStoreState>()(
         return user ? roles.includes(user.role) : false;
       },
 
-      canAccessOrganization: (orgId: string) => {
+      canAccessOrganization: (orgId: number) => {
         const { user } = get();
         if (!user) return false;
         return user.role === UserRole.SUPER_ADMIN || user.organizationId === orgId;
@@ -151,7 +151,7 @@ export const useEventStore = create<EventStoreState>()(
         });
       },
 
-      updateEvent: (id: string, updates: Partial<DamageEvent>) => {
+      updateEvent: (id: number, updates: Partial<DamageEvent>) => {
         set((state) => {
           const updated = state.events
             .map((e) => (e.id === id ? { ...e, ...updates } : e))
@@ -170,7 +170,7 @@ export const useEventStore = create<EventStoreState>()(
         });
       },
 
-      deleteEvent: (id: string) => {
+      deleteEvent: (id: number) => {
         set((state) => {
           const updated = state.events.filter((e) => e.id !== id);
           const filtered = state.filteredEvents.filter((e) => e.id !== id);
@@ -183,7 +183,7 @@ export const useEventStore = create<EventStoreState>()(
         });
       },
 
-      toggleHideEvent: (id: string) => {
+      toggleHideEvent: (id: number) => {
         set((state) => {
           const updated = state.events.map((e) =>
             e.id === id ? { ...e, hidden: !e.hidden } : e
@@ -203,7 +203,7 @@ export const useEventStore = create<EventStoreState>()(
         }));
       },
 
-      filterEventsByOrganization: (orgId: string) => {
+      filterEventsByOrganization: (orgId: number) => {
         set((state) => ({
           filteredEvents: state.events
             .filter((e) => e.organizationId === orgId)
@@ -277,7 +277,7 @@ export const useEventStore = create<EventStoreState>()(
         };
       },
 
-      getOrganizationStats: (orgId: string): DashboardStats => {
+      getOrganizationStats: (orgId: number): DashboardStats => {
         const { events } = get();
         const orgEvents = events.filter((e) => e.organizationId === orgId);
 

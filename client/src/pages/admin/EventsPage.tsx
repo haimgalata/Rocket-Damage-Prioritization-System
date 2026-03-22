@@ -10,10 +10,11 @@ import { EventMap } from '../../components/maps/MapContainer';
 import { EventDetailView } from '../../components/events/EventDetailView';
 import { useEventStore } from '../../store/authStore';
 import { useAuth } from '../../hooks';
-import { MOCK_EVENTS, MOCK_USERS, MOCK_ORGANIZATIONS } from '../../data/mockData';
+import { fetchOrganizations } from '../../api/organizations';
+import { fetchUsers } from '../../api/auth';
 import { EventStatus } from '../../types';
 import type { DamageEvent } from '../../types';
-import { API_BASE_URL } from '../../config/api';
+import { fetchEvents } from '../../api/events';
 
 type MapMode    = 'pins' | 'heatmap';
 type FilterStatus = 'all' | EventStatus;
@@ -24,11 +25,18 @@ export const EventsPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const orgFilter = searchParams.get('org');
 
+  const [orgs, setOrgs] = useState<{ id: number; name: string }[]>([]);
+  const [users, setUsers] = useState<{ id: number; name: string }[]>([]);
   const orgMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    MOCK_ORGANIZATIONS.forEach(o => { map[o.id] = o.name; });
+    const map: Record<number, string> = {};
+    orgs.forEach(o => { map[o.id] = o.name; });
     return map;
-  }, []);
+  }, [orgs]);
+  const userNameMap = useMemo(() => {
+    const map: Record<number, string> = {};
+    users.forEach((u) => { map[u.id] = u.name; });
+    return map;
+  }, [users]);
 
   const [selectedEvent,  setSelectedEvent]  = useState<DamageEvent | null>(null);
   const [editingEvent,   setEditingEvent]   = useState<DamageEvent | null>(null);
@@ -42,25 +50,29 @@ export const EventsPage: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/events`);
-        if (res.ok) {
-          const data: DamageEvent[] = await res.json();
-          if (data.length > 0) { setEvents(data); return; }
-        }
-      } catch { /* backend unavailable — fall through to mock */ }
-      if (events.length === 0) setEvents(MOCK_EVENTS);
+        const [eventsData, orgsRes, usersRes] = await Promise.all([
+          fetchEvents(),
+          fetchOrganizations(),
+          fetchUsers(),
+        ]);
+        setEvents(eventsData);
+        setOrgs(orgsRes.map(o => ({ id: o.id, name: o.name })));
+        setUsers(usersRes.map(u => ({ id: u.id, name: u.name })));
+      } catch { /* backend unavailable */ }
     };
     load();
   }, []);
 
-  const userNameMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    MOCK_USERS.forEach((u) => { map[u.id] = u.name; });
-    return map;
-  }, []);
-
-  const baseOrgId     = orgFilter || (user?.role !== 'SUPER_ADMIN' ? user?.organizationId : null);
-  const orgEvents     = baseOrgId ? events.filter((e) => e.organizationId === baseOrgId) : events;
+  const baseOrgIdNum =
+    orgFilter != null && orgFilter !== ''
+      ? Number(orgFilter)
+      : user?.role !== 'SUPER_ADMIN'
+        ? user?.organizationId ?? null
+        : null;
+  const orgEvents =
+    baseOrgIdNum != null && Number.isFinite(baseOrgIdNum)
+      ? events.filter((e) => e.organizationId === baseOrgIdNum)
+      : events;
   const statusFiltered = filterStatus === 'all' ? orgEvents : orgEvents.filter((e) => e.status === filterStatus);
   const displayEvents  = showHidden ? statusFiltered : statusFiltered.filter((e) => !e.hidden);
 
@@ -75,7 +87,7 @@ export const EventsPage: React.FC = () => {
     setIsEditOpen(true);
   };
 
-  const handleSaveEdit = (id: string, updates: Partial<DamageEvent>) => {
+  const handleSaveEdit = (id: number, updates: Partial<DamageEvent>) => {
     updateEvent(id, updates);
     if (selectedEvent?.id === id) {
       setSelectedEvent((prev) => prev ? { ...prev, ...updates } : prev);

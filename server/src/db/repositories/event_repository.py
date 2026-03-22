@@ -77,13 +77,11 @@ def _event_to_response(event: Event) -> dict[str, Any]:
     llm_explanation = analysis.explanation if analysis else ""
     ai_model = analysis.ai_model if analysis else "PrioritAI-v2.1"
 
-    org_ext = event.organization.external_id if event.organization.external_id else str(event.organization_id)
-    user_ext = event.created_by_user.external_id if event.created_by_user.external_id else str(event.created_by)
-
     return {
-        "id": str(event.id),
-        "organizationId": org_ext,
-        "createdBy": user_ext,
+        "id": event.id,
+        "name": event.name,
+        "organizationId": event.organization_id,
+        "createdBy": event.created_by,
         "description": event.description,
         "location": {
             "lat": float(event.lat),

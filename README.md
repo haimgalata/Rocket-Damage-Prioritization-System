@@ -74,6 +74,8 @@ server/src/
 │
 ├── api/
 │   └── routes/
+│       ├── auth.py                 # POST /auth/login · GET /auth/users
+│       ├── organizations.py        # GET|POST /organizations · GET /settlements
 │       ├── events.py               # POST /events · GET /events · GET /events/{id}
 │       ├── analyze.py              # POST /analyze  (raw pipeline, used by tests)
 │       └── health.py               # GET /health
@@ -102,6 +104,7 @@ server/src/
 │           ├── closest_road.py
 │           └── closest_military_base.py
 │
+├── seed_db.py                      # CLI script: populates DB (settlements, orgs, users, events)
 └── seed_data.py                    # CLI script: runs GIS for 20 events → seed_events.json
 ```
 
@@ -146,10 +149,6 @@ client/src/
 │
 ├── hooks/
 │   └── index.ts                # useAuth() — reads from authStore, exposes user + logout
-│
-├── data/
-│   └── mockData.ts             # Fallback data (MOCK_EVENTS, MOCK_USERS, MOCK_ORGANIZATIONS)
-│                               # Used only when the backend is unreachable
 │
 ├── utils/
 │   └── helpers.ts              # Pure formatting functions:
@@ -260,7 +259,7 @@ Dashboard / EventsPage mounts
 fetch GET /events
         │
         ├─ 200 OK + data  →  setEvents(data)  →  all views update
-        └─ Network error  →  fallback to MOCK_EVENTS
+        └─ Network error  →  empty list / UI error (no mock fallback)
 ```
 
 ---
@@ -347,21 +346,41 @@ docker-compose up --build
 # API docs: http://localhost:8000/docs
 ```
 
-### Re-seed the database
+### Populate the database (full seed)
+
+```bash
+# 1. Run migrations first (creates tables and reference data)
+psql -U prioritai -d prioritai -f server/migrations/001_init_schema.sql
+
+# 2. Populate all tables: settlements, organizations, users, events
+python -m server.src.seed_db
+```
+
+This seeds:
+- **Settlements**: Tel Aviv, South, Jerusalem
+- **Organizations**: Tel Aviv Municipality, South Authority, Jerusalem Municipality (each linked to a settlement)
+- **Users**: Super admins (haimgalata@gmail.com, linoysahalo@gmail.com), admins, operators — all with password `1234`
+- **Events**: 20 events from `seed_events.json` with full AI + GIS data, images, tags, and history
+
+Idempotent: safe to run multiple times; skips existing data.
+
+### Re-generate seed_events.json (optional)
 
 ```bash
 # Runs full GIS pipeline for all 20 events and writes seed_events.json
 python -m server.src.seed_data
-# Then restart the backend to load the fresh data
+# Then run seed_db again to load the fresh events
 ```
 
-### Demo login credentials
+### Demo login credentials (password: 1234)
 
-| Role | Email | Password |
-|---|---|---|
-| Super Admin | sarah@prioritai.gov | demo1234 |
-| Admin | david@tel-aviv.gov | demo1234 |
-| Operator | miriam@tel-aviv.gov | demo1234 |
+| Role | Email |
+|---|---|
+| Super Admin | haimgalata@gmail.com |
+| Super Admin | linoysahalo@gmail.com |
+| Super Admin | sarah@prioritai.gov |
+| Admin | david@tel-aviv.gov |
+| Operator | miriam@tel-aviv.gov |
 
 ---
 

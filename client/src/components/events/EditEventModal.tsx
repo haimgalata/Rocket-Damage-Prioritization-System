@@ -19,7 +19,7 @@ interface EditEventModalProps {
   event:   DamageEvent | null;
   isOpen:  boolean;
   onClose: () => void;
-  onSave:  (id: string, updates: Partial<DamageEvent>) => void;
+  onSave:  (id: number, updates: Partial<DamageEvent>) => void;
 }
 
 export const EditEventModal: React.FC<EditEventModalProps> = ({ event, isOpen, onClose, onSave }) => {
@@ -50,7 +50,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({ event, isOpen, o
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Edit Event — #${event.id.slice(-3)}`} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={`Edit Event — #${String(event.id).slice(-3)}`} size="md">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
         <Input

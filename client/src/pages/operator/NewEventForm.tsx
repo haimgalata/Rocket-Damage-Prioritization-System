@@ -12,6 +12,7 @@ import { useEventStore, useNotificationStore } from '../../store/authStore';
 import { useAuth } from '../../hooks';
 import { EventStatus } from '../../types';
 import type { Location, DamageEvent, GisDetails } from '../../types';
+import { parseDamageEvent } from '../../api/parsers';
 import { API_BASE_URL } from '../../config/api';
 import { TEST_TEMPLATES } from '../../config/testTemplates';
 
@@ -185,12 +186,12 @@ export const NewEventForm: React.FC = () => {
     }
   };
 
-  const pollForGis = async (eventId: string) => {
+  const pollForGis = async (eventId: number) => {
     const MAX_ATTEMPTS = 20;
     for (let i = 0; i < MAX_ATTEMPTS; i++) {
       await new Promise(r => setTimeout(r, 4000));
       try {
-        const resp = await fetch(`${API_BASE_URL}/events/${eventId}`);
+        const resp = await fetch(`${API_BASE_URL}/events/${String(eventId)}`);
         if (!resp.ok) continue;
         const evt = await resp.json();
         if (evt.gisStatus === 'done') {
@@ -229,8 +230,8 @@ export const NewEventForm: React.FC = () => {
       formData.append('lat', String(loc.lat));
       formData.append('lon', String(loc.lng));
       formData.append('description', data.description);
-      formData.append('organization_id', user?.organizationId || 'org-1');
-      formData.append('created_by', user?.id || 'user-op-1');
+      formData.append('organization_id', String(user?.organizationId ?? 1));
+      formData.append('created_by', String(user?.id ?? ''));
       formData.append('tags', data.tags || '');
       if (imageFile) formData.append('image', imageFile);
 
@@ -247,25 +248,14 @@ export const NewEventForm: React.FC = () => {
         geoMultiplier:    evt.gisDetails?.geoMultiplier    ?? 1,
       };
 
+      const parsed = parseDamageEvent(evt as Record<string, unknown>);
       newEvent = {
-        id:                   evt.id,
-        organizationId:       evt.organizationId,
-        name:                 data.name,
-        location:             { lat: loc.lat, lng: loc.lng, address: evt.location?.address ?? loc.address, city: evt.location?.city ?? loc.city },
-        imageUrl:             evt.imageUrl || imagePreview || '',
-        description:          evt.description,
-        damageClassification: evt.damageClassification as 'Light' | 'Heavy',
-        damageScore:          evt.damageScore,
-        priorityScore:        evt.priorityScore,
+        ...parsed,
+        name: data.name,
+        location: { lat: loc.lat, lng: loc.lng, address: evt.location?.address ?? loc.address, city: evt.location?.city ?? loc.city },
+        imageUrl: parsed.imageUrl || imagePreview || '',
         gisDetails,
-        status:               EventStatus.PENDING,
-        hidden:               false,
-        llmExplanation:       evt.llmExplanation,
-        aiModel:              evt.aiModel || 'PrioritAI-v2.1',
-        createdBy:            evt.createdBy,
-        createdAt:            new Date(evt.createdAt),
-        tags:                 evt.tags ?? [],
-        gisStatus:            evt.gisStatus as 'pending' | 'done' | undefined,
+        status: EventStatus.PENDING,
       };
     } catch (_err) {
       usedFallback = true;
@@ -273,7 +263,7 @@ export const NewEventForm: React.FC = () => {
       const { classification, damageScore } = simulateAIClassification();
       const gisDetails = simulateGISMultiplier(loc.lat, loc.lng);
       const finalScore = Math.min(10, Math.max(0.1, Math.round(damageScore * gisDetails.geoMultiplier * 10) / 10));
-      const eventId = `evt-${Date.now()}`;
+      const eventId = Date.now();
 
       const llmExplanation = `${classification} damage classification detected. AI analysis identified structural characteristics consistent with ${classification.toLowerCase()} damage patterns. ${
         classification === 'Heavy'
@@ -287,7 +277,7 @@ export const NewEventForm: React.FC = () => {
 
       newEvent = {
         id:                   eventId,
-        organizationId:       user?.organizationId || 'org-1',
+        organizationId:       user?.organizationId ?? 1,
         name:                 data.name,
         location:             loc,
         imageUrl:             imagePreview || '',
@@ -300,7 +290,7 @@ export const NewEventForm: React.FC = () => {
         hidden:               false,
         llmExplanation,
         aiModel:              'PrioritAI-v2.1 (offline)',
-        createdBy:            user?.id || 'user-op-1',
+        createdBy:            user?.id ?? 0,
         createdAt:            new Date(),
         tags:                 data.tags?.split(',').map((t) => t.trim()).filter(Boolean) ?? [],
       };

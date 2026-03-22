@@ -23,7 +23,9 @@ export const ModelRunner: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [runs, setRuns] = useState<ModelRun[]>([]);
 
-  const orgEvents = events.filter((e) => e.organizationId === user?.organizationId);
+  const orgEvents = events.filter(
+    (e) => user?.organizationId != null && e.organizationId === user.organizationId,
+  );
   const pendingEvents = orgEvents.filter((e) => e.status === EventStatus.PENDING);
 
   const handleRun = async () => {
@@ -51,7 +53,10 @@ export const ModelRunner: React.FC = () => {
     }
 
     const updatedPending = events.filter(
-      (e) => e.organizationId === user?.organizationId && e.status === EventStatus.PENDING
+      (e) =>
+        user?.organizationId != null &&
+        e.organizationId === user.organizationId &&
+        e.status === EventStatus.PENDING,
     );
     const after = updatedPending.length > 0
       ? Math.round(updatedPending.reduce((s, e) => s + e.priorityScore, 0) / updatedPending.length)

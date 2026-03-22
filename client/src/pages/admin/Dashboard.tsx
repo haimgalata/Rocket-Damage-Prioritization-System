@@ -11,9 +11,8 @@ import { EventDetailView } from '../../components/events/EventDetailView';
 import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../hooks';
 import { useEventStore, useNotificationStore } from '../../store/authStore';
-import { MOCK_EVENTS, MOCK_NOTIFICATIONS } from '../../data/mockData';
 import type { DamageEvent } from '../../types';
-import { API_BASE_URL } from '../../config/api';
+import { fetchEvents } from '../../api/events';
 import { EventStatus } from '../../types';
 import { formatScore } from '../../utils/helpers';
 
@@ -62,21 +61,21 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/events`);
-        if (res.ok) {
-          const data: DamageEvent[] = await res.json();
-          if (data.length > 0) { setEvents(data); return; }
-        }
-      } catch { /* backend unavailable — fall through to mock */ }
-      if (events.length === 0) setEvents(MOCK_EVENTS);
+        const data = await fetchEvents();
+        setEvents(data);
+      } catch { /* backend unavailable */ }
     };
     load();
-    setNotifications(MOCK_NOTIFICATIONS);
+    setNotifications([]);
   }, []);
 
-  const orgEvents = user?.role === 'SUPER_ADMIN'
-    ? events
-    : events.filter((e) => e.organizationId === user?.organizationId);
+  const orgEvents =
+    user?.role === 'SUPER_ADMIN'
+      ? events
+      : events.filter(
+          (e) =>
+            user?.organizationId != null && e.organizationId === user.organizationId,
+        );
 
   const statusFiltered = filterStatus === 'all'
     ? orgEvents
