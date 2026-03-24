@@ -3,7 +3,7 @@ import { Brain, Play, CheckCircle, Cpu, Zap } from 'lucide-react';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { useEventStore } from '../../store/authStore';
+import { useEventStore } from '../../store/eventStore';
 import { useAuth } from '../../hooks';
 import { EventStatus } from '../../types';
 
@@ -26,7 +26,7 @@ export const ModelRunner: React.FC = () => {
   const orgEvents = events.filter(
     (e) => user?.organizationId != null && e.organizationId === user.organizationId,
   );
-  const pendingEvents = orgEvents.filter((e) => e.status === EventStatus.PENDING);
+  const pendingEvents = orgEvents.filter((e) => e.status === EventStatus.NEW);
 
   const handleRun = async () => {
     if (pendingEvents.length === 0) return;
@@ -56,7 +56,7 @@ export const ModelRunner: React.FC = () => {
       (e) =>
         user?.organizationId != null &&
         e.organizationId === user.organizationId &&
-        e.status === EventStatus.PENDING,
+        e.status === EventStatus.NEW,
     );
     const after = updatedPending.length > 0
       ? Math.round(updatedPending.reduce((s, e) => s + e.priorityScore, 0) / updatedPending.length)
@@ -115,7 +115,7 @@ export const ModelRunner: React.FC = () => {
           </div>
         </Card>
 
-        <Card title="Run Assessment" subtitle={`${pendingEvents.length} events awaiting scoring`}>
+        <Card title="Run Assessment" subtitle={`${pendingEvents.length} events in "new" status (demo batch update)`}>
           {isRunning ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between text-sm mb-1">
@@ -143,7 +143,7 @@ export const ModelRunner: React.FC = () => {
                 disabled={pendingEvents.length === 0}
                 size="lg"
               >
-                {pendingEvents.length === 0 ? 'No Pending Events' : `Run on ${pendingEvents.length} Events`}
+                {pendingEvents.length === 0 ? 'No events in New status' : `Run on ${pendingEvents.length} events`}
               </Button>
               {pendingEvents.length === 0 && (
                 <p className="text-sm text-gray-500 flex items-center gap-1.5">

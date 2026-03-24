@@ -18,8 +18,12 @@ does not accept optional metadata fields (``organization_id``,
 """
 
 import logging
+from typing import Annotated
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+
+from server.src.api.deps import get_current_user
+from server.src.db.models import User
 
 from server.src.schemas.analysis import AnalysisResponse
 from server.src.services.ai_service import run_classification
@@ -33,8 +37,9 @@ router = APIRouter(prefix="/analyze", tags=["analyze"])
 
 @router.post("", response_model=AnalysisResponse)
 async def analyze(
-    lat:   float      = Form(...),
-    lon:   float      = Form(...),
+    _user: Annotated[User, Depends(get_current_user)],
+    lat: float = Form(...),
+    lon: float = Form(...),
     image: UploadFile = File(...),
 ) -> AnalysisResponse:
     """Run the full damage-analysis pipeline and return raw outputs.

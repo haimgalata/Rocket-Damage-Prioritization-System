@@ -1,4 +1,5 @@
-import { useAuthStore, useEventStore } from '../store/authStore';
+import { useAuthStore } from '../store/authStore';
+import { useEventStore } from '../store/eventStore';
 import { UserRole } from '../types';
 
 export const useAuth = () => {
@@ -9,6 +10,7 @@ export const useAuth = () => {
     isLoading,
     error,
     loginUser,
+    setSession,
     logoutUser,
     setLoading,
     setError,
@@ -24,6 +26,7 @@ export const useAuth = () => {
     isLoading,
     error,
     loginUser,
+    setSession,
     logoutUser,
     logout: logoutUser,
     setLoading,

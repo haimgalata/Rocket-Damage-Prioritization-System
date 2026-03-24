@@ -3,11 +3,11 @@ import type { DamageEvent, DashboardStats } from '../types';
 
 export const getStatusColor = (status: EventStatus): string => {
   switch (status) {
-    case EventStatus.PENDING:
+    case EventStatus.NEW:
       return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     case EventStatus.IN_PROGRESS:
       return 'bg-blue-100 text-blue-800 border-blue-300';
-    case EventStatus.COMPLETED:
+    case EventStatus.DONE:
       return 'bg-green-100 text-green-800 border-green-300';
     default:
       return 'bg-gray-100 text-gray-800 border-gray-300';
@@ -16,11 +16,11 @@ export const getStatusColor = (status: EventStatus): string => {
 
 export const getStatusBgColor = (status: EventStatus): string => {
   switch (status) {
-    case EventStatus.PENDING:
+    case EventStatus.NEW:
       return 'bg-yellow-50';
     case EventStatus.IN_PROGRESS:
       return 'bg-blue-50';
-    case EventStatus.COMPLETED:
+    case EventStatus.DONE:
       return 'bg-green-50';
     default:
       return 'bg-gray-50';
@@ -186,20 +186,18 @@ export const groupEventsByStatus = (
   events: DamageEvent[]
 ): Record<EventStatus, DamageEvent[]> => {
   return {
-    [EventStatus.PENDING]: events.filter((e) => e.status === EventStatus.PENDING),
+    [EventStatus.NEW]: events.filter((e) => e.status === EventStatus.NEW),
     [EventStatus.IN_PROGRESS]: events.filter(
       (e) => e.status === EventStatus.IN_PROGRESS
     ),
-    [EventStatus.COMPLETED]: events.filter(
-      (e) => e.status === EventStatus.COMPLETED
-    ),
+    [EventStatus.DONE]: events.filter((e) => e.status === EventStatus.DONE),
   };
 };
 
 export const calculateEventStats = (events: DamageEvent[]): DashboardStats => {
-  const pending = events.filter((e) => e.status === EventStatus.PENDING);
+  const pending = events.filter((e) => e.status === EventStatus.NEW);
   const inProgress = events.filter((e) => e.status === EventStatus.IN_PROGRESS);
-  const completed = events.filter((e) => e.status === EventStatus.COMPLETED);
+  const completed = events.filter((e) => e.status === EventStatus.DONE);
 
   const avgDamage =
     events.length > 0

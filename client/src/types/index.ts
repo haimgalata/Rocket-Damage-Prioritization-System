@@ -5,12 +5,21 @@ export const UserRole = {
 } as const;
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
+/** Matches PostgreSQL event_status.name */
 export const EventStatus = {
-  PENDING: 'pending',
+  NEW: 'new',
   IN_PROGRESS: 'in_progress',
-  COMPLETED: 'completed',
+  DONE: 'done',
 } as const;
 export type EventStatus = (typeof EventStatus)[keyof typeof EventStatus];
+
+export interface EventStatusHistoryEntry {
+  oldStatus: string;
+  newStatus: string;
+  changedBy: number;
+  changedByName: string;
+  changedAt: string;
+}
 
 export const DamageClassification = {
   LIGHT: 'Light',
@@ -93,6 +102,8 @@ export interface DamageEvent {
   estimatedRepairCost?: number;
   assignedTo?: string;
   tags?: string[];
+  /** Present when loaded with GET /events/:id?detail=true */
+  history?: EventStatusHistoryEntry[];
 }
 
 export interface Notification {

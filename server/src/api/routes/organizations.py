@@ -1,15 +1,17 @@
 """
-GET  /organizations — List organizations (same shape as legacy /auth/organizations).
-POST /organizations — Create organization (persisted in PostgreSQL).
-GET  /settlements   — List settlements for create-org form.
+GET  /organizations — List organizations (scoped by role).
+POST /organizations — Create organization (super_admin only).
+GET  /settlements   — List settlements (authenticated).
 """
 
 import uuid
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import joinedload
 
+from server.src.api.deps import get_current_user, require_roles
 from server.src.api.routes.auth import _org_to_api
 from server.src.db.connection import get_db
 from server.src.db.models import Organization, Settlement, User
@@ -28,17 +30,22 @@ class CreateOrganizationRequest(BaseModel):
 
 
 @organizations_router.get("/organizations")
-def list_organizations() -> list[dict]:
-    """List all organizations with settlement info and adminId."""
+def list_organizations(current: Annotated[User, Depends(get_current_user)]) -> list[dict]:
+    """Super admin: all orgs. Others: own organization only."""
+    role_name = current.role.name if current.role else ""
     with get_db() as db:
-        orgs = (
+        q = (
             db.query(Organization)
             .options(
                 joinedload(Organization.settlement),
                 joinedload(Organization.users).joinedload(User.role),
             )
-            .all()
         )
+        if role_name != "super_admin":
+            if current.organization_id is None:
+                return []
+            q = q.filter(Organization.id == current.organization_id)
+        orgs = q.all()
         result = []
         for o in orgs:
             d = _org_to_api(o, o.settlement)
@@ -49,7 +56,10 @@ def list_organizations() -> list[dict]:
 
 
 @organizations_router.post("/organizations")
-def create_organization(body: CreateOrganizationRequest) -> dict:
+def create_organization(
+    body: CreateOrganizationRequest,
+    _auth: Annotated[User, Depends(require_roles("super_admin"))],
+) -> dict:
     """Insert organization; optionally reassign an existing admin user to it."""
     with get_db() as db:
         settlement = db.query(Settlement).filter(Settlement.id == body.settlement_id).first()
@@ -107,7 +117,7 @@ def create_organization(body: CreateOrganizationRequest) -> dict:
 
 
 @settlements_router.get("")
-def list_settlements() -> list[dict]:
+def list_settlements(_user: Annotated[User, Depends(get_current_user)]) -> list[dict]:
     """List settlements for dropdowns."""
     with get_db() as db:
         rows = db.query(Settlement).order_by(Settlement.name).all()

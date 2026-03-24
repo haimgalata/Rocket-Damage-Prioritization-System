@@ -10,9 +10,10 @@ import { EventMap } from '../../components/maps/MapContainer';
 import { EventDetailView } from '../../components/events/EventDetailView';
 import { Modal } from '../../components/ui/Modal';
 import { useAuth } from '../../hooks';
-import { useEventStore, useNotificationStore } from '../../store/authStore';
+import { useNotificationStore } from '../../store/authStore';
+import { useEventStore } from '../../store/eventStore';
 import type { DamageEvent } from '../../types';
-import { fetchEvents } from '../../api/events';
+import { fetchEvents, patchEventApi } from '../../api/events';
 import { EventStatus } from '../../types';
 import { formatScore } from '../../utils/helpers';
 
@@ -48,7 +49,7 @@ type MapMode = 'pins' | 'heatmap';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const { events, setEvents, toggleHideEvent } = useEventStore();
+  const { events, setEvents, updateEvent } = useEventStore();
   const { setNotifications } = useNotificationStore();
 
   const [selectedEvent, setSelectedEvent] = useState<DamageEvent | null>(null);
@@ -88,9 +89,9 @@ export const Dashboard: React.FC = () => {
   const mapEvents = orgEvents.filter((e) => !e.hidden);
 
   const total       = orgEvents.length;
-  const pending     = orgEvents.filter((e) => e.status === EventStatus.PENDING).length;
+  const pending     = orgEvents.filter((e) => e.status === EventStatus.NEW).length;
   const inProgress  = orgEvents.filter((e) => e.status === EventStatus.IN_PROGRESS).length;
-  const completed   = orgEvents.filter((e) => e.status === EventStatus.COMPLETED).length;
+  const completed   = orgEvents.filter((e) => e.status === EventStatus.DONE).length;
   const avgPriority = total > 0 ? orgEvents.reduce((s, e) => s + e.priorityScore, 0) / total : 0;
   const criticalCount = orgEvents.filter((e) => e.priorityScore >= 7.5).length;
   const hiddenCount   = orgEvents.filter((e) => e.hidden).length;
@@ -101,11 +102,23 @@ export const Dashboard: React.FC = () => {
     setMapFocusEvent(event);        // triggers FlyToEvent inside the map
   };
 
+  const handleToggleHide = async (id: number) => {
+    const ev = events.find((e) => e.id === id);
+    if (!ev) return;
+    try {
+      const updated = await patchEventApi(id, { hidden: !ev.hidden });
+      updateEvent(id, updated);
+      if (selectedEvent?.id === id) setSelectedEvent(updated);
+    } catch {
+      /* ignore */
+    }
+  };
+
   const filterButtons: { label: string; value: FilterStatus; count: number }[] = [
     { label: 'All',         value: 'all',                   count: total },
-    { label: 'Pending',     value: EventStatus.PENDING,     count: pending },
+    { label: 'New',         value: EventStatus.NEW,         count: pending },
     { label: 'In Progress', value: EventStatus.IN_PROGRESS, count: inProgress },
-    { label: 'Completed',   value: EventStatus.COMPLETED,   count: completed },
+    { label: 'Done',        value: EventStatus.DONE,        count: completed },
   ];
 
   return (
@@ -115,12 +128,12 @@ export const Dashboard: React.FC = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Total Events" value={total}
             icon={<Activity className="w-5 h-5 text-blue-600" />} iconBg="bg-blue-100" />
-          <StatCard label="Pending" value={pending}
+          <StatCard label="New" value={pending}
             icon={<Clock className="w-5 h-5 text-yellow-600" />} iconBg="bg-yellow-100"
             delta={criticalCount > 0 ? `${criticalCount} critical` : undefined} deltaPositive={false} />
           <StatCard label="In Progress" value={inProgress}
             icon={<RefreshCw className="w-5 h-5 text-indigo-600" />} iconBg="bg-indigo-100" />
-          <StatCard label="Completed" value={completed}
+          <StatCard label="Done" value={completed}
             icon={<CheckCircle2 className="w-5 h-5 text-green-600" />} iconBg="bg-green-100"
             delta={total > 0 ? `${Math.round((completed / total) * 100)}% resolution rate` : undefined}
             deltaPositive />
@@ -238,7 +251,7 @@ export const Dashboard: React.FC = () => {
           <EventTable
             events={displayEvents}
             onSelectEvent={handleSelectEvent}
-            onToggleHide={toggleHideEvent}
+            onToggleHide={handleToggleHide}
             selectedEventId={selectedEvent?.id}
             compact
           />

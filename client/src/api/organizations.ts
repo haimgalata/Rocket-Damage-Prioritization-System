@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '../config/api';
+import { apiFetch } from '../shared/api/http';
 import { parseOrganization } from './parsers';
 import type { Organization } from '../types';
 
@@ -9,14 +10,14 @@ export type SettlementOption = {
 };
 
 export async function fetchOrganizations(): Promise<Organization[]> {
-  const res = await fetch(`${API_BASE_URL}/organizations`);
+  const res = await apiFetch('/organizations');
   if (!res.ok) return [];
   const data = await res.json();
   return (data || []).map((o: Record<string, unknown>) => parseOrganization(o));
 }
 
 export async function fetchSettlements(): Promise<SettlementOption[]> {
-  const res = await fetch(`${API_BASE_URL}/settlements`);
+  const res = await apiFetch('/settlements');
   if (!res.ok) return [];
   return res.json();
 }
@@ -30,9 +31,8 @@ export type CreateOrganizationPayload = {
 export async function createOrganization(
   payload: CreateOrganizationPayload
 ): Promise<Organization> {
-  const res = await fetch(`${API_BASE_URL}/organizations`, {
+  const res = await apiFetch('/organizations', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       name: payload.name,
       settlement_id: payload.settlement_id,

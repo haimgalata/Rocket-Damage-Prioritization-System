@@ -111,3 +111,38 @@ def list_events() -> list[dict[str, Any]]:
     """List all events sorted by priorityScore descending."""
     with get_db() as db:
         return EventRepository.list_all(db)
+
+
+def list_events_for_principal(*, role_db_name: str, organization_id: int | None) -> list[dict[str, Any]]:
+    """Scope events: super_admin sees all; others only their organization."""
+    with get_db() as db:
+        if role_db_name == "super_admin":
+            return EventRepository.list_all(db)
+        if organization_id is None:
+            return []
+        return EventRepository.list_by_organization(db, organization_id)
+
+
+def get_event_detail(event_id: str) -> dict[str, Any] | None:
+    with get_db() as db:
+        return EventRepository.get_event_detail_response(db, event_id)
+
+
+def patch_event(
+    event_id: int,
+    *,
+    changed_by_user_id: int,
+    status_name: str | None = None,
+    hidden: bool | None = None,
+) -> dict[str, Any] | None:
+    with get_db() as db:
+        try:
+            return EventRepository.update_event_patch(
+                db,
+                event_id,
+                changed_by_user_id=changed_by_user_id,
+                status_name=status_name,
+                hidden=hidden,
+            )
+        except ValueError:
+            return None

@@ -9,6 +9,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
 import { useAuth } from '../hooks';
+import { changePasswordApi } from '../api/auth';
 import { getInitials, formatRole, formatDate } from '../utils/helpers';
 import { UserRole } from '../types';
 
@@ -21,7 +22,7 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
-  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+  newPassword: z.string().min(4, 'Password must be at least 4 characters'),
   confirmPassword: z.string(),
 }).refine((d) => d.newPassword === d.confirmPassword, {
   message: 'Passwords do not match',
@@ -39,6 +40,7 @@ export const UserProfile: React.FC = () => {
   const { user, updateUserProfile } = useAuth();
   const [profileSaved, setProfileSaved] = useState(false);
   const [passwordSaved, setPasswordSaved] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
 
@@ -69,11 +71,16 @@ export const UserProfile: React.FC = () => {
     setTimeout(() => setProfileSaved(false), 3000);
   };
 
-  const onChangePassword = async (_data: PasswordFormData) => {
-    await new Promise((r) => setTimeout(r, 600));
-    resetPassword();
-    setPasswordSaved(true);
-    setTimeout(() => setPasswordSaved(false), 3000);
+  const onChangePassword = async (data: PasswordFormData) => {
+    setPasswordError('');
+    try {
+      await changePasswordApi(data.currentPassword, data.newPassword);
+      resetPassword();
+      setPasswordSaved(true);
+      setTimeout(() => setPasswordSaved(false), 3000);
+    } catch (e) {
+      setPasswordError(e instanceof Error ? e.message : 'Failed to change password');
+    }
   };
 
   if (!user) return null;
@@ -174,7 +181,7 @@ export const UserProfile: React.FC = () => {
               <div className="relative">
                 <input
                   type={showNew ? 'text' : 'password'}
-                  placeholder="Min. 8 characters"
+                  placeholder="Min. 4 characters"
                   {...regPassword('newPassword')}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -192,6 +199,10 @@ export const UserProfile: React.FC = () => {
               error={passwordErrors.confirmPassword?.message}
               {...regPassword('confirmPassword')}
             />
+
+            {passwordError && (
+              <p className="text-sm text-red-600">{passwordError}</p>
+            )}
 
             <div className="flex items-center justify-end gap-3">
               {passwordSaved && (

@@ -8,7 +8,8 @@ import { EventTable } from '../../components/events/EventTable';
 import { EditEventModal } from '../../components/events/EditEventModal';
 import { EventMap } from '../../components/maps/MapContainer';
 import { EventDetailView } from '../../components/events/EventDetailView';
-import { useEventStore } from '../../store/authStore';
+import { useEventStore } from '../../store/eventStore';
+import { patchEventApi } from '../../api/events';
 import { useAuth } from '../../hooks';
 import { fetchOrganizations } from '../../api/organizations';
 import { fetchUsers } from '../../api/auth';
@@ -21,7 +22,7 @@ type FilterStatus = 'all' | EventStatus;
 
 export const EventsPage: React.FC = () => {
   const { user } = useAuth();
-  const { events, setEvents, toggleHideEvent, updateEvent } = useEventStore();
+  const { events, setEvents, updateEvent } = useEventStore();
   const [searchParams] = useSearchParams();
   const orgFilter = searchParams.get('org');
 
@@ -94,11 +95,23 @@ export const EventsPage: React.FC = () => {
     }
   };
 
+  const handleToggleHide = async (id: number) => {
+    const ev = events.find((e) => e.id === id);
+    if (!ev) return;
+    try {
+      const updated = await patchEventApi(id, { hidden: !ev.hidden });
+      updateEvent(id, updated);
+      if (selectedEvent?.id === id) setSelectedEvent(updated);
+    } catch {
+      /* forbidden or network */
+    }
+  };
+
   const filterButtons: { label: string; value: FilterStatus; count: number }[] = [
     { label: 'All',         value: 'all',                   count: orgEvents.length },
-    { label: 'Pending',     value: EventStatus.PENDING,     count: orgEvents.filter((e) => e.status === EventStatus.PENDING).length },
+    { label: 'New',         value: EventStatus.NEW,         count: orgEvents.filter((e) => e.status === EventStatus.NEW).length },
     { label: 'In Progress', value: EventStatus.IN_PROGRESS, count: orgEvents.filter((e) => e.status === EventStatus.IN_PROGRESS).length },
-    { label: 'Completed',   value: EventStatus.COMPLETED,   count: orgEvents.filter((e) => e.status === EventStatus.COMPLETED).length },
+    { label: 'Done',        value: EventStatus.DONE,        count: orgEvents.filter((e) => e.status === EventStatus.DONE).length },
   ];
 
   return (
@@ -197,8 +210,16 @@ export const EventsPage: React.FC = () => {
             events={displayEvents}
             onSelectEvent={handleSelectEvent}
             onEditEvent={handleEditEvent}
-            onToggleHide={toggleHideEvent}
-            onUpdateStatus={(id, status) => updateEvent(id, { status })}
+            onToggleHide={handleToggleHide}
+            onUpdateStatus={async (id, status) => {
+              try {
+                const updated = await patchEventApi(id, { status });
+                updateEvent(id, updated);
+                if (selectedEvent?.id === id) setSelectedEvent(updated);
+              } catch {
+                /* server rejected */
+              }
+            }}
             selectedEventId={selectedEvent?.id}
             currentUserId={user?.id}
             currentUserRole={user?.role}

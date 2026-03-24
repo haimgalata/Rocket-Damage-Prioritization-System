@@ -14,12 +14,12 @@ import {
   type SettlementOption,
 } from '../../api/organizations';
 import type { Organization, User } from '../../types';
-import { UserRole } from '../../types';
+import { UserRole, EventStatus } from '../../types';
 import { formatDate, formatScore } from '../../utils/helpers';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useEventStore } from '../../store/authStore';
+import { useEventStore } from '../../store/eventStore';
 import { fetchEvents } from '../../api/events';
 
 const regionColor = (_region?: string) => 'bg-gray-100 text-gray-700';
@@ -134,7 +134,7 @@ export const OrgManagement: React.FC = () => {
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <p className="text-sm text-gray-500 mb-1">Pending</p>
-            <p className="text-3xl font-bold text-yellow-600">{events.filter(e => e.status === 'pending').length}</p>
+            <p className="text-3xl font-bold text-yellow-600">{events.filter(e => e.status === EventStatus.NEW).length}</p>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <p className="text-sm text-gray-500 mb-1">Total Users</p>

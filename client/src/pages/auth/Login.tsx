@@ -3,11 +3,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Shield, Eye, EyeOff, Zap } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks';
-import { API_BASE_URL } from '../../config/api';
-import type { User, Organization } from '../../types';
-import { parseOrganization, parseUser } from '../../api/parsers';
+import { loginRequest } from '../../api/auth';
+import { UserRole } from '../../types';
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
@@ -15,17 +14,23 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-/** Quick-fill buttons for demo accounts (all use password: 1234) */
+function safeReturnPath(raw: string | null): string | null {
+  if (!raw || !raw.startsWith('/')) return null;
+  if (raw.startsWith('//')) return null;
+  return raw;
+}
+
+/** Quick-fill demo accounts (password: 1234). Primary super admins: Haim, Linoy. */
 const DEMO_ACCOUNTS = [
-  { email: 'haimgalata@gmail.com', password: '1234', label: 'Super Admin' },
-  { email: 'linoysahalo@gmail.com', password: '1234', label: 'Super Admin' },
-  { email: 'sarah@prioritai.gov', password: '1234', label: 'Super Admin' },
+  { email: 'haimgalata@gmail.com', password: '1234', label: 'Super Admin (Haim)' },
+  { email: 'linoysahalo@gmail.com', password: '1234', label: 'Super Admin (Linoy)' },
   { email: 'david@tel-aviv.gov', password: '1234', label: 'Admin' },
   { email: 'miriam@tel-aviv.gov', password: '1234', label: 'Operator' },
 ];
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { loginUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState('');
@@ -40,35 +45,20 @@ export const Login: React.FC = () => {
   const onSubmit = async (data: FormData) => {
     setLoginError('');
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: data.email, password: data.password }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        setLoginError(err.detail ?? 'Invalid credentials. Use one of the demo accounts below.');
+      const { accessToken, user, organization } = await loginRequest(data.email, data.password);
+      loginUser(user, organization, accessToken);
+
+      const ret = safeReturnPath(searchParams.get('returnUrl'));
+      if (ret) {
+        navigate(ret, { replace: true });
         return;
       }
-      const { user, organization } = await res.json();
-      const u = parseUser(user as Record<string, unknown>);
-      const o: Organization =
-        organization && (organization as Record<string, unknown>).id != null
-          ? parseOrganization(organization as Record<string, unknown>)
-          : {
-              id: 0,
-              name: '',
-              settlementId: 0,
-              settlement_code: '',
-              createdAt: new Date(),
-            };
-      loginUser(u, o);
 
-      if (u.role === 'SUPER_ADMIN') navigate('/super-admin/organizations');
-      else if (u.role === 'ADMIN') navigate('/admin/dashboard');
-      else navigate('/operator/map');
-    } catch {
-      setLoginError('Network error. Is the API server running?');
+      if (user.role === UserRole.SUPER_ADMIN) navigate('/super-admin/dashboard', { replace: true });
+      else if (user.role === UserRole.ADMIN) navigate('/admin/dashboard', { replace: true });
+      else navigate('/operator/dashboard', { replace: true });
+    } catch (e) {
+      setLoginError(e instanceof Error ? e.message : 'Network error. Is the API server running?');
     }
   };
 

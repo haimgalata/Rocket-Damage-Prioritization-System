@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ArrowUpDown, ArrowUp, ArrowDown,
   Eye, EyeOff, MapPin, Calendar, Pencil, Search, Loader2,
@@ -31,9 +32,9 @@ interface EventTableProps {
 }
 
 const statusVariantMap: Record<EventStatus, 'warning' | 'info' | 'success'> = {
-  [EventStatus.PENDING]:     'warning',
+  [EventStatus.NEW]: 'warning',
   [EventStatus.IN_PROGRESS]: 'info',
-  [EventStatus.COMPLETED]:   'success',
+  [EventStatus.DONE]: 'success',
 };
 
 const GisSpinner: React.FC = () => (
@@ -243,27 +244,27 @@ export const EventTable: React.FC<EventTableProps> = ({
                   </td>
 
                   <td className={tdClass}>
-                    {onUpdateStatus ? (
+                    {onUpdateStatus && isAdmin ? (
                       <select
                         value={event.status}
                         onChange={(e) => onUpdateStatus(event.id, e.target.value as EventStatus)}
                         onClick={(e) => e.stopPropagation()}
                         className={`text-xs font-medium rounded-full px-2 py-1 border cursor-pointer
                           focus:outline-none focus:ring-1 focus:ring-blue-400 ${
-                          event.status === EventStatus.PENDING
+                          event.status === EventStatus.NEW
                             ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
                             : event.status === EventStatus.IN_PROGRESS
                             ? 'bg-blue-100 text-blue-800 border-blue-300'
                             : 'bg-green-100 text-green-800 border-green-300'
                         }`}
                       >
-                        <option value={EventStatus.PENDING}>Pending</option>
-                        <option value={EventStatus.IN_PROGRESS}>In Progress</option>
-                        <option value={EventStatus.COMPLETED}>Completed</option>
+                        <option value={EventStatus.NEW}>New</option>
+                        <option value={EventStatus.IN_PROGRESS}>In progress</option>
+                        <option value={EventStatus.DONE}>Done</option>
                       </select>
                     ) : (
                       <Badge variant={statusVariantMap[event.status]}>
-                        {event.status.replace('_', ' ')}
+                        {event.status.replace(/_/g, ' ')}
                       </Badge>
                     )}
                   </td>
@@ -278,17 +279,26 @@ export const EventTable: React.FC<EventTableProps> = ({
                   )}
 
                   <td className={tdClass}>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => onSelectEvent?.(event)}
-                        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium transition cursor-pointer"
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Link
+                        to={`/events/${event.id}`}
+                        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium transition"
                       >
                         <Eye className="w-4 h-4" />
                         View
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => onSelectEvent?.(event)}
+                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 font-medium transition cursor-pointer"
+                      >
+                        Quick
                       </button>
 
                       {isOwner && onEditEvent && (
                         <button
+                          type="button"
                           onClick={() => onEditEvent(event)}
                           className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900 font-medium transition cursor-pointer"
                         >
@@ -297,7 +307,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                         </button>
                       )}
 
-                      {onToggleHide && (
+                      {onToggleHide && isAdmin && (
                         <button
                           onClick={() => onToggleHide(event.id)}
                           title={isHidden ? 'Show event' : 'Hide event'}

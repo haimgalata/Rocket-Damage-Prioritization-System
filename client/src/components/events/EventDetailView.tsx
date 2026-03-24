@@ -210,6 +210,25 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         </div>
       )}
 
+      {event.history && event.history.length > 0 && (
+        <div>
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">Status history</h4>
+          <ul className="space-y-2 text-sm border border-gray-100 rounded-lg divide-y divide-gray-100">
+            {event.history.map((h, i) => (
+              <li key={`${h.changedAt}-${i}`} className="px-3 py-2 text-gray-600">
+                <span className="font-medium text-gray-800">{h.oldStatus || '—'}</span>
+                {' → '}
+                <span className="font-medium text-gray-800">{h.newStatus}</span>
+                <span className="text-gray-400"> · </span>
+                {h.changedByName || `User #${h.changedBy}`}
+                <span className="text-gray-400"> · </span>
+                {formatDateTime(h.changedAt)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <AIExplanationBox
         explanation={event.llmExplanation}
         model={event.aiModel}

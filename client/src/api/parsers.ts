@@ -2,7 +2,15 @@
  * Normalize API JSON (camelCase) to domain types with numeric DB ids.
  */
 
-import type { DamageEvent, Organization, User, EventStatus, UserRole } from '../types';
+import { EventStatus } from '../types';
+import type {
+  DamageEvent,
+  EventStatusHistoryEntry,
+  Organization,
+  User,
+  EventStatus as EventStatusType,
+  UserRole,
+} from '../types';
 
 function num(v: unknown, fallback = 0): number {
   const n = typeof v === 'number' ? v : Number(v);
@@ -31,6 +39,29 @@ export function parseOrganization(raw: Record<string, unknown>): Organization {
     totalEvents: raw.totalEvents as number | undefined,
     totalUsers: raw.totalUsers as number | undefined,
   };
+}
+
+/** Map API/legacy status strings to DB-aligned event_status.name values. */
+export function parseEventStatus(raw: unknown): EventStatusType {
+  const s = String(raw ?? '');
+  if (s === 'pending' || s === EventStatus.NEW) return EventStatus.NEW;
+  if (s === EventStatus.IN_PROGRESS) return EventStatus.IN_PROGRESS;
+  if (s === 'completed' || s === EventStatus.DONE) return EventStatus.DONE;
+  return EventStatus.NEW;
+}
+
+function parseHistory(raw: unknown): EventStatusHistoryEntry[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  return raw.map((h) => {
+    const row = h as Record<string, unknown>;
+    return {
+      oldStatus: String(row.oldStatus ?? ''),
+      newStatus: String(row.newStatus ?? ''),
+      changedBy: num(row.changedBy),
+      changedByName: String(row.changedByName ?? ''),
+      changedAt: String(row.changedAt ?? ''),
+    };
+  });
 }
 
 export function parseUser(raw: Record<string, unknown>): User {
@@ -72,7 +103,7 @@ export function parseDamageEvent(raw: Record<string, unknown>): DamageEvent {
     priorityScore: num(raw.priorityScore),
     gisDetails: raw.gisDetails as DamageEvent['gisDetails'],
     gisStatus: raw.gisStatus as DamageEvent['gisStatus'],
-    status: raw.status as EventStatus,
+    status: parseEventStatus(raw.status),
     hidden: Boolean(raw.hidden),
     llmExplanation: String(raw.llmExplanation ?? ''),
     aiModel: raw.aiModel as string | undefined,
@@ -83,5 +114,6 @@ export function parseDamageEvent(raw: Record<string, unknown>): DamageEvent {
     estimatedRepairCost: raw.estimatedRepairCost as number | undefined,
     assignedTo: raw.assignedTo as string | undefined,
     tags,
+    history: parseHistory(raw.history),
   };
 }

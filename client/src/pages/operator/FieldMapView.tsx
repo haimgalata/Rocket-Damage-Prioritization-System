@@ -6,7 +6,7 @@ import { Modal } from '../../components/ui/Modal';
 import { EventMap } from '../../components/maps/MapContainer';
 import { EventDetailView } from '../../components/events/EventDetailView';
 import { EventTable } from '../../components/events/EventTable';
-import { useEventStore } from '../../store/authStore';
+import { useEventStore } from '../../store/eventStore';
 import { useAuth } from '../../hooks';
 import { fetchEvents } from '../../api/events';
 import { EventStatus } from '../../types';
@@ -32,7 +32,7 @@ export const FieldMapView: React.FC = () => {
   const orgEvents = events.filter(
     (e) => user?.organizationId != null && e.organizationId === user.organizationId,
   );
-  const criticalEvents = orgEvents.filter((e) => e.priorityScore >= 7.5 && e.status !== EventStatus.COMPLETED);
+  const criticalEvents = orgEvents.filter((e) => e.priorityScore >= 7.5 && e.status !== EventStatus.DONE);
 
   const handleSelectEvent = (event: DamageEvent) => {
     setSelectedEvent(event);

@@ -7,7 +7,7 @@ import { EventTable } from '../../components/events/EventTable';
 import { EditEventModal } from '../../components/events/EditEventModal';
 import { EventMap } from '../../components/maps/MapContainer';
 import { EventDetailView } from '../../components/events/EventDetailView';
-import { useEventStore } from '../../store/authStore';
+import { useEventStore } from '../../store/eventStore';
 import { useAuth } from '../../hooks';
 import { fetchUsers } from '../../api/auth';
 import { EventStatus } from '../../types';
@@ -50,9 +50,9 @@ export const OperatorDashboard: React.FC = () => {
   );
 
   const total      = orgEvents.length;
-  const pending    = orgEvents.filter((e) => e.status === EventStatus.PENDING).length;
+  const pending    = orgEvents.filter((e) => e.status === EventStatus.NEW).length;
   const inProgress = orgEvents.filter((e) => e.status === EventStatus.IN_PROGRESS).length;
-  const completed  = orgEvents.filter((e) => e.status === EventStatus.COMPLETED).length;
+  const completed  = orgEvents.filter((e) => e.status === EventStatus.DONE).length;
   const critical   = orgEvents.filter((e) => e.priorityScore >= 7.5).length;
 
   const handleSelectEvent = (event: DamageEvent) => {
@@ -90,9 +90,9 @@ export const OperatorDashboard: React.FC = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: 'Total Events', value: total,      icon: <Activity className="w-5 h-5 text-blue-600" />,       bg: 'bg-blue-100'   },
-            { label: 'Pending',      value: pending,    icon: <Clock className="w-5 h-5 text-yellow-600" />,       bg: 'bg-yellow-100' },
+            { label: 'New',            value: pending,    icon: <Clock className="w-5 h-5 text-yellow-600" />,       bg: 'bg-yellow-100' },
             { label: 'In Progress',  value: inProgress, icon: <Activity className="w-5 h-5 text-indigo-600" />,    bg: 'bg-indigo-100' },
-            { label: 'Completed',    value: completed,  icon: <CheckCircle2 className="w-5 h-5 text-green-600" />, bg: 'bg-green-100'  },
+            { label: 'Done',           value: completed,  icon: <CheckCircle2 className="w-5 h-5 text-green-600" />, bg: 'bg-green-100'  },
           ].map(({ label, value, icon, bg }) => (
             <div key={label} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
               <div className="flex items-center justify-between mb-3">

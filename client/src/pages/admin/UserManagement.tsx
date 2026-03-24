@@ -15,7 +15,8 @@ import { UserRole } from '../../types';
 import type { User as UserType } from '../../types';
 import { formatDate, getInitials } from '../../utils/helpers';
 import { useAuth } from '../../hooks';
-import { useEventStore } from '../../store/authStore';
+import { useEventStore } from '../../store/eventStore';
+import { createUserApi } from '../../api/auth';
 
 function generateStrongPassword(): string {
   const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -181,28 +182,30 @@ export const UserManagement: React.FC = () => {
     reset();
   };
 
-  const onCreate = (data: UserFormData) => {
+  const onCreate = async (data: UserFormData) => {
     const password = generateStrongPassword();
     setGeneratedPassword(password);
 
     const organizationId = Number(data.organizationId);
-    const newUser: UserType = {
-      id: Date.now(),
-      externalId: null,
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      roleId: ROLE_DB_ID[data.role],
-      jobTitle: data.jobTitle,
-      organizationId: Number.isFinite(organizationId) && organizationId > 0
+    const oid =
+      Number.isFinite(organizationId) && organizationId > 0
         ? organizationId
-        : currentUser?.organizationId ?? 1,
-      createdAt: new Date(),
-      isActive: true,
-    };
-    setAllUsers((prev: UserType[]) => [newUser, ...prev]);
-    setSelectedUser(newUser);
-    setModalMode('password');
+        : currentUser?.organizationId ?? 1;
+
+    try {
+      const created = await createUserApi({
+        name: data.name,
+        email: data.email,
+        password,
+        role: data.role,
+        organizationId: oid,
+      });
+      setAllUsers((prev: UserType[]) => [created, ...prev]);
+      setSelectedUser(created);
+      setModalMode('password');
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Failed to create user');
+    }
   };
 
   const onEdit = (data: UserFormData) => {

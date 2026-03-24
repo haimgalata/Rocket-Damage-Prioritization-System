@@ -8,12 +8,13 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { LocationPicker } from '../../components/maps/LocationPicker';
-import { useEventStore, useNotificationStore } from '../../store/authStore';
+import { useNotificationStore } from '../../store/authStore';
+import { useEventStore } from '../../store/eventStore';
 import { useAuth } from '../../hooks';
 import { EventStatus } from '../../types';
 import type { Location, DamageEvent, GisDetails } from '../../types';
 import { parseDamageEvent } from '../../api/parsers';
-import { API_BASE_URL } from '../../config/api';
+import { apiFetch } from '../../shared/api/http';
 import { TEST_TEMPLATES } from '../../config/testTemplates';
 
 const schema = z.object({
@@ -191,7 +192,7 @@ export const NewEventForm: React.FC = () => {
     for (let i = 0; i < MAX_ATTEMPTS; i++) {
       await new Promise(r => setTimeout(r, 4000));
       try {
-        const resp = await fetch(`${API_BASE_URL}/events/${String(eventId)}`);
+        const resp = await apiFetch(`/events/${String(eventId)}`);
         if (!resp.ok) continue;
         const evt = await resp.json();
         if (evt.gisStatus === 'done') {
@@ -235,7 +236,7 @@ export const NewEventForm: React.FC = () => {
       formData.append('tags', data.tags || '');
       if (imageFile) formData.append('image', imageFile);
 
-      const resp = await fetch(`${API_BASE_URL}/events`, { method: 'POST', body: formData });
+      const resp = await apiFetch('/events', { method: 'POST', body: formData });
       if (!resp.ok) throw new Error(`Server error ${resp.status}`);
 
       const evt = await resp.json();
@@ -255,7 +256,7 @@ export const NewEventForm: React.FC = () => {
         location: { lat: loc.lat, lng: loc.lng, address: evt.location?.address ?? loc.address, city: evt.location?.city ?? loc.city },
         imageUrl: parsed.imageUrl || imagePreview || '',
         gisDetails,
-        status: EventStatus.PENDING,
+        status: parsed.status,
       };
     } catch (_err) {
       usedFallback = true;
@@ -286,7 +287,7 @@ export const NewEventForm: React.FC = () => {
         damageScore,
         priorityScore:        finalScore,
         gisDetails,
-        status:               EventStatus.PENDING,
+        status:               EventStatus.NEW,
         hidden:               false,
         llmExplanation,
         aiModel:              'PrioritAI-v2.1 (offline)',

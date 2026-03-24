@@ -9,14 +9,13 @@ from server.src.db.models import (
     Event,
     EventAnalysis,
     EventGIS,
+    EventHistory,
     EventImage,
     EventStatus,
     EventTag,
     Organization,
     User,
 )
-
-_STATUS_TO_API = {"new": "pending", "in_progress": "in_progress", "done": "completed"}
 
 
 def _resolve_org_id(db: Session, organization_id: str | int) -> int | None:
@@ -49,10 +48,10 @@ def _event_to_response(event: Event) -> dict[str, Any]:
     gis = event.gis
     images = event.images
     image_url = images[0].image_url if images else ""
+    image_urls = [im.image_url for im in images] if images else []
     tags_list = [t.tag for t in event.tags]
 
     status_name = event.status.name if event.status else "new"
-    api_status = _STATUS_TO_API.get(status_name, status_name)
 
     gis_status = "done" if gis else "pending"
     gis_details = {
@@ -90,12 +89,13 @@ def _event_to_response(event: Event) -> dict[str, Any]:
             "city": event.city or "Israel",
         },
         "imageUrl": image_url,
+        "imageUrls": image_urls,
         "damageClassification": damage_classification,
         "damageScore": damage_score,
         "priorityScore": priority_score,
         "gisDetails": gis_details,
         "gisStatus": gis_status,
-        "status": api_status,
+        "status": status_name,
         "hidden": event.hidden,
         "llmExplanation": llm_explanation,
         "aiModel": ai_model,
@@ -271,3 +271,99 @@ class EventRepository:
 
         db.commit()
         return True
+
+    @staticmethod
+    def list_by_organization(db: Session, organization_id: int) -> list[dict[str, Any]]:
+        """List events for one organization, sorted by priorityScore descending."""
+        events = (
+            db.query(Event)
+            .options(
+                joinedload(Event.organization),
+                joinedload(Event.created_by_user),
+                joinedload(Event.status),
+                joinedload(Event.analysis),
+                joinedload(Event.gis),
+                joinedload(Event.images),
+                joinedload(Event.tags),
+            )
+            .filter(Event.organization_id == organization_id)
+            .all()
+        )
+        result = [_event_to_response(e) for e in events]
+        return sorted(result, key=lambda x: x.get("priorityScore", 0), reverse=True)
+
+    @staticmethod
+    def _history_entries(db: Session, event_id: int) -> list[dict[str, Any]]:
+        rows = (
+            db.query(EventHistory)
+            .filter(EventHistory.event_id == event_id)
+            .order_by(EventHistory.changed_at.desc())
+            .all()
+        )
+        out: list[dict[str, Any]] = []
+        for h in rows:
+            old_s = db.query(EventStatus).filter(EventStatus.id == h.old_status_id).first()
+            new_s = db.query(EventStatus).filter(EventStatus.id == h.new_status_id).first()
+            changer = db.query(User).filter(User.id == h.changed_by).first()
+            out.append(
+                {
+                    "oldStatus": old_s.name if old_s else "",
+                    "newStatus": new_s.name if new_s else "",
+                    "changedBy": h.changed_by,
+                    "changedByName": changer.name if changer else "",
+                    "changedAt": h.changed_at.isoformat().replace("+00:00", "Z") if h.changed_at else "",
+                }
+            )
+        return out
+
+    @staticmethod
+    def get_event_detail_response(db: Session, event_id: int | str) -> dict[str, Any] | None:
+        """Full event payload including history (for detail page)."""
+        base = EventRepository.get_event_response(db, event_id)
+        if base is None:
+            return None
+        try:
+            eid = int(event_id)
+        except (ValueError, TypeError):
+            return None
+        base["history"] = EventRepository._history_entries(db, eid)
+        return base
+
+    @staticmethod
+    def update_event_patch(
+        db: Session,
+        event_id: int,
+        *,
+        changed_by_user_id: int,
+        status_name: str | None = None,
+        hidden: bool | None = None,
+    ) -> dict[str, Any] | None:
+        """Update status and/or hidden; append event_history when status changes."""
+        event = EventRepository.get_by_id(db, event_id)
+        if not event:
+            return None
+
+        if status_name is None and hidden is None:
+            return EventRepository.get_event_response(db, event_id)
+
+        if status_name is not None:
+            new_st = db.query(EventStatus).filter(EventStatus.name == status_name).first()
+            if not new_st:
+                raise ValueError(f"Unknown status: {status_name}")
+            old_id = event.status_id
+            if old_id != new_st.id:
+                event.status_id = new_st.id
+                db.add(
+                    EventHistory(
+                        event_id=event_id,
+                        old_status_id=old_id,
+                        new_status_id=new_st.id,
+                        changed_by=changed_by_user_id,
+                    )
+                )
+
+        if hidden is not None:
+            event.hidden = hidden
+
+        db.commit()
+        return EventRepository.get_event_response(db, event_id)

@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Menu, X, LayoutDashboard, Settings, Users,
   LogOut, ChevronDown, Building2, FileText, BarChart3, UserCircle,
+  Map,
 } from 'lucide-react';
 import { useAuth } from '../../hooks';
 import { UserRole } from '../../types';
@@ -28,27 +29,45 @@ export const Sidebar: React.FC = () => {
   const navigationItems: NavItem[] = [
     {
       label: 'Dashboard',
-      path: '/admin/dashboard',
+      path: '/super-admin/dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
-      roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
-    },
-    {
-      label: 'Events',
-      path: '/admin/events',
-      icon: <FileText className="w-5 h-5" />,
-      roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
-    },
-    {
-      label: 'New Event',
-      path: '/operator/new-event',
-      icon: <FileText className="w-5 h-5" />,
-      roles: [UserRole.OPERATOR],
+      roles: [UserRole.SUPER_ADMIN],
     },
     {
       label: 'Organizations',
       path: '/super-admin/organizations',
       icon: <Building2 className="w-5 h-5" />,
       roles: [UserRole.SUPER_ADMIN],
+    },
+    {
+      label: 'Dashboard',
+      path: '/admin/dashboard',
+      icon: <LayoutDashboard className="w-5 h-5" />,
+      roles: [UserRole.ADMIN],
+    },
+    {
+      label: 'Events',
+      path: '/admin/events',
+      icon: <FileText className="w-5 h-5" />,
+      roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.OPERATOR],
+    },
+    {
+      label: 'Map',
+      path: '/operator/map',
+      icon: <Map className="w-5 h-5" />,
+      roles: [UserRole.OPERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN],
+    },
+    {
+      label: 'New event',
+      path: '/operator/events/new',
+      icon: <FileText className="w-5 h-5" />,
+      roles: [UserRole.OPERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN],
+    },
+    {
+      label: 'Operator dashboard',
+      path: '/operator/dashboard',
+      icon: <LayoutDashboard className="w-5 h-5" />,
+      roles: [UserRole.OPERATOR],
     },
     {
       label: 'Management',
@@ -63,7 +82,7 @@ export const Sidebar: React.FC = () => {
           roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
         },
         {
-          label: 'AI Models',
+          label: 'AI models',
           path: '/admin/models',
           icon: <BarChart3 className="w-4 h-4" />,
           roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
@@ -84,26 +103,29 @@ export const Sidebar: React.FC = () => {
     }
   };
 
-  const isActive = (path: string): boolean => location.pathname.startsWith(path);
-
-  const handleLogout = () => logoutUser();
-
-  // Clicking the logo/brand → go to role-appropriate home
-  const handleBrandClick = () => {
-    if (user?.role === UserRole.SUPER_ADMIN) navigate('/super-admin/organizations');
-    else if (user?.role === UserRole.ADMIN) navigate('/admin/dashboard');
-    else navigate('/operator/new-event');
+  const isActive = (path: string): boolean => {
+    if (path === '/admin/events' && location.pathname.startsWith('/events/')) return true;
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
-  // Clicking the user avatar → go to profile
+  const handleLogout = () => {
+    logoutUser();
+    navigate('/login');
+  };
+
+  const handleBrandClick = () => {
+    if (user?.role === UserRole.SUPER_ADMIN) navigate('/super-admin/dashboard');
+    else if (user?.role === UserRole.ADMIN) navigate('/admin/dashboard');
+    else navigate('/operator/dashboard');
+  };
+
   const handleProfileClick = () => {
-    navigate('/profile');
+    navigate('/settings');
     setIsMobileOpen(false);
   };
 
   return (
     <>
-      {/* Mobile Toggle */}
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
         className="fixed md:hidden top-4 left-4 z-50 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -111,7 +133,6 @@ export const Sidebar: React.FC = () => {
         {isMobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
 
-      {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-30"
@@ -129,7 +150,6 @@ export const Sidebar: React.FC = () => {
           ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
       >
-        {/* Header — click brand to go home */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200 h-16">
           <button
             onClick={handleBrandClick}
@@ -149,7 +169,6 @@ export const Sidebar: React.FC = () => {
           </button>
         </div>
 
-        {/* User Profile Section — click avatar → /profile */}
         {isOpen && user && (
           <button
             onClick={handleProfileClick}
@@ -168,18 +187,16 @@ export const Sidebar: React.FC = () => {
           </button>
         )}
 
-        {/* Collapsed — show avatar icon that goes to profile */}
         {!isOpen && user && (
           <button
             onClick={handleProfileClick}
             className="flex items-center justify-center mt-3 mx-auto w-10 h-10 bg-blue-600 rounded-full text-white font-bold text-sm hover:bg-blue-700 transition"
-            title="My Profile"
+            title="Settings"
           >
             {getInitials(user.name)}
           </button>
         )}
 
-        {/* Navigation */}
         <nav className="flex-1 px-3 py-4 overflow-y-auto">
           <ul className="space-y-2">
             {visibleItems.map((item) => {
@@ -211,9 +228,9 @@ export const Sidebar: React.FC = () => {
               );
 
               return (
-                <li key={item.path}>
+                <li key={item.path + item.label}>
                   {item.children ? (
-                    <button className={navItemClass} onClick={() => handleNavClick(item)}>
+                    <button type="button" className={navItemClass} onClick={() => handleNavClick(item)}>
                       {navContent}
                     </button>
                   ) : (
@@ -249,9 +266,18 @@ export const Sidebar: React.FC = () => {
           </ul>
         </nav>
 
-        {/* Footer — Logout */}
-        <div className="border-t border-gray-200 p-3">
+        <div className="border-t border-gray-200 p-3 space-y-1">
+          <Link
+            to="/settings"
+            onClick={() => setIsMobileOpen(false)}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-200 transition-all ${isOpen ? '' : 'justify-center'}`}
+            title="Settings"
+          >
+            <Settings className="w-5 h-5" />
+            {isOpen && <span className="text-sm font-medium">Settings</span>}
+          </Link>
           <button
+            type="button"
             onClick={handleLogout}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all ${isOpen ? '' : 'justify-center'}`}
             title="Logout"
