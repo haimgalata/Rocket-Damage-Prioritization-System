@@ -22,8 +22,6 @@ import { z } from 'zod';
 import { useEventStore } from '../../store/eventStore';
 import { fetchEvents } from '../../api/events';
 
-const regionColor = (_region?: string) => 'bg-gray-100 text-gray-700';
-
 const orgCreateSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   settlement_id: z.string().min(1, 'Select a settlement'),
@@ -66,12 +64,15 @@ export const OrgManagement: React.FC = () => {
     } catch { /* backend unavailable */ }
   }, [setEvents]);
 
-  const filtered = orgs.filter(
-    (o) =>
-      o.name.toLowerCase().includes(search.toLowerCase()) ||
-      o.settlement_code.toLowerCase().includes(search.toLowerCase()) ||
-      (o.region || '').toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = orgs.filter((o) => {
+    const q = search.toLowerCase();
+    const settlementLabel = (o.settlementName || o.settlement_code || '').toLowerCase();
+    return (
+      o.name.toLowerCase().includes(q) ||
+      o.settlement_code.toLowerCase().includes(q) ||
+      settlementLabel.includes(q)
+    );
+  });
 
   const getOrgAdmin = (org: Organization) => allUsers.find((u) => u.id === org.adminId);
 
@@ -152,7 +153,7 @@ export const OrgManagement: React.FC = () => {
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search name, code, region..."
+                  placeholder="Search name, settlement, code..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-52"
@@ -170,7 +171,7 @@ export const OrgManagement: React.FC = () => {
                 <tr className="border-b border-gray-100 bg-gray-50">
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Organization</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Code</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Region</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Settlement</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Admin</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Events</th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Users</th>
@@ -208,8 +209,8 @@ export const OrgManagement: React.FC = () => {
                         <code className="text-xs bg-gray-100 px-2 py-1 rounded font-mono">{org.settlement_code}</code>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${regionColor(org.region)}`}>
-                          {org.region || '—'}
+                        <span className="text-xs px-2 py-1 rounded-full font-medium bg-gray-100 text-gray-700">
+                          {org.settlementName || org.settlement_code || '—'}
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -268,8 +269,8 @@ export const OrgManagement: React.FC = () => {
                 )}
                 <div>
                   <h3 className="text-base font-bold text-gray-900">{briefOrg.name}</h3>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${regionColor(briefOrg.region)}`}>
-                    {briefOrg.region}
+                  <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-700">
+                    {briefOrg.settlementName || briefOrg.settlement_code || '—'}
                   </span>
                 </div>
               </div>
@@ -327,7 +328,7 @@ export const OrgManagement: React.FC = () => {
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <p className="text-xs text-gray-500">
-            Organizations are saved in PostgreSQL. Choose a settlement that already exists (seed or migrations).
+            Organizations are saved in PostgreSQL. Choose a settlement that already exists (run seed_db if empty).
           </p>
           <Input
             label="Organization Name"

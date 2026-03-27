@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,10 +11,11 @@ import { LocationPicker } from '../../components/maps/LocationPicker';
 import { useNotificationStore } from '../../store/authStore';
 import { useEventStore } from '../../store/eventStore';
 import { useAuth } from '../../hooks';
-import { EventStatus } from '../../types';
-import type { Location, DamageEvent, GisDetails } from '../../types';
+import { EventStatus, UserRole } from '../../types';
+import type { Location, DamageEvent, GisDetails, Organization } from '../../types';
 import { parseDamageEvent } from '../../api/parsers';
 import { apiFetch } from '../../shared/api/http';
+import { fetchOrganizations } from '../../api/organizations';
 import { TEST_TEMPLATES } from '../../config/testTemplates';
 
 const schema = z.object({
@@ -80,9 +81,21 @@ export const NewEventForm: React.FC = () => {
   const [apiError, setApiError] = useState('');
 
   const [templateImagePath, setTemplateImagePath] = useState<string | null>(null);
+  const [superAdminOrgs, setSuperAdminOrgs] = useState<Organization[]>([]);
+  const [superAdminOrgId, setSuperAdminOrgId] = useState<string>('');
 
   const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } =
     useForm<FormData>({ resolver: zodResolver(schema) });
+
+  useEffect(() => {
+    if (user?.role !== UserRole.SUPER_ADMIN) return;
+    let cancelled = false;
+    (async () => {
+      const list = await fetchOrganizations();
+      if (!cancelled) setSuperAdminOrgs(list);
+    })();
+    return () => { cancelled = true; };
+  }, [user?.role]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -220,6 +233,23 @@ export const NewEventForm: React.FC = () => {
   const onSubmit = async (data: FormData) => {
     const loc = location || { lat: 32.0853, lng: 34.7818, address: 'Unspecified', city: 'Tel Aviv' };
 
+    let organizationIdNum: number;
+    if (user?.role === UserRole.SUPER_ADMIN) {
+      const n = Number(superAdminOrgId);
+      if (!Number.isFinite(n) || n < 1) {
+        setApiError('Select an organization for this event.');
+        return;
+      }
+      organizationIdNum = n;
+    } else {
+      const n = user?.organizationId;
+      if (n == null || !Number.isFinite(n) || n < 1) {
+        setApiError('Your account has no organization assigned. Contact an administrator.');
+        return;
+      }
+      organizationIdNum = n;
+    }
+
     setAiStatus('analyzing');
     setApiError('');
 
@@ -231,7 +261,7 @@ export const NewEventForm: React.FC = () => {
       formData.append('lat', String(loc.lat));
       formData.append('lon', String(loc.lng));
       formData.append('description', data.description);
-      formData.append('organization_id', String(user?.organizationId ?? 1));
+      formData.append('organization_id', String(organizationIdNum));
       formData.append('created_by', String(user?.id ?? ''));
       formData.append('tags', data.tags || '');
       if (imageFile) formData.append('image', imageFile);
@@ -278,7 +308,7 @@ export const NewEventForm: React.FC = () => {
 
       newEvent = {
         id:                   eventId,
-        organizationId:       user?.organizationId ?? 1,
+        organizationId:       organizationIdNum,
         name:                 data.name,
         location:             loc,
         imageUrl:             imagePreview || '',
@@ -348,6 +378,7 @@ export const NewEventForm: React.FC = () => {
       reset();
       setLocation(null);
       setAddressInput('');
+      setSuperAdminOrgId('');
       clearImage();
     }, 3000);
   };
@@ -463,6 +494,33 @@ export const NewEventForm: React.FC = () => {
               />
             </div>
           </Card>
+
+          {user?.role === UserRole.SUPER_ADMIN && (
+            <Card title="Organization">
+              <div>
+                <label className="text-sm font-medium text-gray-700 block mb-1">
+                  Organization for this event <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={superAdminOrgId}
+                  onChange={(e) => setSuperAdminOrgId(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  <option value="">Select organization…</option>
+                  {superAdminOrgs.map((o) => (
+                    <option key={o.id} value={String(o.id)}>
+                      {o.name}
+                      {o.settlementName ? ` — ${o.settlementName}` : o.settlement_code ? ` (${o.settlement_code})` : ''}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1.5">
+                  Super admins are not tied to one organization. Choose which organization owns this event.
+                </p>
+              </div>
+            </Card>
+          )}
 
           <Card title="Location">
             <div className="space-y-3">

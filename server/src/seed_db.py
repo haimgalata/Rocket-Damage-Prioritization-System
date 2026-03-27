@@ -1,12 +1,11 @@
 """Seed DB Script — PrioritAI.
 
-Fully populates the database for end-to-end use:
-- settlements, organizations, users (with real login credentials)
-- events from seed_events.json (events, event_images, event_analysis, event_gis, event_tags, event_history)
+1. Calls init_db() so the schema matches SQLAlchemy models (create_all).
+2. Inserts reference data, settlements, organizations, users, and events from seed_events.json.
 
-Run migrations first, then: python -m server.src.seed_db
+Run (e.g. in Docker): python -m server.src.seed_db
 
-Idempotent: skips existing data to avoid duplicates.
+Idempotent: skips existing data to avoid duplicates (users by email/external_id, events by seed_key).
 """
 
 import json
@@ -44,6 +43,19 @@ from server.src.db.models import (
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SEED_JSON = _REPO_ROOT / "server" / "seed_events.json"
 
+# (display name, unique settlement_code) — idempotent by name; orgs may use only a subset.
+SEED_SETTLEMENTS: list[tuple[str, str]] = [
+    ("Tel Aviv", "TAV-001"),
+    ("South", "STH-002"),
+    ("Jerusalem", "JRS-003"),
+    ("Haifa", "HFA-004"),
+    ("Herzliya", "HRZ-005"),
+    ("Be'er Sheva", "BVS-006"),
+    ("Netanya", "NTN-007"),
+    ("Netivot", "NTV-008"),
+    ("Kiryat Gat", "KTG-009"),
+]
+
 
 # ---------------------------------------------------------------------------
 # Reference data (roles, event_status) — use existing, do NOT duplicate
@@ -51,7 +63,7 @@ SEED_JSON = _REPO_ROOT / "server" / "seed_events.json"
 
 
 def ensure_reference_data(db) -> None:
-    """Ensure event_status and roles exist. Migration already seeds them; add if missing."""
+    """Ensure event_status and roles exist (add if missing)."""
     if db.query(EventStatus).count() == 0:
         for name in ("new", "in_progress", "done"):
             db.add(EventStatus(name=name))
@@ -65,18 +77,19 @@ def ensure_reference_data(db) -> None:
 
 
 def seed_settlements(db) -> dict[str, int]:
-    """Create settlements if missing. Returns mapping name -> id."""
-    result = {s.name: s.id for s in db.query(Settlement).all()}
-    if len(result) >= 3:
-        logger.info("Settlements already exist — skipping.")
-        return result
-
-    for name, code in [("Tel Aviv", "TAV-001"), ("South", "STH-002"), ("Jerusalem", "JRS-003")]:
-        if name in result:
+    """Ensure seed settlements exist (by name). Returns mapping name -> id."""
+    by_name = {s.name: s.id for s in db.query(Settlement).all()}
+    added = 0
+    for name, code in SEED_SETTLEMENTS:
+        if name in by_name:
             continue
-        s = Settlement(name=name, settlement_code=code)
-        db.add(s)
-    db.flush()
+        db.add(Settlement(name=name, settlement_code=code))
+        added += 1
+    if added:
+        db.flush()
+        logger.info("Added %d new settlement(s); total seed list: %d.", added, len(SEED_SETTLEMENTS))
+    else:
+        logger.info("All %d seed settlements already present.", len(SEED_SETTLEMENTS))
     return {s.name: s.id for s in db.query(Settlement).all()}
 
 
@@ -107,32 +120,56 @@ def seed_organizations(db, settlement_ids: dict[str, int]) -> dict[str, int]:
     return result
 
 
+def reconcile_seed_users(db, org_ids: dict[str, int]) -> None:
+    """Idempotent: two global super admins (null org); demote legacy third super admin."""
+    role_sa = db.query(Role).filter(Role.name == "super_admin").first()
+    role_admin = db.query(Role).filter(Role.name == "admin").first()
+    if not role_sa or not role_admin:
+        return
+    org1 = org_ids.get("org-1")
+    for email, ext in (
+        ("haimgalata@gmail.com", "user-sa-haim"),
+        ("linoysahalo@gmail.com", "user-sa-lino"),
+    ):
+        u = db.query(User).filter((User.email == email) | (User.external_id == ext)).first()
+        if u:
+            u.role_id = role_sa.id
+            u.organization_id = None
+            if u.external_id is None:
+                u.external_id = ext
+    legacy_sa = db.query(User).filter(
+        (User.external_id == "user-sa-1") | (User.email == "sarah@prioritai.gov")
+    ).first()
+    if legacy_sa:
+        legacy_sa.role_id = role_admin.id
+        if org1:
+            legacy_sa.organization_id = org1
+    db.flush()
+
+
 def seed_users(db, org_ids: dict[str, int]) -> dict[str, int]:
-    """Create users: super_admins (haimgalata, linoysahalo), admins, operators.
-    Passwords stored as plain text (1234 for super admins).
+    """Create users: 2 super_admins (global), 6 org employees (1 admin + 1 operator per org).
+    Passwords stored as plain text (1234). Reconciles roles/orgs on every run.
     Returns mapping external_id -> id.
     """
     role_sa = db.query(Role).filter(Role.name == "super_admin").first()
     role_admin = db.query(Role).filter(Role.name == "admin").first()
     role_op = db.query(Role).filter(Role.name == "operator").first()
     if not all([role_sa, role_admin, role_op]):
-        raise RuntimeError("Roles not found — run migrations first.")
+        raise RuntimeError("Roles not found — ensure_reference_data should have run after init_db().")
 
     existing = {u.external_id: u.id for u in db.query(User).all() if u.external_id}
-    # Check by email for the two super admins we must create
     emails_exist = {u.email for u in db.query(User).all()}
 
     users_to_create = [
-        # SUPER_ADMIN — required logins
-        ("Haim Galata", "haimgalata@gmail.com", "1234", role_sa.id, org_ids.get("org-1"), "user-sa-haim"),
-        ("Lino Ysahalo", "linoysahalo@gmail.com", "1234", role_sa.id, org_ids.get("org-1"), "user-sa-lino"),
-        # Super admin (legacy) + org admins + operators
-        ("Sarah Cohen", "sarah@prioritai.gov", "1234", role_sa.id, org_ids.get("org-1"), "user-sa-1"),
+        ("Haim Galata", "haimgalata@gmail.com", "1234", role_sa.id, None, "user-sa-haim"),
+        ("Linoy Sahalo", "linoysahalo@gmail.com", "1234", role_sa.id, None, "user-sa-lino"),
         ("David Levi", "david@tel-aviv.gov", "1234", role_admin.id, org_ids.get("org-1"), "user-admin-1"),
         ("Miriam Shapiro", "miriam@tel-aviv.gov", "1234", role_op.id, org_ids.get("org-1"), "user-op-1"),
-        ("Yosef Mizrahi", "yosef@tel-aviv.gov", "1234", role_op.id, org_ids.get("org-1"), "user-op-2"),
         ("Ruth Goldstein", "ruth@south.gov", "1234", role_admin.id, org_ids.get("org-2"), "user-admin-2"),
+        ("South Operator", "operator@south.gov", "1234", role_op.id, org_ids.get("org-2"), "user-op-south"),
         ("Eli Shapira", "eli@jerusalem.gov", "1234", role_admin.id, org_ids.get("org-3"), "user-admin-3"),
+        ("Jerusalem Operator", "operator@jerusalem.gov", "1234", role_op.id, org_ids.get("org-3"), "user-op-jerusalem"),
     ]
 
     result = dict(existing)
@@ -151,9 +188,13 @@ def seed_users(db, org_ids: dict[str, int]) -> dict[str, int]:
         db.flush()
         result[ext_id] = u.id
         emails_exist.add(email)
+        existing[ext_id] = u.id
 
-    logger.info(f"Seeded users (total with existing: {len(result)}).")
-    return result
+    reconcile_seed_users(db, org_ids)
+
+    ext_map = {u.external_id: u.id for u in db.query(User).all() if u.external_id}
+    logger.info(f"Users with external_id: {len(ext_map)}.")
+    return ext_map
 
 
 def seed_events(db, org_ids: dict[str, int], user_ids: dict[str, int]) -> None:
@@ -178,13 +219,8 @@ def seed_events(db, org_ids: dict[str, int], user_ids: dict[str, int]) -> None:
             return status_done.id
         return status_in_progress.id
 
-    # Check if we already have seeded events (by description + org match to avoid full re-seed)
-    existing_count = db.query(Event).count()
-    if existing_count >= len(events_data):
-        logger.info("Events already seeded — skipping.")
-        return
-
     created = 0
+    skipped = 0
     for ev in events_data:
         org_ext = ev.get("organizationId", "org-1")
         user_ext = ev.get("createdBy", "user-op-1")
@@ -202,6 +238,26 @@ def seed_events(db, org_ids: dict[str, int], user_ids: dict[str, int]) -> None:
         desc = ev.get("description", "No description")
         name = ev.get("name", "")
         curr_status_id = status_id(ev.get("status"))
+        seed_key = ev.get("seedKey") or ev.get("seed_key")
+
+        if seed_key:
+            if db.query(Event).filter(Event.seed_key == seed_key).first():
+                skipped += 1
+                continue
+            legacy = (
+                db.query(Event)
+                .filter(
+                    Event.organization_id == org_db_id,
+                    Event.description == desc,
+                    Event.seed_key.is_(None),
+                )
+                .first()
+            )
+            if legacy:
+                legacy.seed_key = seed_key
+                db.flush()
+                skipped += 1
+                continue
 
         event = Event(
             lat=Decimal(str(lat)),
@@ -214,6 +270,7 @@ def seed_events(db, org_ids: dict[str, int], user_ids: dict[str, int]) -> None:
             created_by=user_db_id,
             status_id=curr_status_id,
             hidden=bool(ev.get("hidden", False)),
+            seed_key=seed_key or None,
         )
         db.add(event)
         db.flush()
@@ -280,23 +337,21 @@ def seed_events(db, org_ids: dict[str, int], user_ids: dict[str, int]) -> None:
         )
         created += 1
 
-    logger.info(f"Seeded {created} events (with images, analysis, GIS, tags, history).")
+    logger.info(
+        f"Events seed: {created} inserted, {skipped} already present (seed_key / legacy match)."
+    )
 
 
 def run_seed() -> None:
-    """Main entry: seed all data."""
-    logger.info("Initializing database...")
+    """Create schema (create_all), then seed idempotently."""
+    logger.info("Initializing database (SQLAlchemy create_all)...")
     init_db()
 
     with get_db() as db:
         ensure_reference_data(db)
 
     with get_db() as db:
-        settlement_ids = {s.name: s.id for s in db.query(Settlement).all()}
-        if not settlement_ids:
-            settlement_ids = seed_settlements(db)
-        else:
-            settlement_ids = {s.name: s.id for s in db.query(Settlement).all()}
+        settlement_ids = seed_settlements(db)
 
     with get_db() as db:
         org_ids = {o.external_id: o.id for o in db.query(Organization).filter(Organization.external_id.isnot(None)).all()}

@@ -5,7 +5,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useEventStore } from '../../store/eventStore';
 import { useAuth } from '../../hooks';
-import { EventStatus } from '../../types';
+import { EventStatus, UserRole } from '../../types';
 
 interface ModelRun {
   id: string;
@@ -23,9 +23,10 @@ export const ModelRunner: React.FC = () => {
   const [progress, setProgress] = useState(0);
   const [runs, setRuns] = useState<ModelRun[]>([]);
 
-  const orgEvents = events.filter(
-    (e) => user?.organizationId != null && e.organizationId === user.organizationId,
-  );
+  const orgEvents = events.filter((e) => {
+    if (user?.role === UserRole.SUPER_ADMIN) return true;
+    return user?.organizationId != null && e.organizationId === user.organizationId;
+  });
   const pendingEvents = orgEvents.filter((e) => e.status === EventStatus.NEW);
 
   const handleRun = async () => {
@@ -52,12 +53,11 @@ export const ModelRunner: React.FC = () => {
       setProgress(Math.round(((i + 1) / pendingEvents.length) * 100));
     }
 
-    const updatedPending = events.filter(
-      (e) =>
-        user?.organizationId != null &&
-        e.organizationId === user.organizationId &&
-        e.status === EventStatus.NEW,
-    );
+    const updatedPending = events.filter((e) => {
+      if (e.status !== EventStatus.NEW) return false;
+      if (user?.role === UserRole.SUPER_ADMIN) return true;
+      return user?.organizationId != null && e.organizationId === user.organizationId;
+    });
     const after = updatedPending.length > 0
       ? Math.round(updatedPending.reduce((s, e) => s + e.priorityScore, 0) / updatedPending.length)
       : 0;

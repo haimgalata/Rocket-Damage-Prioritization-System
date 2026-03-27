@@ -348,11 +348,17 @@ docker-compose up --build
 
 ### Populate the database (full seed)
 
-```bash
-# 1. Run migrations first (creates tables and reference data)
-psql -U prioritai -d prioritai -f server/migrations/001_init_schema.sql
+Schema comes from **SQLAlchemy models** (`init_db()` → `create_all`). Seed fills data.
 
-# 2. Populate all tables: settlements, organizations, users, events
+**Docker** (after `docker-compose up --build`):
+
+```bash
+docker exec -it prioritai-backend python -m server.src.seed_db
+```
+
+**Local** (Postgres running, `DATABASE_URL` set):
+
+```bash
 python -m server.src.seed_db
 ```
 
@@ -363,6 +369,8 @@ This seeds:
 - **Events**: 20 events from `seed_events.json` with full AI + GIS data, images, tags, and history
 
 Idempotent: safe to run multiple times; skips existing data.
+
+If an old Postgres volume was created before the schema lived only in SQLAlchemy models and you see missing-column errors, reset data once: `docker compose down -v`, then `up --build` and run `seed_db` again.
 
 ### Re-generate seed_events.json (optional)
 
@@ -378,7 +386,7 @@ python -m server.src.seed_data
 |---|---|
 | Super Admin | haimgalata@gmail.com |
 | Super Admin | linoysahalo@gmail.com |
-| Super Admin | sarah@prioritai.gov |
+| Admin (Tel Aviv) | sarah@prioritai.gov |
 | Admin | david@tel-aviv.gov |
 | Operator | miriam@tel-aviv.gov |
 
@@ -409,7 +417,7 @@ The database replaces the previous in-memory store and provides persistence acro
 | `event_status` | Event lifecycle (new, in_progress, done) | id, name | id | — |
 | `organizations` | Municipal authorities | id, name, settlement_id, external_id, created_at | id | settlements.id |
 | `users` | System users | id, name, email, password, role_id, organization_id, external_id, created_at | id | roles.id, organizations.id |
-| `events` | Damage event records | id, lat, lon, address, city, description, organization_id, created_by, status_id, hidden, created_at | id | organizations.id, users.id, event_status.id |
+| `events` | Damage event records | id, lat, lon, address, city, description, organization_id, created_by, status_id, hidden, seed_key, created_at | id | organizations.id, users.id, event_status.id |
 | `event_images` | Event image URLs | id, event_id, image_url | id | events.id |
 | `event_gis` | GIS features per event (1:1) | id, event_id, distance_hospital, distance_school, distance_road, distance_military, population_density, geo_multiplier, created_at | id | events.id |
 | `event_analysis` | AI damage score and explanation | id, event_id, damage_score, damage_classification, priority_score, explanation, ai_model, created_at | id | events.id |
@@ -476,4 +484,4 @@ erDiagram
 | **PostgreSQL 16** | Relational database |
 | **SQLAlchemy 2.x** | ORM; models in `server/src/db/models.py` |
 | **psycopg2** | PostgreSQL driver |
-| **Migration script** | `server/migrations/001_init_schema.sql` — creates tables and seed reference data |
+| **Schema** | `init_db()` / `Base.metadata.create_all` from `server/src/db/models.py` |

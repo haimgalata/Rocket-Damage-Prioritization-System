@@ -53,7 +53,7 @@ _RAW_EVENTS = [
             "vehicles on scene. Building is a registered heritage structure."
         ),
         lat=32.0627, lon=34.7739,
-        organizationId="org-1", createdBy="user-op-2",
+        organizationId="org-1", createdBy="user-op-1",
         damageClassification="Heavy", damageScore=7,
         imageFilename="tel_aviv_heavy_2.jpg",
         tags=["gas-leak", "heritage", "residential"],
@@ -83,7 +83,7 @@ _RAW_EVENTS = [
             "Area accessible via main roads."
         ),
         lat=32.0555, lon=34.7660,
-        organizationId="org-1", createdBy="user-op-2",
+        organizationId="org-1", createdBy="user-op-1",
         damageClassification="Light", damageScore=3,
         imageFilename="tel_aviv_light_1.jpg",
         tags=["roof", "power-outage"],
@@ -113,7 +113,7 @@ _RAW_EVENTS = [
             "Park temporarily closed to the public."
         ),
         lat=32.0982, lon=34.7962,
-        organizationId="org-1", createdBy="user-op-2",
+        organizationId="org-1", createdBy="user-op-1",
         damageClassification="Light", damageScore=3,
         imageFilename="tel_aviv_light_3.jpg",
         tags=["infrastructure", "park", "electrical"],
@@ -364,6 +364,7 @@ def run_seed() -> None:
         lat  = raw["lat"]
         lon  = raw["lon"]
         name = raw["name"]
+        seed_key = f"prioritai-seed-{i:02d}"
         logger.info(f"[{i:02d}/{total}] {name}  ({lat:.4f}, {lon:.4f})")
 
         try:
@@ -393,6 +394,7 @@ def run_seed() -> None:
 
         event = {
             "id":                   _make_id(),
+            "seedKey":              seed_key,
             "organizationId":       raw["organizationId"],
             "createdBy":            raw["createdBy"],
             "name":                 raw["name"],

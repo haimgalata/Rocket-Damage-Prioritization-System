@@ -22,7 +22,7 @@ SessionLocal = sessionmaker(
 
 
 def init_db() -> None:
-    """Create all tables. Call after migrations or for dev setup."""
+    """Create all tables from SQLAlchemy models (full schema; no separate SQL migrations)."""
     Base.metadata.create_all(bind=engine)
 
 

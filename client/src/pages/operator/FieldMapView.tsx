@@ -9,7 +9,7 @@ import { EventTable } from '../../components/events/EventTable';
 import { useEventStore } from '../../store/eventStore';
 import { useAuth } from '../../hooks';
 import { fetchEvents } from '../../api/events';
-import { EventStatus } from '../../types';
+import { EventStatus, UserRole } from '../../types';
 import type { DamageEvent } from '../../types';
 
 export const FieldMapView: React.FC = () => {
@@ -29,9 +29,10 @@ export const FieldMapView: React.FC = () => {
     load();
   }, []);
 
-  const orgEvents = events.filter(
-    (e) => user?.organizationId != null && e.organizationId === user.organizationId,
-  );
+  const orgEvents = events.filter((e) => {
+    if (user?.role === UserRole.SUPER_ADMIN) return true;
+    return user?.organizationId != null && e.organizationId === user.organizationId;
+  });
   const criticalEvents = orgEvents.filter((e) => e.priorityScore >= 7.5 && e.status !== EventStatus.DONE);
 
   const handleSelectEvent = (event: DamageEvent) => {

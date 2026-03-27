@@ -113,6 +113,7 @@ class Event(Base):
         Integer, ForeignKey("event_status.id", ondelete="RESTRICT"), nullable=False
     )
     hidden: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    seed_key: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

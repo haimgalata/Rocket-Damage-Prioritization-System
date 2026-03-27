@@ -34,8 +34,8 @@ export interface Organization {
   name: string;
   settlementId: number;
   settlement_code: string;
+  settlementName?: string;
   description?: string;
-  region?: string;
   adminId?: number | null;
   logoUrl?: string;
   createdAt: Date;
@@ -174,7 +174,6 @@ export interface OrganizationFormData {
   name: string;
   settlement_code: string;
   description?: string;
-  region?: string;
   adminId?: number;
 }
 

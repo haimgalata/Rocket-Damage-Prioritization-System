@@ -138,7 +138,7 @@ class EventRepository:
         if not status_new:
             status_new = db.query(EventStatus).first()
         if not status_new:
-            raise ValueError("No event status found — run migrations")
+            raise ValueError("No event status found — run seed_db or ensure event_status is populated")
 
         event = Event(
             lat=Decimal(str(lat)),

@@ -33,12 +33,13 @@
       "evacuation",
       "commercial"
     ],
-    "createdAt": "2026-03-19T03:25:16Z"
+    "createdAt": "2026-03-19T03:25:16Z",
+    "seedKey": "prioritai-seed-01"
   },
   {
     "id": "seed-dd2bb0ea",
     "organizationId": "org-1",
-    "createdBy": "user-op-2",
+    "createdBy": "user-op-1",
     "name": "Rothschild Boulevard Building Collapse",
     "description": "Residential tower on Rothschild Blvd sustained a near-miss that caused partial collapse of the eastern stairwell. Three upper floors compromised. Gas leak detected on ground floor. Boutique district highly accessible — emergency vehicles on scene. Building is a registered heritage structure.",
     "location": {
@@ -69,7 +70,8 @@
       "heritage",
       "residential"
     ],
-    "createdAt": "2026-03-20T03:25:16Z"
+    "createdAt": "2026-03-20T03:25:16Z",
+    "seedKey": "prioritai-seed-02"
   },
   {
     "id": "seed-83219aa5",
@@ -106,12 +108,13 @@
       "port",
       "heritage"
     ],
-    "createdAt": "2026-03-18T03:25:16Z"
+    "createdAt": "2026-03-18T03:25:16Z",
+    "seedKey": "prioritai-seed-03"
   },
   {
     "id": "seed-ebb6ad2b",
     "organizationId": "org-1",
-    "createdBy": "user-op-2",
+    "createdBy": "user-op-1",
     "name": "Florentin Workshop Roof Damage",
     "description": "Rocket fragment landed on the flat roof of a two-story artisan workshop in Florentin neighbourhood. Roof membrane punctured; minor structural cracks on parapet wall. No injuries. Power supply interrupted for 12 units in the block. Area accessible via main roads.",
     "location": {
@@ -141,7 +144,8 @@
       "roof",
       "power-outage"
     ],
-    "createdAt": "2026-03-17T03:25:16Z"
+    "createdAt": "2026-03-17T03:25:16Z",
+    "seedKey": "prioritai-seed-04"
   },
   {
     "id": "seed-aae50b8a",
@@ -177,12 +181,13 @@
       "residential",
       "windows"
     ],
-    "createdAt": "2026-03-16T03:25:16Z"
+    "createdAt": "2026-03-16T03:25:16Z",
+    "seedKey": "prioritai-seed-05"
   },
   {
     "id": "seed-199f8309",
     "organizationId": "org-1",
-    "createdBy": "user-op-2",
+    "createdBy": "user-op-1",
     "name": "HaYarkon Park Infrastructure Hit",
     "description": "Rocket struck an open area in HaYarkon Park near the sports facilities. Irrigation pipes ruptured; electrical box serving the tennis courts destroyed. No casualties. Footpaths and one footbridge show surface cratering. Park temporarily closed to the public.",
     "location": {
@@ -213,7 +218,8 @@
       "park",
       "electrical"
     ],
-    "createdAt": "2026-03-20T03:25:16Z"
+    "createdAt": "2026-03-20T03:25:16Z",
+    "seedKey": "prioritai-seed-06"
   },
   {
     "id": "seed-5c5dd460",
@@ -249,7 +255,8 @@
       "structural",
       "debris"
     ],
-    "createdAt": "2026-03-19T03:25:16Z"
+    "createdAt": "2026-03-19T03:25:16Z",
+    "seedKey": "prioritai-seed-07"
   },
   {
     "id": "seed-d9486094",
@@ -285,7 +292,8 @@
       "hazmat",
       "structural"
     ],
-    "createdAt": "2026-03-20T03:25:16Z"
+    "createdAt": "2026-03-20T03:25:16Z",
+    "seedKey": "prioritai-seed-08"
   },
   {
     "id": "seed-70ccdcae",
@@ -321,7 +329,8 @@
       "evacuation",
       "kibbutz"
     ],
-    "createdAt": "2026-03-18T03:25:16Z"
+    "createdAt": "2026-03-18T03:25:16Z",
+    "seedKey": "prioritai-seed-09"
   },
   {
     "id": "seed-20f1b578",
@@ -357,7 +366,8 @@
       "shrapnel",
       "perimeter"
     ],
-    "createdAt": "2026-03-17T03:25:16Z"
+    "createdAt": "2026-03-17T03:25:16Z",
+    "seedKey": "prioritai-seed-10"
   },
   {
     "id": "seed-8048bed0",
@@ -393,7 +403,8 @@
       "agricultural",
       "fence"
     ],
-    "createdAt": "2026-03-20T03:25:16Z"
+    "createdAt": "2026-03-20T03:25:16Z",
+    "seedKey": "prioritai-seed-11"
   },
   {
     "id": "seed-e5369966",
@@ -429,7 +440,8 @@
       "tourism",
       "remote"
     ],
-    "createdAt": "2026-03-15T03:25:16Z"
+    "createdAt": "2026-03-15T03:25:16Z",
+    "seedKey": "prioritai-seed-12"
   },
   {
     "id": "seed-6ae68221",
@@ -466,7 +478,8 @@
       "greenhouse",
       "remote"
     ],
-    "createdAt": "2026-03-19T03:25:16Z"
+    "createdAt": "2026-03-19T03:25:16Z",
+    "seedKey": "prioritai-seed-13"
   },
   {
     "id": "seed-71ef391f",
@@ -503,7 +516,8 @@
       "collapse",
       "urban"
     ],
-    "createdAt": "2026-03-19T03:25:16Z"
+    "createdAt": "2026-03-19T03:25:16Z",
+    "seedKey": "prioritai-seed-14"
   },
   {
     "id": "seed-ac879366",
@@ -540,7 +554,8 @@
       "structural",
       "evacuation"
     ],
-    "createdAt": "2026-03-20T03:25:16Z"
+    "createdAt": "2026-03-20T03:25:16Z",
+    "seedKey": "prioritai-seed-15"
   },
   {
     "id": "seed-191bb2ca",
@@ -577,7 +592,8 @@
       "structural",
       "collapse"
     ],
-    "createdAt": "2026-03-18T03:25:16Z"
+    "createdAt": "2026-03-18T03:25:16Z",
+    "seedKey": "prioritai-seed-16"
   },
   {
     "id": "seed-75f1c48d",
@@ -614,7 +630,8 @@
       "suburban",
       "evacuation"
     ],
-    "createdAt": "2026-03-20T03:25:16Z"
+    "createdAt": "2026-03-20T03:25:16Z",
+    "seedKey": "prioritai-seed-17"
   },
   {
     "id": "seed-854c51b3",
@@ -650,7 +667,8 @@
       "shrapnel",
       "low-severity"
     ],
-    "createdAt": "2026-03-16T03:25:16Z"
+    "createdAt": "2026-03-16T03:25:16Z",
+    "seedKey": "prioritai-seed-18"
   },
   {
     "id": "seed-a3bf8352",
@@ -686,7 +704,8 @@
       "shrapnel",
       "vehicles"
     ],
-    "createdAt": "2026-03-17T03:25:16Z"
+    "createdAt": "2026-03-17T03:25:16Z",
+    "seedKey": "prioritai-seed-19"
   },
   {
     "id": "seed-4b00e9d8",
@@ -722,6 +741,7 @@
       "shrapnel",
       "windows"
     ],
-    "createdAt": "2026-03-19T03:25:16Z"
+    "createdAt": "2026-03-19T03:25:16Z",
+    "seedKey": "prioritai-seed-20"
   }
 ]

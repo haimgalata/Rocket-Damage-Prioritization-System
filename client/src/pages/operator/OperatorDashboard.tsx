@@ -10,7 +10,7 @@ import { EventDetailView } from '../../components/events/EventDetailView';
 import { useEventStore } from '../../store/eventStore';
 import { useAuth } from '../../hooks';
 import { fetchUsers } from '../../api/auth';
-import { EventStatus } from '../../types';
+import { EventStatus, UserRole } from '../../types';
 import type { DamageEvent } from '../../types';
 import { fetchEvents } from '../../api/events';
 
@@ -45,9 +45,11 @@ export const OperatorDashboard: React.FC = () => {
     load();
   }, []);
 
-  const orgEvents = events.filter(
-    (e) => user?.organizationId != null && e.organizationId === user.organizationId && !e.hidden,
-  );
+  const orgEvents = events.filter((e) => {
+    if (e.hidden) return false;
+    if (user?.role === UserRole.SUPER_ADMIN) return true;
+    return user?.organizationId != null && e.organizationId === user.organizationId;
+  });
 
   const total      = orgEvents.length;
   const pending    = orgEvents.filter((e) => e.status === EventStatus.NEW).length;

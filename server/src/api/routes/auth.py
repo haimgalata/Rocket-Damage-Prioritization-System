@@ -70,12 +70,20 @@ def _org_to_api(org: Organization, settlement: Settlement | None = None) -> dict
         "name": org.name,
         "settlementId": org.settlement_id,
         "settlement_code": settlement.settlement_code if settlement else "",
+        "settlementName": settlement.name if settlement else "",
         "createdAt": org.created_at.isoformat() if org.created_at else "",
     }
 
 
 def _empty_org() -> dict:
-    return {"id": 0, "name": "", "settlement_code": "", "settlementId": 0, "createdAt": ""}
+    return {
+        "id": 0,
+        "name": "",
+        "settlement_code": "",
+        "settlementName": "",
+        "settlementId": 0,
+        "createdAt": "",
+    }
 
 
 def _client_role_to_db(role: str) -> str | None:
