@@ -104,7 +104,7 @@ server/src/
 │           ├── closest_road.py
 │           └── closest_military_base.py
 │
-├── seed_db.py                      # CLI script: populates DB (settlements, orgs, users, events)
+├── seed_db.py                      # CLI script: populates DB (settlements, orgs, users, events); backfills event names
 └── seed_data.py                    # CLI script: runs GIS for 20 events → seed_events.json
 ```
 
@@ -113,7 +113,7 @@ server/src/
 | File | What it does |
 |---|---|
 | `main.py` | Creates the FastAPI app. On startup: loads the Keras model, preloads CBS population data, and loads `seed_events.json` into the in-memory event store. Mounts `/uploads` as a static directory. |
-| `api/routes/events.py` | Owns the in-memory `_event_store` dict. `POST /events` runs AI classification immediately and queues GIS as a `BackgroundTask`. `GET /events` returns all events sorted by priority. `GET /events/{id}` is polled by the frontend to detect when GIS finishes. |
+| `api/routes/events.py` | Owns the in-memory `_event_store` dict. `POST /events` runs AI classification immediately and queues GIS as a `BackgroundTask`. `GET /events` returns all events sorted by priority, with `createdByName` joined from the users table. `GET /events/{id}` is polled by the frontend to detect when GIS finishes. |
 | `api/routes/analyze.py` | Legacy endpoint used by integration tests. Runs the full AI+GIS+priority pipeline synchronously and returns raw intermediate values. |
 | `core/ai_logic.py` | Loads `rocket_damage_model.keras` once at startup (via `preload_model()`). `run_inference(image_bytes)` preprocesses the image and returns `{"classification": "Heavy"|"Light", "damage_score": 7|3}`. |
 | `core/priority_logic.py` | Contains `calculate_piecewise_value(distance)` and `get_final_priority_score(damage_score, gis_features)`. The formula is `clamp(damage_score × (1 + S_total), 0.1, 10.0)` where `S_total` is a weighted sum of 5 GIS coefficients. |
@@ -160,7 +160,7 @@ client/src/
 │   │   └── Login.tsx           # Login form with demo credential presets
 │   │
 │   ├── admin/
-│   │   ├── Dashboard.tsx       # Admin overview: stats cards + map + event table
+│   │   ├── Dashboard.tsx       # Admin overview: stats cards (Critical/Hidden clickable) + map + event table; org filter for Super Admin
 │   │   ├── EventsPage.tsx      # Full event list with filters, heatmap toggle, hide/show
 │   │   ├── UserManagement.tsx  # Create / edit / deactivate users; expandable event brief
 │   │   └── ModelRunner.tsx     # Manual image upload → raw AI+GIS pipeline test
@@ -171,6 +171,7 @@ client/src/
 │   │   └── FieldMapView.tsx        # Full-screen map view for field use
 │   │
 │   ├── super-admin/
+│   │   ├── SuperAdminDashboard.tsx # Cross-org summary: stats cards (clickable), status modal
 │   │   └── OrgManagement.tsx   # Lists all organizations; live event/user stats; create org
 │   │
 │   └── UserProfile.tsx         # User profile + settings page
@@ -182,7 +183,7 @@ client/src/
 │   │   └── PageContainer.tsx   # Wraps every page with scroll area + Navbar
 │   │
 │   ├── events/
-│   │   ├── EventTable.tsx      # Sortable/searchable event table; role-aware columns
+│   │   ├── EventTable.tsx      # Sortable/searchable table; shows event name, createdByName, role-aware columns
 │   │   ├── EventDetailView.tsx # Full event detail card: image, GIS panel, explanation
 │   │   ├── EditEventModal.tsx  # Modal form (react-hook-form + zod) to edit name/desc/tags
 │   │   └── AIExplanationBox.tsx # Renders the llmExplanation text with formatting
@@ -208,7 +209,7 @@ client/src/
 | `store/authStore.ts` | Three independent Zustand stores. **AuthStore** holds the logged-in user and org. **EventStore** is the single source of truth for all events in the UI — every dashboard reads from it. **NotificationStore** manages the bell dropdown. |
 | `pages/operator/NewEventForm.tsx` | Submits a `multipart/form-data` POST to `/events`. After the backend responds (with `gisStatus: "pending"`), the component polls `GET /events/{id}` every 4 seconds until `gisStatus` becomes `"done"`, then calls `updateEvent()` in the store. |
 | `config/api.ts` | Exports `API_BASE_URL`. In local dev this is `http://localhost:8000`; in Docker it is `/api` (proxied by Nginx). All `fetch()` calls in the app use this constant. |
-| `types/index.ts` | Single source of truth for all types. `DamageEvent` is the central interface. `UserRole` (`SUPER_ADMIN`, `ADMIN`, `OPERATOR`) and `EventStatus` (`PENDING`, `IN_PROGRESS`, `COMPLETED`) are the key enums used for access control and filtering. |
+| `types/index.ts` | Single source of truth for all types. `DamageEvent` is the central interface (includes `createdByName?: string`). `UserRole` (`SUPER_ADMIN`, `ADMIN`, `OPERATOR`) and `EventStatus` (`new`, `in_progress`, `done`) are the key enums used for access control and filtering. |
 
 ---
 
