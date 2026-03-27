@@ -83,8 +83,11 @@ logs/
 # ── Docker runtime volumes (if stored locally) ────────────────────────────────
 docker-volumes/
 
-# ── Uploads (user content — not committed) ────────────────────────────────────
+# ── Uploads ───────────────────────────────────────────────────────────────────
+# Allow demo images to be committed for local setup
 uploads/*
+!uploads/*.jpg
+!uploads/*.png
 !uploads/.gitkeep
 
 # ── Claude Code ───────────────────────────────────────────────────────────────
