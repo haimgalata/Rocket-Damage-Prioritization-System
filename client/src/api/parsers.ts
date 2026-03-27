@@ -87,7 +87,7 @@ export function parseDamageEvent(raw: Record<string, unknown>): DamageEvent {
   return {
     id: num(raw.id),
     organizationId: num(raw.organizationId),
-    name: raw.name as string | undefined,
+    name: raw.name ? String(raw.name) : undefined,
     location: {
       lat: num(loc.lat),
       lng: num(loc.lng),
@@ -108,6 +108,7 @@ export function parseDamageEvent(raw: Record<string, unknown>): DamageEvent {
     llmExplanation: String(raw.llmExplanation ?? ''),
     aiModel: raw.aiModel as string | undefined,
     createdBy: num(raw.createdBy),
+    createdByName: raw.createdByName ? String(raw.createdByName) : undefined,
     createdAt: raw.createdAt ? new Date(String(raw.createdAt)) : new Date(),
     updatedAt: raw.updatedAt ? new Date(String(raw.updatedAt)) : undefined,
     resolvedAt: raw.resolvedAt ? new Date(String(raw.resolvedAt)) : undefined,

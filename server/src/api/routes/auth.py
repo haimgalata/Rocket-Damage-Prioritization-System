@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import joinedload
 
-from server.src.api.deps import get_current_user
+from server.src.api.deps import get_current_user, require_roles
 from server.src.core.jwt_tokens import create_access_token
 from server.src.db.connection import get_db
 from server.src.db.models import Organization, Role, Settlement, User
@@ -58,7 +58,7 @@ def _user_to_api(user: User) -> dict:
         "roleId": user.role_id,
         "organizationId": user.organization_id,
         "createdAt": user.created_at.isoformat() if user.created_at else "",
-        "isActive": True,
+        "isActive": getattr(user, "is_active", True),
     }
 
 
@@ -106,6 +106,8 @@ def login(req: LoginRequest) -> LoginResponse:
         )
         if not user or user.password != req.password:
             raise HTTPException(status_code=401, detail="Invalid credentials")
+        if not getattr(user, "is_active", True):
+            raise HTTPException(status_code=401, detail="Account has been deactivated")
         org = user.organization
         settlement = org.settlement if org else None
         token = create_access_token(user_id=user.id)
@@ -159,6 +161,71 @@ def list_users(current: Annotated[User, Depends(get_current_user)]) -> list[dict
             q = q.filter(User.organization_id == current.organization_id)
         users = q.all()
         return [_user_to_api(u) for u in users]
+
+
+class PatchUserRequest(BaseModel):
+    is_active: bool | None = None
+
+
+@router.patch("/users/{user_id}", status_code=200)
+def patch_user(
+    user_id: int,
+    body: PatchUserRequest,
+    current: Annotated[User, Depends(get_current_user)],
+) -> dict:
+    """Toggle user active status. Super admin and admin only.
+    Guard: cannot deactivate the sole active admin of an organization."""
+    role_name = current.role.name if current.role else ""
+    if role_name not in ("super_admin", "admin"):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+
+    with get_db() as db:
+        target = (
+            db.query(User)
+            .options(joinedload(User.role))
+            .filter(User.id == user_id)
+            .first()
+        )
+        if not target:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if role_name == "admin" and target.organization_id != current.organization_id:
+            raise HTTPException(status_code=403, detail="Cannot manage users outside your organization")
+
+        if body.is_active is False:
+            target_role_name = target.role.name if target.role else ""
+            if target_role_name == "admin" and target.organization_id:
+                other_active_admins = (
+                    db.query(User)
+                    .join(User.role)
+                    .filter(
+                        User.organization_id == target.organization_id,
+                        User.is_active.is_(True),
+                        Role.name == "admin",
+                        User.id != user_id,
+                    )
+                    .count()
+                )
+                if other_active_admins == 0:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=(
+                            "Cannot deactivate the only active admin. "
+                            "Please appoint or activate another admin for this organization first."
+                        ),
+                    )
+
+        if body.is_active is not None:
+            target.is_active = body.is_active
+            db.flush()
+            db.refresh(target)
+            target = (
+                db.query(User)
+                .options(joinedload(User.role))
+                .filter(User.id == user_id)
+                .first()
+            )
+        return _user_to_api(target)
 
 
 @router.post("/users", status_code=201)

@@ -63,6 +63,7 @@ async def create_event_route(
     lon: float = Form(...),
     description: str = Form(...),
     organization_id: str = Form(...),
+    name: Optional[str] = Form(default=None),
     created_by: str = Form(default=""),  # ignored; always current user
     tags: Optional[str] = Form(default=""),
     image: Optional[UploadFile] = File(default=None),
@@ -92,6 +93,7 @@ async def create_event_route(
             lon=lon,
             description=description,
             organization_id=organization_id,
+            name=name or "",
             created_by=str(current.id),  # always authenticated user
             tags=tags or "",
             image_bytes=image_bytes,

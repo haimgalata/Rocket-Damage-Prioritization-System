@@ -96,6 +96,7 @@ export interface DamageEvent {
   llmExplanation: string;
   aiModel?: string;
   createdBy: number;
+  createdByName?: string;
   createdAt: Date;
   updatedAt?: Date;
   resolvedAt?: Date;
