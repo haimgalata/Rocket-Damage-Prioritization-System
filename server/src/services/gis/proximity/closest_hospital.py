@@ -1,33 +1,42 @@
+"""Nearest-hospital proximity service."""
+
+import logging
+
 import geopandas as gpd
 import osmnx as ox
 from shapely.geometry import Point
 from osmnx._errors import InsufficientResponseError
+from server.src.services.gis.proximity.osm_query import features_from_point as osm_features_from_point
+
+ox.settings.timeout = 25
+ox.settings.use_cache = True
+logger = logging.getLogger(__name__)
 
 
 def distance_to_closest_hospital(lat: float, lon: float):
-    """
-    Computes the distance (in meters) to the closest hospital
-    using progressive search radii: 5km, 10km, 15km.
-    Returns 0 if no hospital is found within 15km.
-    """
+    """Compute the straight-line distance to the nearest hospital.
 
+    Returns (distance_m, found_lat, found_lon) or -1 if not found within 15 km.
+    """
     search_radii = [5000, 10000, 15000]
 
     for radius in search_radii:
         try:
-            hospitals_gdf = ox.features_from_point(
+            hospitals_gdf = osm_features_from_point(
                 (lat, lon),
                 tags={"amenity": "hospital"},
                 dist=radius
             )
         except InsufficientResponseError:
-            # Nothing found for this radius
+            logger.debug(f"[GIS:hospital] No features at radius={radius}m for ({lat},{lon})")
+            continue
+        except Exception as exc:
+            logger.error(f"[GIS:hospital] OSM query failed at radius={radius}m for ({lat},{lon}): {type(exc).__name__}: {exc}")
             continue
 
         if hospitals_gdf.empty:
             continue
 
-        # Project to metric CRS
         hospitals_gdf_metric = hospitals_gdf.to_crs(epsg=3857)
 
         event_point_metric = gpd.GeoSeries(
@@ -44,5 +53,4 @@ def distance_to_closest_hospital(lat: float, lon: float):
 
         return int(round(distances.min())), found_lat, found_lon
 
-    # No hospital found within 6km
     return -1

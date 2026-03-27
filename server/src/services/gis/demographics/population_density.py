@@ -2,84 +2,114 @@ import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point
 import os
+import logging
+
+logger = logging.getLogger(__name__)
+
+_gdf = None
+_df_pop = None
+_pop_col = None
 
 
-def get_cbs_population_density(lat, lon):
+def _get_data_path() -> tuple[str, str]:
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.abspath(os.path.join(current_dir, "..", "..", "..", ".."))
     data_path = os.path.join(project_root, "data", "cbs_data")
+    return (
+        os.path.join(data_path, "statistical_areas_2022.shp"),
+        os.path.join(data_path, "population_info_2023.xlsx"),
+    )
 
-    shapefile_path = os.path.join(data_path, "statistical_areas_2022.shp")
-    excel_path = os.path.join(data_path, "population_info_2023.xlsx")
+
+def preload_population_data() -> None:
+    """Load CBS shapefile and population Excel into memory once at startup."""
+    global _gdf, _df_pop, _pop_col
+
+    shapefile_path, excel_path = _get_data_path()
+    if not os.path.exists(shapefile_path) or not os.path.exists(excel_path):
+        logger.warning("[CBS] Data files not found — population density will return 0.0")
+        return
 
     try:
-        if not os.path.exists(shapefile_path) or not os.path.exists(excel_path):
-            return 0.0
+        logger.info("[CBS] Loading shapefile...")
+        _gdf = gpd.read_file(shapefile_path)
 
-        # טעינת המפה
-        gdf = gpd.read_file(shapefile_path)
-
-        # טעינה חכמה של האקסל (מציאת השורה של CODE)
-        xls = pd.ExcelFile(excel_path)
-        sheet = xls.sheet_names[1] if len(xls.sheet_names) > 1 else xls.sheet_names[0]
-        df_scan = xls.parse(sheet, nrows=20, header=None)
-
-        header_idx = None
-        for i, row in df_scan.iterrows():
-            if "CODE" in [str(val).strip().upper() for val in row.values if pd.notna(val)]:
-                header_idx = i
-                break
-
-        if header_idx is None: return 0.0
-
-        df_pop = xls.parse(sheet, skiprows=header_idx)
-        df_pop.columns = [str(c).strip().upper() for c in df_pop.columns]
-
-        # פונקציה חסינה ליצירת מפתח (4+4 ספרות)
-        def create_key(row):
+        def to_8_digit(val):
             try:
-                yishuv = str(int(float(row['CODE']))).zfill(4)
-                se_val = str(row.get('SE', '')).strip()
-                # אם זה סה"כ או ריק -> 0000
-                if "סה\"כ" in se_val or se_val.lower() in ["nan", ""]:
-                    se_area = "0000"
-                else:
-                    se_area = str(int(float(se_val))).zfill(4)
-                return yishuv + se_area
-            except:
+                if pd.isna(val) or str(val).strip() == "":
+                    return None
+                return str(int(float(str(val).replace('"', '').strip()))).zfill(8)
+            except Exception:
                 return None
 
-        df_pop['JOIN_KEY'] = df_pop.apply(create_key, axis=1)
-        gdf['JOIN_KEY'] = gdf['YISHUV_STA'].astype(str).str.zfill(8)
+        _gdf['JOIN_KEY'] = _gdf['YISHUV_STA'].apply(to_8_digit)
 
-        # מיזוג נתונים
-        merged = gdf.merge(df_pop[['JOIN_KEY', 'POPULATION']], on='JOIN_KEY', how='left')
+        logger.info("[CBS] Loading population Excel...")
+        xls = pd.ExcelFile(excel_path)
+        sheet = xls.sheet_names[1] if len(xls.sheet_names) > 1 else xls.sheet_names[0]
+        _df_pop = xls.parse(sheet, skiprows=6)
+        _df_pop.columns = [str(c).strip().upper() for c in _df_pop.columns]
 
-        # בדיקה גיאוגרפית
-        if merged.crs != "EPSG:4326":
-            merged = merged.to_crs(epsg=4326)
+        _pop_col = next(
+            (c for c in _df_pop.columns if 'POPULATION' in c or 'אוכלוסייה' in c),
+            None,
+        )
 
-        point = Point(lon, lat)
-        match = merged[merged.contains(point)]
+        def create_excel_neighborhood_key(row):
+            try:
+                yishuv = str(int(float(row['CODE']))).zfill(4)
+                se_val = str(row.get('SE', '')).strip().replace('"', '')
+                if any(x in se_val for x in ["סה", "SA", "nan", ""]) or se_val == "0":
+                    se_code = "0000"
+                else:
+                    se_code = str(int(float(se_val))).zfill(4)
+                return yishuv + se_code
+            except Exception:
+                return None
+
+        _df_pop['JOIN_KEY'] = _df_pop.apply(create_excel_neighborhood_key, axis=1)
+        logger.info("[CBS] Population data preloaded successfully.")
+    except Exception as exc:
+        logger.error(f"[CBS] Preload failed: {exc}")
+        _gdf = None
+        _df_pop = None
+        _pop_col = None
+
+
+def get_cbs_population_density(lat: float, lon: float) -> float:
+    """Return population density (persons/km²) at the given coordinate."""
+    global _gdf, _df_pop, _pop_col
+
+    if _gdf is None:
+        preload_population_data()
+
+    if _gdf is None or _df_pop is None or _pop_col is None:
+        return 0.0
+
+    try:
+        point_wgs = gpd.GeoSeries([Point(lon, lat)], crs="EPSG:4326")
+        point_local = point_wgs.to_crs(_gdf.crs).iloc[0]
+        match = _gdf[_gdf.contains(point_local)]
 
         if not match.empty:
-            row = match.iloc[0]
-            pop = row['POPULATION']
+            neighborhood_row = match.iloc[0]
+            target_key = neighborhood_row['JOIN_KEY']
 
-            # --- מנגנון הגיבוי (Fallback) ---
-            # אם השכונה (למשל 424) לא נמצאה באקסל, ניקח את סה"כ העיר (0000)
-            if pd.isna(pop):
-                city_key = row['JOIN_KEY'][:4] + "0000"
-                city_row = df_pop[df_pop['JOIN_KEY'] == city_key]
-                if not city_row.empty:
-                    pop = city_row.iloc[0]['POPULATION']
+            pop_match = _df_pop[_df_pop['JOIN_KEY'] == target_key]
+            if not pop_match.empty and pd.notna(pop_match[_pop_col].iloc[0]):
+                pop = float(pop_match[_pop_col].iloc[0])
+                area_km2 = neighborhood_row['SHAPE_Area'] / 1_000_000
+                return round(pop / area_km2, 2)
 
-            area_km2 = row['SHAPE_Area'] / 1_000_000
-            if pd.isna(pop) or area_km2 == 0: return 0.0
-
-            return round(pop / area_km2, 2)
+            yishuv_code = target_key[:4]
+            city_pop_row = _df_pop[_df_pop['JOIN_KEY'] == yishuv_code + "0000"]
+            if not city_pop_row.empty:
+                city_pop = float(city_pop_row[_pop_col].iloc[0])
+                city_area_m2 = _gdf[_gdf['JOIN_KEY'].str.startswith(yishuv_code)]['SHAPE_Area'].sum()
+                if city_area_m2 > 0:
+                    return round(city_pop / (city_area_m2 / 1_000_000), 2)
 
         return 0.0
-    except Exception as e:
-        print(f"[ERROR] Logic failed: {e}")
-        return -1
+    except Exception as exc:
+        logger.error(f"[CBS] Density lookup failed: {exc}")
+        return 0.0

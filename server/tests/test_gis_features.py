@@ -11,7 +11,7 @@ from server.src.services.gis.demographics.population_density import get_cbs_popu
 
 def test_proximity_logic():
     # Test coordinates (Tel Hashomer / Ramat Gan area)
-    test_lat, test_lon = 32.0461, 34.8451
+    test_lat, test_lon = 30.91580, 34.95670
 
     print(f"--- Starting Tests for Lat: {test_lat}, Lon: {test_lon} ---\n")
 
