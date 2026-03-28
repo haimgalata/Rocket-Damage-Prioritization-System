@@ -1,35 +1,19 @@
-name: Sync to Hugging Face Space
-
-# Runs on every push to the Linoy branch.
+name: Sync to Hugging Face hub
 on:
   push:
-    branches:
-      - Linoy
+    branches: [Linoy]
+  force_push: true
 
 jobs:
-  sync:
-    name: Push repository to HF Space
+  sync-to-hub:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout full history
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
-          fetch-depth: 0          # full history so HF gets a proper git log
-
-      - name: Configure git identity
-        run: |
-          git config user.email "actions@github.com"
-          git config user.name  "GitHub Actions"
-
-      - name: Push to Hugging Face Space (linoysa/prioritai-backend)
+          fetch-depth: 0
+          lfs: true
+      - name: Push to hub
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Add the HF remote (credentials embedded in URL, never printed)
-          git remote add hf_space \
-            "https://linoysa:${HF_TOKEN}@huggingface.co/spaces/linoysa/prioritai-backend"
-
-          # Force-push the current branch to the Space's main branch.
-          # --force is required because the Space may have diverged.
-          git push hf_space HEAD:main --force
+          git push --force https://linoysa:$HF_TOKEN@huggingface.co/spaces/linoysa/prioritai-backend Linoy:main
