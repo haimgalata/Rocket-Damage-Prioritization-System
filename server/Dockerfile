@@ -27,7 +27,5 @@ COPY server/ ./server/
 
 # Uvicorn is started from /app so that `server.src.main` resolves correctly
 # as a Python package (server/__init__.py must exist).
-# HF Spaces requires port 7860.  Local Docker Compose overrides with PORT=8000.
-# The shell form lets ${PORT} expand at container start-up.
-EXPOSE 7860
-CMD ["sh", "-c", "uvicorn server.src.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
+EXPOSE 8000
+CMD ["uvicorn", "server.src.main:app", "--host", "0.0.0.0", "--port", "8000"]
