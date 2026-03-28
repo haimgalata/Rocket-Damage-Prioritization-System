@@ -130,6 +130,12 @@ def get_event_detail(event_id: str) -> dict[str, Any] | None:
         return EventRepository.get_event_detail_response(db, event_id)
 
 
+def delete_event(event_id: int) -> bool:
+    """Delete event by id. Returns False if not found."""
+    with get_db() as db:
+        return EventRepository.delete_event(db, event_id)
+
+
 def patch_event(
     event_id: int,
     *,

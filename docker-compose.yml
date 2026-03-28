@@ -31,6 +31,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
       - DATABASE_URL=postgresql://prioritai:prioritai@postgres:5432/prioritai
+      - PORT=8000
     depends_on:
       postgres:
         condition: service_healthy

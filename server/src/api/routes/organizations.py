@@ -14,7 +14,7 @@ from sqlalchemy.orm import joinedload
 from server.src.api.deps import get_current_user, require_roles
 from server.src.api.routes.auth import _org_to_api
 from server.src.db.connection import get_db
-from server.src.db.models import Organization, Settlement, User
+from server.src.db.models import Event, Organization, Settlement, User
 
 organizations_router = APIRouter(tags=["organizations"])
 settlements_router = APIRouter(prefix="/settlements", tags=["settlements"])
@@ -114,6 +114,30 @@ def create_organization(
         d = _org_to_api(org, settlement)
         d["adminId"] = admin.id if admin else None
         return d
+
+
+@organizations_router.delete("/organizations/{org_id}", status_code=204)
+def delete_organization(
+    org_id: int,
+    _auth: Annotated[User, Depends(require_roles("super_admin"))],
+) -> None:
+    """Delete organization (super_admin only).
+    Events are deleted first to satisfy the RESTRICT FK on events.organization_id.
+    Users in the org have their organization_id SET NULL via the DB FK constraint."""
+    with get_db() as db:
+        org = db.query(Organization).filter(Organization.id == org_id).first()
+        if not org:
+            raise HTTPException(status_code=404, detail="Organization not found")
+
+        # Delete all org events (SQLAlchemy cascades to images/gis/analysis/tags;
+        # DB cascade handles EventHistory rows)
+        events = db.query(Event).filter(Event.organization_id == org_id).all()
+        for event in events:
+            db.delete(event)
+        db.flush()
+
+        db.delete(org)
+        # users.organization_id → SET NULL is handled by the DB FK constraint
 
 
 @settlements_router.get("")

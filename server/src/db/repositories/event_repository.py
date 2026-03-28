@@ -334,6 +334,16 @@ class EventRepository:
         return base
 
     @staticmethod
+    def delete_event(db: Session, event_id: int) -> bool:
+        """Delete event and cascade its children (images, gis, analysis, tags, history).
+        Returns True if the event existed and was deleted, False if not found."""
+        event = EventRepository.get_by_id(db, event_id)
+        if not event:
+            return False
+        db.delete(event)
+        return True
+
+    @staticmethod
     def update_event_patch(
         db: Session,
         event_id: int,
