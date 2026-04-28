@@ -1,6 +1,7 @@
 [
   {
-    "id": "seed-e9210708",
+    "id": "seed-bf713b42",
+    "seedKey": "prioritai-seed-01",
     "organizationId": "org-1",
     "createdBy": "user-op-1",
     "name": "Dizengoff Center Strike",
@@ -11,7 +12,7 @@
       "address": "Dizengoff Center Strike",
       "city": "Tel Aviv"
     },
-    "imageUrl": "/uploads/tel_aviv_heavy_1.jpg",
+    "imageUr l": "/uploads/tel_aviv_heavy_1.jpg",
     "damageClassification": "Heavy",
     "damageScore": 7,
     "priorityScore": 10.0,
@@ -33,11 +34,11 @@
       "evacuation",
       "commercial"
     ],
-    "createdAt": "2026-03-19T03:25:16Z",
-    "seedKey": "prioritai-seed-01"
+    "createdAt": "2026-03-26T17:06:24Z"
   },
   {
-    "id": "seed-dd2bb0ea",
+    "id": "seed-415ecff3",
+    "seedKey": "prioritai-seed-02",
     "organizationId": "org-1",
     "createdBy": "user-op-1",
     "name": "Rothschild Boulevard Building Collapse",
@@ -70,11 +71,11 @@
       "heritage",
       "residential"
     ],
-    "createdAt": "2026-03-20T03:25:16Z",
-    "seedKey": "prioritai-seed-02"
+    "createdAt": "2026-03-27T17:06:24Z"
   },
   {
-    "id": "seed-83219aa5",
+    "id": "seed-cd8f633f",
+    "seedKey": "prioritai-seed-03",
     "organizationId": "org-1",
     "createdBy": "user-op-1",
     "name": "Jaffa Port Warehouse Fire",
@@ -108,11 +109,11 @@
       "port",
       "heritage"
     ],
-    "createdAt": "2026-03-18T03:25:16Z",
-    "seedKey": "prioritai-seed-03"
+    "createdAt": "2026-03-25T17:06:24Z"
   },
   {
-    "id": "seed-ebb6ad2b",
+    "id": "seed-5d0ab668",
+    "seedKey": "prioritai-seed-04",
     "organizationId": "org-1",
     "createdBy": "user-op-1",
     "name": "Florentin Workshop Roof Damage",
@@ -144,11 +145,11 @@
       "roof",
       "power-outage"
     ],
-    "createdAt": "2026-03-17T03:25:16Z",
-    "seedKey": "prioritai-seed-04"
+    "createdAt": "2026-03-24T17:06:24Z"
   },
   {
-    "id": "seed-aae50b8a",
+    "id": "seed-c2d1b18f",
+    "seedKey": "prioritai-seed-05",
     "organizationId": "org-1",
     "createdBy": "user-op-1",
     "name": "Ramat Aviv Residential Shrapnel",
@@ -181,11 +182,11 @@
       "residential",
       "windows"
     ],
-    "createdAt": "2026-03-16T03:25:16Z",
-    "seedKey": "prioritai-seed-05"
+    "createdAt": "2026-03-23T17:06:24Z"
   },
   {
-    "id": "seed-199f8309",
+    "id": "seed-98b96c80",
+    "seedKey": "prioritai-seed-06",
     "organizationId": "org-1",
     "createdBy": "user-op-1",
     "name": "HaYarkon Park Infrastructure Hit",
@@ -218,11 +219,11 @@
       "park",
       "electrical"
     ],
-    "createdAt": "2026-03-20T03:25:16Z",
-    "seedKey": "prioritai-seed-06"
+    "createdAt": "2026-03-27T17:06:24Z"
   },
   {
-    "id": "seed-5c5dd460",
+    "id": "seed-c28b918d",
+    "seedKey": "prioritai-seed-07",
     "organizationId": "org-2",
     "createdBy": "user-admin-2",
     "name": "Beer Sheva Central Bus Station Impact",
@@ -255,11 +256,11 @@
       "structural",
       "debris"
     ],
-    "createdAt": "2026-03-19T03:25:16Z",
-    "seedKey": "prioritai-seed-07"
+    "createdAt": "2026-03-26T17:06:24Z"
   },
   {
-    "id": "seed-d9486094",
+    "id": "seed-0ec0bd33",
+    "seedKey": "prioritai-seed-08",
     "organizationId": "org-2",
     "createdBy": "user-admin-2",
     "name": "Dimona Industrial Zone Strike",
@@ -292,11 +293,11 @@
       "hazmat",
       "structural"
     ],
-    "createdAt": "2026-03-20T03:25:16Z",
-    "seedKey": "prioritai-seed-08"
+    "createdAt": "2026-03-27T17:06:24Z"
   },
   {
-    "id": "seed-70ccdcae",
+    "id": "seed-d84a0f5b",
+    "seedKey": "prioritai-seed-09",
     "organizationId": "org-2",
     "createdBy": "user-admin-2",
     "name": "Kibbutz Nir Oz Residential Block",
@@ -329,11 +330,11 @@
       "evacuation",
       "kibbutz"
     ],
-    "createdAt": "2026-03-18T03:25:16Z",
-    "seedKey": "prioritai-seed-09"
+    "createdAt": "2026-03-25T17:06:24Z"
   },
   {
-    "id": "seed-20f1b578",
+    "id": "seed-9952ddee",
+    "seedKey": "prioritai-seed-10",
     "organizationId": "org-2",
     "createdBy": "user-admin-2",
     "name": "Ofakim School Perimeter Damage",
@@ -366,11 +367,11 @@
       "shrapnel",
       "perimeter"
     ],
-    "createdAt": "2026-03-17T03:25:16Z",
-    "seedKey": "prioritai-seed-10"
+    "createdAt": "2026-03-24T17:06:24Z"
   },
   {
-    "id": "seed-8048bed0",
+    "id": "seed-a1c11e22",
+    "seedKey": "prioritai-seed-11",
     "organizationId": "org-2",
     "createdBy": "user-admin-2",
     "name": "Kibbutz Revivim Perimeter Fence",
@@ -403,11 +404,11 @@
       "agricultural",
       "fence"
     ],
-    "createdAt": "2026-03-20T03:25:16Z",
-    "seedKey": "prioritai-seed-11"
+    "createdAt": "2026-03-27T17:06:24Z"
   },
   {
-    "id": "seed-e5369966",
+    "id": "seed-38101f1f",
+    "seedKey": "prioritai-seed-12",
     "organizationId": "org-2",
     "createdBy": "user-admin-2",
     "name": "Mitzpe Ramon Visitor Center Strike",
@@ -440,11 +441,11 @@
       "tourism",
       "remote"
     ],
-    "createdAt": "2026-03-15T03:25:16Z",
-    "seedKey": "prioritai-seed-12"
+    "createdAt": "2026-03-22T17:06:24Z"
   },
   {
-    "id": "seed-6ae68221",
+    "id": "seed-4a18b8e2",
+    "seedKey": "prioritai-seed-13",
     "organizationId": "org-2",
     "createdBy": "user-admin-2",
     "name": "Sde Boker Research Station Damage",
@@ -478,11 +479,11 @@
       "greenhouse",
       "remote"
     ],
-    "createdAt": "2026-03-19T03:25:16Z",
-    "seedKey": "prioritai-seed-13"
+    "createdAt": "2026-03-26T17:06:24Z"
   },
   {
-    "id": "seed-71ef391f",
+    "id": "seed-41b2f7b2",
+    "seedKey": "prioritai-seed-14",
     "organizationId": "org-3",
     "createdBy": "user-admin-3",
     "name": "Mahane Yehuda Market Direct Hit",
@@ -516,11 +517,11 @@
       "collapse",
       "urban"
     ],
-    "createdAt": "2026-03-19T03:25:16Z",
-    "seedKey": "prioritai-seed-14"
+    "createdAt": "2026-03-26T17:06:24Z"
   },
   {
-    "id": "seed-ac879366",
+    "id": "seed-f8e435c8",
+    "seedKey": "prioritai-seed-15",
     "organizationId": "org-3",
     "createdBy": "user-admin-3",
     "name": "Givat Shaul Apartment Tower",
@@ -554,11 +555,11 @@
       "structural",
       "evacuation"
     ],
-    "createdAt": "2026-03-20T03:25:16Z",
-    "seedKey": "prioritai-seed-15"
+    "createdAt": "2026-03-27T17:06:24Z"
   },
   {
-    "id": "seed-191bb2ca",
+    "id": "seed-252801d4",
+    "seedKey": "prioritai-seed-16",
     "organizationId": "org-3",
     "createdBy": "user-admin-3",
     "name": "Talpiot Industrial Building Collapse",
@@ -592,11 +593,11 @@
       "structural",
       "collapse"
     ],
-    "createdAt": "2026-03-18T03:25:16Z",
-    "seedKey": "prioritai-seed-16"
+    "createdAt": "2026-03-25T17:06:24Z"
   },
   {
-    "id": "seed-75f1c48d",
+    "id": "seed-c2324ea4",
+    "seedKey": "prioritai-seed-17",
     "organizationId": "org-3",
     "createdBy": "user-admin-3",
     "name": "Pisgat Ze'ev Northern Tower Strike",
@@ -630,11 +631,11 @@
       "suburban",
       "evacuation"
     ],
-    "createdAt": "2026-03-20T03:25:16Z",
-    "seedKey": "prioritai-seed-17"
+    "createdAt": "2026-03-27T17:06:24Z"
   },
   {
-    "id": "seed-854c51b3",
+    "id": "seed-d529529c",
+    "seedKey": "prioritai-seed-18",
     "organizationId": "org-3",
     "createdBy": "user-admin-3",
     "name": "German Colony Garden Wall Damage",
@@ -667,11 +668,11 @@
       "shrapnel",
       "low-severity"
     ],
-    "createdAt": "2026-03-16T03:25:16Z",
-    "seedKey": "prioritai-seed-18"
+    "createdAt": "2026-03-23T17:06:24Z"
   },
   {
-    "id": "seed-a3bf8352",
+    "id": "seed-9eb114aa",
+    "seedKey": "prioritai-seed-19",
     "organizationId": "org-3",
     "createdBy": "user-admin-3",
     "name": "Hadassah Mount Scopus Perimeter",
@@ -704,11 +705,11 @@
       "shrapnel",
       "vehicles"
     ],
-    "createdAt": "2026-03-17T03:25:16Z",
-    "seedKey": "prioritai-seed-19"
+    "createdAt": "2026-03-24T17:06:24Z"
   },
   {
-    "id": "seed-4b00e9d8",
+    "id": "seed-4002c964",
+    "seedKey": "prioritai-seed-20",
     "organizationId": "org-3",
     "createdBy": "user-admin-3",
     "name": "Ramot Residential Shrapnel Scatter",
@@ -741,7 +742,6 @@
       "shrapnel",
       "windows"
     ],
-    "createdAt": "2026-03-19T03:25:16Z",
-    "seedKey": "prioritai-seed-20"
+    "createdAt": "2026-03-26T17:06:24Z"
   }
 ]

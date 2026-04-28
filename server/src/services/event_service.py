@@ -18,6 +18,7 @@ def create_event(
     lon: float,
     description: str,
     organization_id: str,
+    name: str = "",
     created_by: str,
     tags: str = "",
     image_bytes: bytes = b"",
@@ -39,6 +40,7 @@ def create_event(
             lon=lon,
             address=f"GPS {lat:.5f}, {lon:.5f}",
             city="Israel",
+            name=name or None,
             description=description,
             organization_id=organization_id,
             created_by=created_by,
@@ -126,6 +128,12 @@ def list_events_for_principal(*, role_db_name: str, organization_id: int | None)
 def get_event_detail(event_id: str) -> dict[str, Any] | None:
     with get_db() as db:
         return EventRepository.get_event_detail_response(db, event_id)
+
+
+def delete_event(event_id: int) -> bool:
+    """Delete event by id. Returns False if not found."""
+    with get_db() as db:
+        return EventRepository.delete_event(db, event_id)
 
 
 def patch_event(

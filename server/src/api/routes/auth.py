@@ -6,16 +6,19 @@ GET  /auth/users — scoped user list.
 POST /auth/users — create user (admin / super_admin rules).
 """
 
+import secrets
+import string
+import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import joinedload
 
-from server.src.api.deps import get_current_user
+from server.src.api.deps import get_current_user, require_roles
 from server.src.core.jwt_tokens import create_access_token
 from server.src.db.connection import get_db
-from server.src.db.models import Organization, Role, Settlement, User
+from server.src.db.models import Event, EventHistory, Organization, Role, Settlement, User
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -58,7 +61,7 @@ def _user_to_api(user: User) -> dict:
         "roleId": user.role_id,
         "organizationId": user.organization_id,
         "createdAt": user.created_at.isoformat() if user.created_at else "",
-        "isActive": True,
+        "isActive": getattr(user, "is_active", True),
     }
 
 
@@ -106,6 +109,8 @@ def login(req: LoginRequest) -> LoginResponse:
         )
         if not user or user.password != req.password:
             raise HTTPException(status_code=401, detail="Invalid credentials")
+        if not getattr(user, "is_active", True):
+            raise HTTPException(status_code=401, detail="Account has been deactivated")
         org = user.organization
         settlement = org.settlement if org else None
         token = create_access_token(user_id=user.id)
@@ -161,6 +166,71 @@ def list_users(current: Annotated[User, Depends(get_current_user)]) -> list[dict
         return [_user_to_api(u) for u in users]
 
 
+class PatchUserRequest(BaseModel):
+    is_active: bool | None = None
+
+
+@router.patch("/users/{user_id}", status_code=200)
+def patch_user(
+    user_id: int,
+    body: PatchUserRequest,
+    current: Annotated[User, Depends(get_current_user)],
+) -> dict:
+    """Toggle user active status. Super admin and admin only.
+    Guard: cannot deactivate the sole active admin of an organization."""
+    role_name = current.role.name if current.role else ""
+    if role_name not in ("super_admin", "admin"):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+
+    with get_db() as db:
+        target = (
+            db.query(User)
+            .options(joinedload(User.role))
+            .filter(User.id == user_id)
+            .first()
+        )
+        if not target:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if role_name == "admin" and target.organization_id != current.organization_id:
+            raise HTTPException(status_code=403, detail="Cannot manage users outside your organization")
+
+        if body.is_active is False:
+            target_role_name = target.role.name if target.role else ""
+            if target_role_name == "admin" and target.organization_id:
+                other_active_admins = (
+                    db.query(User)
+                    .join(User.role)
+                    .filter(
+                        User.organization_id == target.organization_id,
+                        User.is_active.is_(True),
+                        Role.name == "admin",
+                        User.id != user_id,
+                    )
+                    .count()
+                )
+                if other_active_admins == 0:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=(
+                            "Cannot deactivate the only active admin. "
+                            "Please appoint or activate another admin for this organization first."
+                        ),
+                    )
+
+        if body.is_active is not None:
+            target.is_active = body.is_active
+            db.flush()
+            db.refresh(target)
+            target = (
+                db.query(User)
+                .options(joinedload(User.role))
+                .filter(User.id == user_id)
+                .first()
+            )
+        return _user_to_api(target)
+
+
 @router.post("/users", status_code=201)
 def create_user(
     body: CreateUserRequest,
@@ -191,12 +261,16 @@ def create_user(
         r = db.query(Role).filter(Role.name == db_role).first()
         if not r:
             raise HTTPException(status_code=500, detail="Role not configured")
+        ext_id = f"usr-{uuid.uuid4().hex[:12]}"
+        while db.query(User).filter(User.external_id == ext_id).first():
+            ext_id = f"usr-{uuid.uuid4().hex[:12]}"
         u = User(
             name=body.name.strip(),
             email=body.email.strip(),
             password=body.password,
             role_id=r.id,
             organization_id=body.organizationId,
+            external_id=ext_id,
         )
         db.add(u)
         db.flush()
@@ -208,3 +282,75 @@ def create_user(
             .first()
         )
         return _user_to_api(u)
+
+
+@router.delete("/users/{user_id}", status_code=204)
+def delete_user(
+    user_id: int,
+    current: Annotated[User, Depends(get_current_user)],
+) -> None:
+    """Delete user. Admin: own org only. Super admin: any user.
+    Blocked if user has created events or event history (FK RESTRICT)."""
+    role_name = current.role.name if current.role else ""
+    if role_name not in ("super_admin", "admin"):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    if user_id == current.id:
+        raise HTTPException(status_code=400, detail="Cannot delete your own account")
+
+    with get_db() as db:
+        target = (
+            db.query(User)
+            .options(joinedload(User.role))
+            .filter(User.id == user_id)
+            .first()
+        )
+        if not target:
+            raise HTTPException(status_code=404, detail="User not found")
+        if role_name == "admin" and target.organization_id != current.organization_id:
+            raise HTTPException(status_code=403, detail="Cannot manage users outside your organization")
+
+        event_count = db.query(Event).filter(Event.created_by == user_id).count()
+        if event_count > 0:
+            raise HTTPException(
+                status_code=409,
+                detail=f"Cannot delete user who has created {event_count} event(s). Delete or reassign those events first.",
+            )
+        history_count = db.query(EventHistory).filter(EventHistory.changed_by == user_id).count()
+        if history_count > 0:
+            raise HTTPException(
+                status_code=409,
+                detail="Cannot delete user who has event history entries (changed_by constraint).",
+            )
+
+        db.delete(target)
+
+
+@router.post("/users/{user_id}/reset-password", status_code=200)
+def reset_user_password(
+    user_id: int,
+    current: Annotated[User, Depends(get_current_user)],
+) -> dict:
+    """Generate a temporary password and assign it to the target user.
+    Returns the plain-text password once so the admin can hand it to the user.
+    Admin: own org only. Super admin: any user."""
+    role_name = current.role.name if current.role else ""
+    if role_name not in ("super_admin", "admin"):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+
+    with get_db() as db:
+        target = (
+            db.query(User)
+            .options(joinedload(User.role))
+            .filter(User.id == user_id)
+            .first()
+        )
+        if not target:
+            raise HTTPException(status_code=404, detail="User not found")
+        if role_name == "admin" and target.organization_id != current.organization_id:
+            raise HTTPException(status_code=403, detail="Cannot manage users outside your organization")
+
+        alphabet = string.ascii_letters + string.digits + "!@#$%"
+        temp_password = "".join(secrets.choice(alphabet) for _ in range(12))
+        target.password = temp_password
+
+    return {"temporaryPassword": temp_password, "userId": user_id}

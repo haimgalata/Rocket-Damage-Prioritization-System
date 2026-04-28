@@ -73,6 +73,7 @@ class User(Base):
         Integer, ForeignKey("organizations.id", ondelete="SET NULL")
     )
     external_id: Mapped[str | None] = mapped_column(String(64), unique=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

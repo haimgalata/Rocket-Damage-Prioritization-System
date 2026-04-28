@@ -1,6 +1,15 @@
 import { EventStatus } from '../types';
 import type { DamageEvent, DashboardStats } from '../types';
 
+export const getStatusLabel = (status: EventStatus): string => {
+  switch (status) {
+    case EventStatus.NEW:         return 'New';
+    case EventStatus.IN_PROGRESS: return 'In Progress';
+    case EventStatus.DONE:        return 'Done';
+    default:                      return status;
+  }
+};
+
 export const getStatusColor = (status: EventStatus): string => {
   switch (status) {
     case EventStatus.NEW:

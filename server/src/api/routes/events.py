@@ -16,6 +16,7 @@ from server.src.db.models import User
 from server.src.schemas.event import EventResponse
 from server.src.services.event_service import (
     create_event,
+    delete_event,
     get_event,
     get_event_detail,
     list_events_for_principal,
@@ -56,6 +57,7 @@ async def create_event_route(
     lon: float = Form(...),
     description: str = Form(...),
     organization_id: str = Form(...),
+    name: Optional[str] = Form(default=None),
     created_by: str = Form(default=""),  # ignored; always current user
     tags: Optional[str] = Form(default=""),
     image: Optional[UploadFile] = File(default=None),
@@ -81,6 +83,7 @@ async def create_event_route(
             lon=lon,
             description=description,
             organization_id=organization_id,
+            name=name or "",
             created_by=str(current.id),  # always authenticated user
             tags=tags or "",
             image_bytes=image_bytes,
@@ -126,6 +129,29 @@ async def get_event_route(
     if org_id is not None and not _can_access_org(current, int(org_id)):
         raise HTTPException(status_code=403, detail="Access denied")
     return event
+
+
+@router.delete("/{event_id}", status_code=204)
+async def delete_event_route(
+    event_id: str,
+    current: Annotated[User, Depends(get_current_user)],
+) -> None:
+    """Delete event and all its children. Admin and super_admin only."""
+    if not _can_change_status(current):
+        raise HTTPException(status_code=403, detail="Only admins can delete events")
+    existing = get_event(event_id)
+    if existing is None:
+        raise HTTPException(status_code=404, detail="Event not found")
+    org_id = int(existing["organizationId"])
+    if not _can_access_org(current, org_id):
+        raise HTTPException(status_code=403, detail="Access denied")
+    try:
+        eid = int(event_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid event id")
+    deleted = delete_event(eid)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Event not found")
 
 
 @router.patch("/{event_id}")

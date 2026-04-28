@@ -255,6 +255,9 @@ def seed_events(db, org_ids: dict[str, int], user_ids: dict[str, int]) -> None:
             )
             if legacy:
                 legacy.seed_key = seed_key
+                # Backfill name if the legacy row is missing it
+                if not legacy.name and name:
+                    legacy.name = name
                 db.flush()
                 skipped += 1
                 continue
@@ -264,7 +267,7 @@ def seed_events(db, org_ids: dict[str, int], user_ids: dict[str, int]) -> None:
             lon=Decimal(str(lon)),
             address=address,
             city=city,
-            name=name,
+            name=name or None,
             description=desc,
             organization_id=org_db_id,
             created_by=user_db_id,
