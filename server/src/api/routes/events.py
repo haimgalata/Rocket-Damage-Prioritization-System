@@ -6,8 +6,6 @@ PATCH /events/{event_id} — Status / hidden (auth).
 """
 
 import logging
-import os
-import uuid
 from typing import Annotated, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Query, UploadFile
@@ -24,14 +22,9 @@ from server.src.services.event_service import (
     patch_event,
     run_gis_and_update,
 )
+from server.src.services.storage.supabase_storage import SupabaseStorageError, upload_event_image
 
 logger = logging.getLogger(__name__)
-
-UPLOADS_DIR = os.environ.get(
-    "UPLOADS_DIR",
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "uploads"),
-)
-os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -80,11 +73,7 @@ async def create_event_route(
 
         image_url = ""
         if image and image_bytes:
-            ext = os.path.splitext(image.filename)[1] if image.filename else ".jpg"
-            filename = f"{uuid.uuid4().hex[:12]}{ext}"
-            with open(os.path.join(UPLOADS_DIR, filename), "wb") as f:
-                f.write(image_bytes)
-            image_url = f"/uploads/{filename}"
+            image_url = upload_event_image(image_bytes, image.filename, image.content_type)
 
         logger.info(f"[Event] New event at lat={lat}, lon={lon}")
         response, event_id, damage_score = create_event(
@@ -104,6 +93,8 @@ async def create_event_route(
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except SupabaseStorageError as e:
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         logger.exception("Event creation failed")
         raise HTTPException(status_code=500, detail=str(e))
