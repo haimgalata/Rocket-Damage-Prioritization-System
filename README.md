@@ -28,7 +28,7 @@ PrioritAI is a **rocket damage prioritization system** used by three tiers of mu
 3. Computes a **priority score** (0–10) using a weighted piecewise formula
 4. Returns the event to the dashboard ranked by urgency
 
-**Stack:** FastAPI (Python) · React + TypeScript · Leaflet maps · Zustand state · Docker + Nginx
+**Stack:** FastAPI (Python) · React + TypeScript · Leaflet maps · Zustand state · Docker + Nginx · Supabase PostgreSQL · Supabase Storage
 
 ---
 
@@ -38,7 +38,7 @@ PrioritAI is a **rocket damage prioritization system** used by three tiers of mu
 Rocket-Damage-Prioritization-System/
 │
 ├── docker-compose.yml          # Orchestrates backend + frontend containers
-├── uploads/                    # Uploaded damage images (persisted via bind-mount)
+├── uploads/                    # Local/dev images (legacy paths + placeholders)
 │   ├── tel_aviv_heavy_1.jpg
 │   ├── jerusalem_heavy_1.jpg
 │   └── ...                     # 20 seed images + any user-uploaded files
@@ -112,8 +112,8 @@ server/src/
 
 | File | What it does |
 |---|---|
-| `main.py` | Creates the FastAPI app. On startup: loads the Keras model, preloads CBS population data, and loads `seed_events.json` into the in-memory event store. Mounts `/uploads` as a static directory. |
-| `api/routes/events.py` | Owns the in-memory `_event_store` dict. `POST /events` runs AI classification immediately and queues GIS as a `BackgroundTask`. `GET /events` returns all events sorted by priority, with `createdByName` joined from the users table. `GET /events/{id}` is polled by the frontend to detect when GIS finishes. |
+| `main.py` | Creates the FastAPI app. On startup: loads the Keras model, preloads CBS population data, and ensures DB schema/reference rows exist. Mounts `/uploads` for backward compatibility with legacy local image paths. |
+| `api/routes/events.py` | `POST /events` runs AI classification immediately, uploads the image to Supabase Storage (`event-images`), stores the returned public URL in DB, and queues GIS as a `BackgroundTask`. `GET /events` and `GET /events/{id}` read from PostgreSQL via repositories/services. |
 | `api/routes/analyze.py` | Legacy endpoint used by integration tests. Runs the full AI+GIS+priority pipeline synchronously and returns raw intermediate values. |
 | `core/ai_logic.py` | Loads `rocket_damage_model.keras` once at startup (via `preload_model()`). `run_inference(image_bytes)` preprocesses the image and returns `{"classification": "Heavy"|"Light", "damage_score": 7|3}`. |
 | `core/priority_logic.py` | Contains `calculate_piecewise_value(distance)` and `get_final_priority_score(damage_score, gis_features)`. The formula is `clamp(damage_score × (1 + S_total), 0.1, 10.0)` where `S_total` is a weighted sum of 5 GIS coefficients. |
@@ -226,7 +226,8 @@ POST /events  (multipart: image + lat/lon/description/org)
         ├─► AI classification  (≈100 ms)
         │      ai_logic.py → damage_score = 7 (Heavy) or 3 (Light)
         │
-        ├─► Save image to /uploads/{event_id}.jpg
+        ├─► Upload image to Supabase Storage (event-images bucket)
+        │      store public URL in event_images.image_url
         │
         ├─► Return event immediately  ◄── gisStatus: "pending"
         │      Frontend shows spinner
@@ -243,7 +244,7 @@ POST /events  (multipart: image + lat/lon/description/org)
                ├─► priority_logic.py
                │      final_score = clamp(damage_score × (1 + S_total), 0.1, 10)
                │
-               └─► _event_store[event_id].update(score, gisDetails, gisStatus="done")
+        └─► Persist GIS + score updates in PostgreSQL tables
 
 [Frontend polls GET /events/{id} every 4s]
         │
@@ -338,14 +339,31 @@ npm install
 npm run dev
 ```
 
-### Docker (production)
+### Docker (recommended)
 
 ```bash
 docker-compose up --build
-# Frontend: http://localhost:5173
+# Frontend: http://localhost
 # Backend:  http://localhost:8000
 # API docs: http://localhost:8000/docs
 ```
+
+### Environment setup
+
+```bash
+cp .env.example .env
+```
+
+Required backend variables:
+
+- `DATABASE_URL` — Supabase Postgres URL (recommended) or local fallback
+- `SUPABASE_URL` — your Supabase project URL
+- `SUPABASE_KEY` — key with storage upload permission for `event-images`
+
+Important:
+- Never commit `.env`
+- For Supabase Postgres, use `?sslmode=require`
+- If DB password has special characters, URL-encode it
 
 ### Populate the database (full seed)
 
@@ -372,6 +390,13 @@ This seeds:
 Idempotent: safe to run multiple times; skips existing data.
 
 If an old Postgres volume was created before the schema lived only in SQLAlchemy models and you see missing-column errors, reset data once: `docker compose down -v`, then `up --build` and run `seed_db` again.
+
+### Supabase usage notes
+
+- **Database:** backend reads `DATABASE_URL` from environment; Docker Compose no longer hardcodes DB host.
+- **Storage:** uploaded event images are sent to Supabase Storage bucket `event-images`.
+- **DB image path field:** `event_images.image_url` now stores public Supabase URLs for new uploads.
+- **Legacy compatibility:** old `/uploads/...` paths remain valid historical records and are not auto-migrated.
 
 ### Re-generate seed_events.json (optional)
 
