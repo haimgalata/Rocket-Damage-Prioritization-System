@@ -6,8 +6,6 @@ PATCH /events/{event_id} — Status / hidden (auth).
 """
 
 import logging
-import os
-import uuid
 from typing import Annotated, Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, Query, UploadFile
@@ -18,20 +16,16 @@ from server.src.db.models import User
 from server.src.schemas.event import EventResponse
 from server.src.services.event_service import (
     create_event,
+    delete_event,
     get_event,
     get_event_detail,
     list_events_for_principal,
     patch_event,
     run_gis_and_update,
 )
+from server.src.services.storage.supabase_storage import SupabaseStorageError, upload_event_image
 
 logger = logging.getLogger(__name__)
-
-UPLOADS_DIR = os.environ.get(
-    "UPLOADS_DIR",
-    os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "uploads"),
-)
-os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -63,6 +57,7 @@ async def create_event_route(
     lon: float = Form(...),
     description: str = Form(...),
     organization_id: str = Form(...),
+    name: Optional[str] = Form(default=None),
     created_by: str = Form(default=""),  # ignored; always current user
     tags: Optional[str] = Form(default=""),
     image: Optional[UploadFile] = File(default=None),
@@ -80,11 +75,7 @@ async def create_event_route(
 
         image_url = ""
         if image and image_bytes:
-            ext = os.path.splitext(image.filename)[1] if image.filename else ".jpg"
-            filename = f"{uuid.uuid4().hex[:12]}{ext}"
-            with open(os.path.join(UPLOADS_DIR, filename), "wb") as f:
-                f.write(image_bytes)
-            image_url = f"/uploads/{filename}"
+            image_url = upload_event_image(image_bytes, image.filename, image.content_type)
 
         logger.info(f"[Event] New event at lat={lat}, lon={lon}")
         response, event_id, damage_score = create_event(
@@ -92,6 +83,7 @@ async def create_event_route(
             lon=lon,
             description=description,
             organization_id=organization_id,
+            name=name or "",
             created_by=str(current.id),  # always authenticated user
             tags=tags or "",
             image_bytes=image_bytes,
@@ -104,6 +96,8 @@ async def create_event_route(
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except SupabaseStorageError as e:
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         logger.exception("Event creation failed")
         raise HTTPException(status_code=500, detail=str(e))
@@ -135,6 +129,29 @@ async def get_event_route(
     if org_id is not None and not _can_access_org(current, int(org_id)):
         raise HTTPException(status_code=403, detail="Access denied")
     return event
+
+
+@router.delete("/{event_id}", status_code=204)
+async def delete_event_route(
+    event_id: str,
+    current: Annotated[User, Depends(get_current_user)],
+) -> None:
+    """Delete event and all its children. Admin and super_admin only."""
+    if not _can_change_status(current):
+        raise HTTPException(status_code=403, detail="Only admins can delete events")
+    existing = get_event(event_id)
+    if existing is None:
+        raise HTTPException(status_code=404, detail="Event not found")
+    org_id = int(existing["organizationId"])
+    if not _can_access_org(current, org_id):
+        raise HTTPException(status_code=403, detail="Access denied")
+    try:
+        eid = int(event_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid event id")
+    deleted = delete_event(eid)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Event not found")
 
 
 @router.patch("/{event_id}")

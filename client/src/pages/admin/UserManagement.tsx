@@ -16,7 +16,7 @@ import type { User as UserType } from '../../types';
 import { formatDate, getInitials } from '../../utils/helpers';
 import { useAuth } from '../../hooks';
 import { useEventStore } from '../../store/eventStore';
-import { createUserApi } from '../../api/auth';
+import { createUserApi, patchUserStatusApi } from '../../api/auth';
 
 function generateStrongPassword(): string {
   const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -237,10 +237,20 @@ export const UserManagement: React.FC = () => {
     closeModal();
   };
 
-  const toggleActive = (id: number) => {
-    setAllUsers((prev: UserType[]) =>
-      prev.map((u) => u.id === id ? { ...u, isActive: !u.isActive } : u)
-    );
+  const [toggleError, setToggleError] = useState<string | null>(null);
+
+  const toggleActive = async (id: number) => {
+    const target = allUsers.find((u) => u.id === id);
+    if (!target) return;
+    setToggleError(null);
+    try {
+      const updated = await patchUserStatusApi(id, !target.isActive);
+      setAllUsers((prev: UserType[]) =>
+        prev.map((u) => u.id === id ? { ...u, isActive: updated.isActive } : u)
+      );
+    } catch (e) {
+      setToggleError(e instanceof Error ? e.message : 'Failed to update user status');
+    }
   };
 
   const copyPassword = () => {
@@ -349,6 +359,13 @@ export const UserManagement: React.FC = () => {
                 <p className="text-2xl font-bold text-gray-900">{value}</p>
               </div>
             ))}
+          </div>
+        )}
+
+        {toggleError && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-start gap-2">
+            <span className="text-red-600 text-sm font-medium">{toggleError}</span>
+            <button onClick={() => setToggleError(null)} className="ml-auto text-red-400 hover:text-red-600 text-xs">✕</button>
           </div>
         )}
 

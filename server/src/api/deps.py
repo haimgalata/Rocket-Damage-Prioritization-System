@@ -47,6 +47,8 @@ def get_current_user(token: Annotated[str | None, Depends(get_bearer_token)]) ->
         )
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    if not getattr(user, "is_active", True):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account has been deactivated")
     return user
 
 

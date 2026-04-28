@@ -76,11 +76,13 @@ def _event_to_response(event: Event) -> dict[str, Any]:
     llm_explanation = analysis.explanation if analysis else ""
     ai_model = analysis.ai_model if analysis else "PrioritAI-v2.1"
 
+    creator = event.created_by_user
     return {
         "id": event.id,
         "name": event.name,
         "organizationId": event.organization_id,
         "createdBy": event.created_by,
+        "createdByName": creator.name if creator else str(event.created_by),
         "description": event.description,
         "location": {
             "lat": float(event.lat),
@@ -115,6 +117,7 @@ class EventRepository:
         lon: float,
         address: str,
         city: str,
+        name: str | None = None,
         description: str,
         organization_id: str | int,
         created_by: str | int,
@@ -145,6 +148,7 @@ class EventRepository:
             lon=Decimal(str(lon)),
             address=address or f"GPS {lat:.5f}, {lon:.5f}",
             city=city or "Israel",
+            name=name or None,
             description=description,
             organization_id=org_db_id,
             created_by=user_db_id,
@@ -328,6 +332,16 @@ class EventRepository:
             return None
         base["history"] = EventRepository._history_entries(db, eid)
         return base
+
+    @staticmethod
+    def delete_event(db: Session, event_id: int) -> bool:
+        """Delete event and cascade its children (images, gis, analysis, tags, history).
+        Returns True if the event existed and was deleted, False if not found."""
+        event = EventRepository.get_by_id(db, event_id)
+        if not event:
+            return False
+        db.delete(event)
+        return True
 
     @staticmethod
     def update_event_patch(

@@ -98,6 +98,19 @@ export type CreateUserPayload = {
   organizationId: number;
 };
 
+export async function patchUserStatusApi(userId: number, isActive: boolean): Promise<User> {
+  const res = await apiFetch(`/auth/users/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ is_active: isActive }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const detail = (data as { detail?: string }).detail;
+    throw new Error(typeof detail === 'string' ? detail : 'Failed to update user status');
+  }
+  return parseUser(data as Record<string, unknown>);
+}
+
 export async function createUserApi(payload: CreateUserPayload): Promise<User> {
   const res = await apiFetch('/auth/users', {
     method: 'POST',

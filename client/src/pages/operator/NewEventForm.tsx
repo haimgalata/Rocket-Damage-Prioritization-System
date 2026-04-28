@@ -260,6 +260,7 @@ export const NewEventForm: React.FC = () => {
       const formData = new window.FormData();
       formData.append('lat', String(loc.lat));
       formData.append('lon', String(loc.lng));
+      formData.append('name', data.name);
       formData.append('description', data.description);
       formData.append('organization_id', String(organizationIdNum));
       formData.append('created_by', String(user?.id ?? ''));

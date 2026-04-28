@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   AlertTriangle, CheckCircle2, Clock, TrendingUp,
-  Activity, RefreshCw, X, Eye, EyeOff, Map, Layers,
+  Activity, RefreshCw, X, Eye, EyeOff, Map, Layers, ChevronRight,
 } from 'lucide-react';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { Card } from '../../components/ui/Card';
@@ -14,8 +15,9 @@ import { useNotificationStore } from '../../store/authStore';
 import { useEventStore } from '../../store/eventStore';
 import type { DamageEvent } from '../../types';
 import { fetchEvents, patchEventApi } from '../../api/events';
-import { EventStatus } from '../../types';
-import { formatScore } from '../../utils/helpers';
+import { fetchOrganizations } from '../../api/organizations';
+import { EventStatus, UserRole } from '../../types';
+import { formatScore, getStatusLabel } from '../../utils/helpers';
 
 interface StatCardProps {
   label: string;
@@ -24,10 +26,14 @@ interface StatCardProps {
   iconBg: string;
   delta?: string;
   deltaPositive?: boolean;
+  onClick?: () => void;
 }
 
-const StatCard: React.FC<StatCardProps> = ({ label, value, icon, iconBg, delta, deltaPositive }) => (
-  <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+const StatCard: React.FC<StatCardProps> = ({ label, value, icon, iconBg, delta, deltaPositive, onClick }) => (
+  <div
+    onClick={onClick}
+    className={`bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer hover:border-blue-300' : ''}`}
+  >
     <div className="flex items-center justify-between mb-3">
       <p className="text-sm font-medium text-gray-500">{label}</p>
       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconBg}`}>
@@ -39,6 +45,11 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, icon, iconBg, delta, 
       <p className={`text-xs mt-1.5 flex items-center gap-1 ${deltaPositive ? 'text-green-600' : 'text-red-500'}`}>
         <TrendingUp className="w-3.5 h-3.5" />
         {delta}
+      </p>
+    )}
+    {onClick && (
+      <p className="text-xs mt-1.5 text-blue-500 flex items-center gap-0.5">
+        View events <ChevronRight className="w-3 h-3" />
       </p>
     )}
   </div>
@@ -54,16 +65,23 @@ export const Dashboard: React.FC = () => {
 
   const [selectedEvent, setSelectedEvent] = useState<DamageEvent | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [statusModal, setStatusModal] = useState<{ label: string; events: DamageEvent[] } | null>(null);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [showHidden, setShowHidden] = useState(false);
   const [mapMode, setMapMode] = useState<MapMode>('pins');
   const [mapFocusEvent, setMapFocusEvent] = useState<DamageEvent | null>(null);
+  const [mapOrgFilter, setMapOrgFilter] = useState<number | null>(null);
+  const [organizations, setOrganizations] = useState<{ id: number; name: string }[]>([]);
 
   useEffect(() => {
     const load = async () => {
       try {
         const data = await fetchEvents();
         setEvents(data);
+        if (user?.role === UserRole.SUPER_ADMIN) {
+          const orgsData = await fetchOrganizations();
+          setOrganizations(orgsData.map((o) => ({ id: o.id, name: o.name })));
+        }
       } catch { /* backend unavailable */ }
     };
     load();
@@ -86,7 +104,10 @@ export const Dashboard: React.FC = () => {
     ? statusFiltered
     : statusFiltered.filter((e) => !e.hidden);
 
-  const mapEvents = orgEvents.filter((e) => !e.hidden);
+  const allMapEvents = orgEvents.filter((e) => !e.hidden);
+  const mapEvents = user?.role === UserRole.SUPER_ADMIN && mapOrgFilter !== null
+    ? allMapEvents.filter((e) => e.organizationId === mapOrgFilter)
+    : allMapEvents;
 
   const total       = orgEvents.length;
   const pending     = orgEvents.filter((e) => e.status === EventStatus.NEW).length;
@@ -127,16 +148,20 @@ export const Dashboard: React.FC = () => {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Total Events" value={total}
-            icon={<Activity className="w-5 h-5 text-blue-600" />} iconBg="bg-blue-100" />
+            icon={<Activity className="w-5 h-5 text-blue-600" />} iconBg="bg-blue-100"
+            onClick={() => setStatusModal({ label: 'All Events', events: orgEvents })} />
           <StatCard label="New" value={pending}
             icon={<Clock className="w-5 h-5 text-yellow-600" />} iconBg="bg-yellow-100"
-            delta={criticalCount > 0 ? `${criticalCount} critical` : undefined} deltaPositive={false} />
+            delta={criticalCount > 0 ? `${criticalCount} critical` : undefined} deltaPositive={false}
+            onClick={() => setStatusModal({ label: getStatusLabel(EventStatus.NEW), events: orgEvents.filter(e => e.status === EventStatus.NEW) })} />
           <StatCard label="In Progress" value={inProgress}
-            icon={<RefreshCw className="w-5 h-5 text-indigo-600" />} iconBg="bg-indigo-100" />
+            icon={<RefreshCw className="w-5 h-5 text-indigo-600" />} iconBg="bg-indigo-100"
+            onClick={() => setStatusModal({ label: getStatusLabel(EventStatus.IN_PROGRESS), events: orgEvents.filter(e => e.status === EventStatus.IN_PROGRESS) })} />
           <StatCard label="Done" value={completed}
             icon={<CheckCircle2 className="w-5 h-5 text-green-600" />} iconBg="bg-green-100"
             delta={total > 0 ? `${Math.round((completed / total) * 100)}% resolution rate` : undefined}
-            deltaPositive />
+            deltaPositive
+            onClick={() => setStatusModal({ label: getStatusLabel(EventStatus.DONE), events: orgEvents.filter(e => e.status === EventStatus.DONE) })} />
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
@@ -148,19 +173,25 @@ export const Dashboard: React.FC = () => {
             </div>
             <p className="text-blue-200 text-xs mt-1">Out of 10</p>
           </div>
-          <div className="bg-gradient-to-br from-red-500 to-rose-600 rounded-xl p-5 text-white shadow-sm">
+          <button
+            onClick={() => setStatusModal({ label: 'Critical Events (≥7.5)', events: orgEvents.filter(e => e.priorityScore >= 7.5) })}
+            className="bg-gradient-to-br from-red-500 to-rose-600 rounded-xl p-5 text-white shadow-sm text-left hover:opacity-90 transition cursor-pointer"
+          >
             <p className="text-red-100 text-sm mb-1">Critical Events (≥7.5)</p>
             <p className="text-4xl font-bold">{criticalCount}</p>
             <p className="text-red-200 text-xs mt-2 flex items-center gap-1">
-              <AlertTriangle className="w-3.5 h-3.5" /> Require immediate attention
+              <AlertTriangle className="w-3.5 h-3.5" /> Click to view events
             </p>
-          </div>
+          </button>
           <div className="bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl p-5 text-white shadow-sm flex flex-col justify-between">
-            <div>
+            <button
+              onClick={() => hiddenCount > 0 && setStatusModal({ label: 'Hidden Events', events: orgEvents.filter(e => e.hidden) })}
+              className={`text-left ${hiddenCount > 0 ? 'cursor-pointer hover:opacity-90' : 'cursor-default'} transition`}
+            >
               <p className="text-slate-400 text-sm mb-1">Hidden Events</p>
               <p className="text-4xl font-bold">{hiddenCount}</p>
-              <p className="text-slate-400 text-xs mt-1">Filtered from view</p>
-            </div>
+              <p className="text-slate-400 text-xs mt-1">{hiddenCount > 0 ? 'Click to view' : 'Filtered from view'}</p>
+            </button>
             {hiddenCount > 0 && (
               <button onClick={() => setShowHidden((v) => !v)}
                 className="mt-3 flex items-center gap-2 text-sm text-slate-300 hover:text-white transition">
@@ -176,19 +207,33 @@ export const Dashboard: React.FC = () => {
           subtitle={mapMode === 'pins' ? 'Click a row to zoom in · color-coded by priority' : 'Damage density heatmap'}
           noPadding
           headerRight={
-            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
-              <button onClick={() => setMapMode('pins')}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
-                  mapMode === 'pins' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-                }`}>
-                <Map className="w-3.5 h-3.5" /> Pins
-              </button>
-              <button onClick={() => setMapMode('heatmap')}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
-                  mapMode === 'heatmap' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
-                }`}>
-                <Layers className="w-3.5 h-3.5" /> Heatmap
-              </button>
+            <div className="flex items-center gap-2">
+              {user?.role === UserRole.SUPER_ADMIN && organizations.length > 0 && (
+                <select
+                  value={mapOrgFilter ?? ''}
+                  onChange={(e) => setMapOrgFilter(e.target.value === '' ? null : Number(e.target.value))}
+                  className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-300"
+                >
+                  <option value="">National view</option>
+                  {organizations.map((org) => (
+                    <option key={org.id} value={org.id}>{org.name}</option>
+                  ))}
+                </select>
+              )}
+              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                <button onClick={() => setMapMode('pins')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                    mapMode === 'pins' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  }`}>
+                  <Map className="w-3.5 h-3.5" /> Pins
+                </button>
+                <button onClick={() => setMapMode('heatmap')}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                    mapMode === 'heatmap' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  }`}>
+                  <Layers className="w-3.5 h-3.5" /> Heatmap
+                </button>
+              </div>
             </div>
           }
         >
@@ -284,6 +329,43 @@ export const Dashboard: React.FC = () => {
         size="lg"
       >
         {selectedEvent && <EventDetailView event={selectedEvent} />}
+      </Modal>
+
+      <Modal
+        isOpen={statusModal !== null}
+        onClose={() => setStatusModal(null)}
+        title={statusModal ? `${statusModal.label} (${statusModal.events.length})` : ''}
+        size="md"
+      >
+        {statusModal && (
+          <div className="space-y-1 max-h-96 overflow-y-auto">
+            {statusModal.events.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-6">No events in this status.</p>
+            ) : (
+              statusModal.events.map((ev) => (
+                <Link
+                  key={ev.id}
+                  to={`/events/${ev.id}`}
+                  onClick={() => setStatusModal(null)}
+                  className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-blue-50 transition group"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-gray-900 group-hover:text-blue-700">
+                      {ev.name ?? `Event #${String(ev.id).slice(-4)}`}
+                    </p>
+                    <p className="text-xs text-gray-500">{ev.location.address}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-semibold ${ev.priorityScore >= 7.5 ? 'text-red-600' : ev.priorityScore >= 5 ? 'text-orange-500' : 'text-green-600'}`}>
+                      {ev.priorityScore.toFixed(1)}
+                    </span>
+                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+        )}
       </Modal>
     </PageContainer>
   );

@@ -30,10 +30,8 @@ services:
       - .env
     environment:
       - PYTHONUNBUFFERED=1
-      - DATABASE_URL=postgresql://prioritai:prioritai@postgres:5432/prioritai
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     volumes:
       - ./uploads:/app/uploads
       - ./server/cache:/app/server/cache

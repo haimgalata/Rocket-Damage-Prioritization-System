@@ -10,6 +10,7 @@ import { Badge } from '../ui/Badge';
 import {
   getPriorityLabel,
   getPriorityColor,
+  getStatusLabel,
   formatDate,
   truncateText,
 } from '../../utils/helpers';
@@ -159,11 +160,15 @@ export const EventTable: React.FC<EventTableProps> = ({
               const isOwner       = currentUserId ? currentUserId === event.createdBy : false;
               const priorityLabel = getPriorityLabel(event.priorityScore);
 
+              // createdByName comes from the API join — show for every role
+              const creatorName = event.createdByName
+                ?? (userNameMap[event.createdBy] || null);
               let creatorLine: React.ReactNode = null;
-              if (isAdmin) {
-                const name = userNameMap[event.createdBy] ?? String(event.createdBy);
-                creatorLine = <span className="text-gray-400 text-xs">By: {name}</span>;
-              } else if (isOperator && isOwner) {
+              if (creatorName) {
+                creatorLine = isOwner
+                  ? <span className="text-xs"><span className="text-gray-400">By: {creatorName}</span> <span className="text-blue-500 font-medium">(You)</span></span>
+                  : <span className="text-gray-400 text-xs">By: {creatorName}</span>;
+              } else if (isOwner) {
                 creatorLine = <span className="text-blue-500 text-xs font-medium">(You)</span>;
               }
 
@@ -182,7 +187,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                           onClick={() => onSelectEvent?.(event)}
                           className="font-medium text-blue-700 hover:text-blue-900 hover:underline text-xs text-left cursor-pointer transition"
                         >
-                          {event.name ?? `Event #${String(event.id).slice(-3)}`}
+                          {event.name || event.location.address || `Event #${String(event.id).slice(-3)}`}
                         </button>
                         <p className="text-gray-500 text-xs">{event.location.address}</p>
                         {orgMap[event.organizationId] && (
@@ -264,7 +269,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                       </select>
                     ) : (
                       <Badge variant={statusVariantMap[event.status]}>
-                        {event.status.replace(/_/g, ' ')}
+                        {getStatusLabel(event.status)}
                       </Badge>
                     )}
                   </td>
@@ -280,23 +285,23 @@ export const EventTable: React.FC<EventTableProps> = ({
 
                   <td className={tdClass}>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Link
-                        to={`/events/${event.id}`}
-                        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium transition"
-                      >
-                        <Eye className="w-4 h-4" />
-                        View
-                      </Link>
-
                       <button
                         type="button"
                         onClick={() => onSelectEvent?.(event)}
                         className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 font-medium transition cursor-pointer"
                       >
-                        Quick
+                        <Eye className="w-3.5 h-3.5" />
+                        Quick View
                       </button>
 
-                      {isOwner && onEditEvent && (
+                      <Link
+                        to={`/events/${event.id}`}
+                        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium transition"
+                      >
+                        Event Details
+                      </Link>
+
+                      {isAdmin && onEditEvent && (
                         <button
                           type="button"
                           onClick={() => onEditEvent(event)}
