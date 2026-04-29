@@ -28,4 +28,4 @@ COPY . .
 # Uvicorn is started from /app so that `server.src.main` resolves correctly
 # as a Python package (server/__init__.py must exist).
 EXPOSE 8000
-CMD ["uvicorn", "server.src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
