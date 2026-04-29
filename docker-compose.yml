@@ -19,9 +19,10 @@ services:
       retries: 5
 
   backend:
+    # Build context must be ./server so Dockerfile COPY requirements.txt / COPY . ./server match [server/Dockerfile](server/Dockerfile).
     build:
-      context: .
-      dockerfile: server/Dockerfile
+      context: ./server
+      dockerfile: Dockerfile
     container_name: prioritai-backend
     restart: unless-stopped
     ports:

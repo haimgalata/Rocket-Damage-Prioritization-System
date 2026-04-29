@@ -1,0 +1,23 @@
+# Render Blueprint — PrioritAI FastAPI backend only.
+# Deploy: Dashboard → Blueprints → New Blueprint Instance (select repo), or attach this file when creating a Web Service.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# After first deploy, set secret env vars in the Render Dashboard (Blueprint sync: false placeholders below).
+
+services:
+  - type: web
+    name: prioritai-backend
+    runtime: docker
+    rootDir: server
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: ./server
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
