@@ -15,7 +15,7 @@ WORKDIR /app
 
 # Install Python dependencies before copying source so this layer is cached
 # and only invalidated when requirements.txt changes.
-COPY server/requirements.txt ./requirements.txt
+COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire server package.  This includes:
