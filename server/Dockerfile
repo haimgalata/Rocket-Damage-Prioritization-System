@@ -23,7 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 #   server/data/        — CBS shapefiles and population Excel data
 #   server/src/core/rocket_damage_model.keras — Keras model (must be present locally)
 #   server/__init__.py  — makes `server` an importable Python package
-COPY server/ ./server/
+COPY . .
 
 # Uvicorn is started from /app so that `server.src.main` resolves correctly
 # as a Python package (server/__init__.py must exist).
