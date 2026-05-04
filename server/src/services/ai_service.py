@@ -1,5 +1,5 @@
 """
-AI service — calls PrioritAI ML microservice (TensorFlow) over HTTP.
+AI service — calls PrioritAI ML microservice over HTTP.
 """
 
 from __future__ import annotations
