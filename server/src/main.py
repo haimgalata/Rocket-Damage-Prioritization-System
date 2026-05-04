@@ -26,6 +26,32 @@ os.makedirs(UPLOADS_DIR, exist_ok=True)
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+_DEFAULT_CORS_ORIGINS: list[str] = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "http://localhost:5176",
+    "http://localhost:5177",
+    "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://localhost",
+    "http://127.0.0.1",
+    "https://rocket-damage-prioritization-system.onrender.com",
+]
+
+
+def _cors_allow_origins() -> list[str]:
+    """Default dev + production static origins; extend with CORS_ORIGINS (comma-separated)."""
+    extra = os.environ.get("CORS_ORIGINS", "")
+    seen = set(_DEFAULT_CORS_ORIGINS)
+    out = list(_DEFAULT_CORS_ORIGINS)
+    for raw in extra.split(","):
+        origin = raw.strip()
+        if origin and origin not in seen:
+            seen.add(origin)
+            out.append(origin)
+    return out
+
 
 def _ensure_db_ready() -> None:
     """Create tables and seed reference data if empty."""
@@ -59,13 +85,7 @@ app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173", "http://localhost:5174",
-        "http://localhost:5175", "http://localhost:5176",
-        "http://localhost:5177", "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://localhost", "http://127.0.0.1",
-    ],
+    allow_origins=_cors_allow_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

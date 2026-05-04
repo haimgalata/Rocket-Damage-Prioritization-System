@@ -4,8 +4,11 @@
 #
 # After first deploy, set secret env vars in the Render Dashboard (Blueprint sync: false placeholders below).
 #
-# Frontend: set VITE_API_URL to your live backend HTTPS origin (e.g. https://prioritai-backend.onrender.com),
-# no trailing slash. Required at build time so the browser bundle calls the correct API.
+# Frontend: Node 20+ required (Tailwind v4 native bindings, Vite 8, react-router 7). Set NODE_VERSION in Dashboard if not using Blueprint.
+# Set VITE_API_URL to your live backend HTTPS origin (e.g. https://prioritai-backend-7f69.onrender.com),
+# no trailing slash. Required at build time so the browser bundle calls the correct API; rebuild static site after changing.
+#
+# Backend CORS: production static origin is baked into code; optional CORS_ORIGINS adds extra origins (comma-separated, no spaces in values).
 
 services:
   - type: web
@@ -29,17 +32,22 @@ services:
         sync: false
       - key: ML_SERVICE_API_KEY
         sync: false
+      # Optional comma-separated extra origins (e.g. preview deploys). Production static origin is in server/src/main.py.
+      - key: CORS_ORIGINS
+        sync: false
 
   - type: web
     name: prioritai-frontend
     runtime: static
     rootDir: client
     buildCommand: npm ci && npm run build
-    staticPublishPath: ./client/dist
+    staticPublishPath: dist
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: VITE_API_URL
         sync: false
