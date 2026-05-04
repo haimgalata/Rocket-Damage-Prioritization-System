@@ -5,7 +5,7 @@
 # After first deploy, set secret env vars in the Render Dashboard (Blueprint sync: false placeholders below).
 #
 # Frontend: Node 20+ required (Tailwind v4 native bindings, Vite 8, react-router 7). Set NODE_VERSION in Dashboard if not using Blueprint.
-# Set VITE_API_URL to your live backend HTTPS origin (e.g. https://prioritai-backend-7f69.onrender.com),
+# Set VITE_API_URL to your live backend HTTPS origin (e.g. https://prioritai-backend.onrender.com),
 # no trailing slash. Required at build time so the browser bundle calls the correct API; rebuild static site after changing.
 #
 # Backend CORS: production static origin is baked into code; optional CORS_ORIGINS adds extra origins (comma-separated, no spaces in values).
@@ -27,7 +27,7 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
-      # Example: https://prioritai-ml-973722445460.europe-west1.run.app (set value in Dashboard)
+      # Example: https://your-ml-service.<region>.run.app (set value in Dashboard)
       - key: ML_SERVICE_URL
         sync: false
       - key: ML_SERVICE_API_KEY

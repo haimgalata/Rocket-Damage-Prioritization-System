@@ -36,9 +36,6 @@ cache/
 server/cache/
 **/osmnx_cache/
 
-# ── Uploads ───────────────────────────────────────────────────────────────────
-server/uploads/
-
 # ── Node / Frontend ───────────────────────────────────────────────────────────
 node_modules/
 client/dist/
@@ -83,12 +80,16 @@ logs/
 # ── Docker runtime volumes (if stored locally) ────────────────────────────────
 docker-volumes/
 
-# ── Uploads ───────────────────────────────────────────────────────────────────
-# Allow demo images to be committed for local setup
+# ── Uploads (repo root + server) ──────────────────────────────────────────────
+# Ignore arbitrary uploads; allow only seed/demo assets referenced by server/seed_events.json
+# and placeholder fallback (see server/src/seed_db.py).
+server/uploads/
 uploads/*
-!uploads/*.jpg
-!uploads/*.png
 !uploads/.gitkeep
+!uploads/placeholder_1.jpg
+!uploads/tel_aviv_*.jpg
+!uploads/jerusalem_*.jpg
+!uploads/south_*.jpg
 
 # ── Claude Code ───────────────────────────────────────────────────────────────
 .claude/

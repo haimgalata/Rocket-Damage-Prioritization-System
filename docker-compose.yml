@@ -18,6 +18,21 @@ services:
       timeout: 5s
       retries: 5
 
+  ml-service:
+    build:
+      context: ./ml-service
+      dockerfile: Dockerfile
+    container_name: prioritai-ml
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/health')"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
   backend:
     # Build context must be ./server so Dockerfile COPY requirements.txt / COPY . ./server match [server/Dockerfile](server/Dockerfile).
     build:
@@ -31,8 +46,13 @@ services:
       - .env
     environment:
       - PYTHONUNBUFFERED=1
+      # Use in-cluster ML container; overrides ML_SERVICE_URL from .env for Compose-only setups.
+      - ML_SERVICE_URL=http://ml-service:8080
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      ml-service:
+        condition: service_healthy
     volumes:
       - ./uploads:/app/uploads
       - ./server/cache:/app/server/cache

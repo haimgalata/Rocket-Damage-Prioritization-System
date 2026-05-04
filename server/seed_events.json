@@ -12,7 +12,7 @@
       "address": "Dizengoff Center Strike",
       "city": "Tel Aviv"
     },
-    "imageUr l": "/uploads/tel_aviv_heavy_1.jpg",
+    "imageUrl": "/uploads/tel_aviv_heavy_1.jpg",
     "damageClassification": "Heavy",
     "damageScore": 7,
     "priorityScore": 10.0,

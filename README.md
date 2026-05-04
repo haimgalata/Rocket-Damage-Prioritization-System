@@ -1,513 +1,204 @@
-# PrioritAI — Project Architecture Guide
+# PrioritAI
 
-> **Goal of this document:** A developer or partner who has never seen this codebase should be able to locate any piece of logic within 5 minutes.
+Rocket damage **prioritization** for municipal operations: field photos are classified for severity, combined with **geographic context** (critical infrastructure and population), and surfaced on a **ranked dashboard** for response planning.
 
----
-
-## Table of Contents
-
-1. [System Overview](#1-system-overview)
-2. [Directory Tree](#2-directory-tree)
-3. [Backend — `/server`](#3-backend--server)
-4. [Frontend — `/client`](#4-frontend--client)
-5. [Data Flow: End-to-End Request](#5-data-flow-end-to-end-request)
-6. [Role Model](#6-role-model)
-7. [Priority Score Formula](#7-priority-score-formula)
-8. [How to Add a New Feature](#8-how-to-add-a-new-feature)
-9. [Running the Project](#9-running-the-project)
-10. [Database Architecture](#10-database-architecture)
+> **Note:** The vision model is **experimental** and expected to change across releases. Treat scores as decision-support, not ground truth.
 
 ---
 
-## 1. System Overview
+## Project overview
 
-PrioritAI is a **rocket damage prioritization system** used by three tiers of municipal authorities (Super Admin, Admin, Operator). When a field operator photographs a damaged building, the system:
-
-1. Classifies the damage severity using a **Keras CNN model** (Heavy / Light)
-2. Runs a **GIS pipeline** (OpenStreetMap + CBS demographics) to measure proximity to hospitals, schools, roads, military sites, and population density
-3. Computes a **priority score** (0–10) using a weighted piecewise formula
-4. Returns the event to the dashboard ranked by urgency
-
-**Stack:** FastAPI (Python) · React + TypeScript · Leaflet maps · Zustand state · Docker + Nginx · Supabase PostgreSQL · Supabase Storage
+PrioritAI supports a three-tier role model (**Super Admin**, **Admin**, **Operator**). Operators submit damage events (image + GPS). The API runs **damage classification** immediately, persists the event, then completes **GIS enrichment** asynchronously. **Admins** manage visibility and workflow status; **Super Admins** work across organizations.
 
 ---
 
-## 2. Directory Tree
+## System architecture
 
+```mermaid
+flowchart LR
+  subgraph client [Web client]
+    React[React TypeScript SPA]
+  end
+  subgraph backend [Backend]
+    API[FastAPI API]
+    GIS[GIS pipeline OSM CBS]
+    DB[(PostgreSQL)]
+    Storage[Supabase Storage optional]
+  end
+  subgraph ml [ML service]
+    MLAPI[FastAPI predict]
+    TF[TensorFlow Keras]
+  end
+  React -->|JWT REST| API
+  API -->|HTTP predict raw image| MLAPI
+  MLAPI --> TF
+  API --> GIS
+  API --> DB
+  API --> Storage
 ```
-Rocket-Damage-Prioritization-System/
-│
-├── docker-compose.yml          # Orchestrates backend + frontend containers
-├── uploads/                    # Local/dev images (legacy paths + placeholders)
-│   ├── tel_aviv_heavy_1.jpg
-│   ├── jerusalem_heavy_1.jpg
-│   └── ...                     # 20 seed images + any user-uploaded files
-│
-├── server/                     # Python FastAPI backend
-│   ├── Dockerfile
-│   ├── requirements.txt
-│   ├── seed_events.json        # Pre-computed seed data (20 events with real GIS scores)
-│   ├── data/                   # CBS demographic shapefiles + Excel population data
-│   │   ├── statistical_areas.shp
-│   │   └── population_2022.xlsx
-│   ├── tests/                  # Integration + unit tests
-│   └── src/                    # All application code (see §3)
-│
-└── client/                     # React + TypeScript frontend
-    ├── Dockerfile
-    ├── nginx.conf              # Nginx reverse-proxy config (for Docker deployment)
-    ├── public/
-    │   └── test-images/        # Images used by the "test templates" in the Add Event form
-    └── src/                    # All application code (see §4)
-```
+
+- **Frontend (`client/`):** Vite + React + TypeScript; calls the API using `VITE_API_URL` (local dev: backend origin; Docker: `/api` behind Nginx).
+- **Backend (`server/`):** FastAPI, SQLAlchemy models, JWT auth, event CRUD, GIS orchestration, priority scoring, optional Groq-backed narrative explanations.
+- **ML service (`ml-service/`):** Separate container or Cloud Run service exposing `POST /predict` (raw image body) and `GET /health`. Keeps TensorFlow **out of** the main API image ([server/Dockerfile](server/Dockerfile)).
+- **Database:** PostgreSQL (local Docker or hosted, e.g. Supabase). Schema is created via SQLAlchemy `create_all` (no Alembic migrations in-repo).
+- **Object storage:** Event images can be uploaded to Supabase Storage (`event-images` bucket); legacy `/uploads/` paths may still exist for older rows.
+
+Deeper file-level maps, formulas, and DB tables: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ---
 
-## 3. Backend — `/server`
+## Data flow (pipeline)
 
-### 3.1 Source tree
-
-```
-server/src/
-│
-├── main.py                         # FastAPI app factory + lifespan startup
-│
-├── api/
-│   └── routes/
-│       ├── auth.py                 # POST /auth/login · GET /auth/users
-│       ├── organizations.py        # GET|POST /organizations · GET /settlements
-│       ├── events.py               # POST /events · GET /events · GET /events/{id}
-│       ├── analyze.py              # POST /analyze  (raw pipeline, used by tests)
-│       └── health.py               # GET /health
-│
-├── core/
-│   ├── ai_logic.py                 # Keras model loader + inference
-│   ├── priority_logic.py           # Piecewise scoring formula
-│   └── rocket_damage_model.keras   # Trained CNN weights (tracked via Git LFS)
-│
-├── schemas/
-│   ├── event.py                    # EventResponse Pydantic model
-│   └── analysis.py                 # AnalysisResponse Pydantic model
-│
-├── services/
-│   ├── ai_service.py               # Thin wrapper: calls ai_logic, returns dict
-│   ├── gis_service.py              # Thin wrapper: calls gis_pipeline, returns dict
-│   ├── priority_service.py         # Thin wrapper: calls priority_logic + explanation builder
-│   └── gis/
-│       ├── gis_pipeline.py         # Orchestrates all 5 GIS sub-queries + coordinate cache
-│       ├── demographics/
-│       │   └── population_density.py   # CBS shapefile lookup (preloaded at startup)
-│       └── proximity/
-│           ├── osm_query.py            # Overpass API wrapper with fallback endpoints
-│           ├── closest_hospital.py
-│           ├── closest_school.py
-│           ├── closest_road.py
-│           └── closest_military_base.py
-│
-├── seed_db.py                      # CLI script: populates DB (settlements, orgs, users, events); backfills event names
-└── seed_data.py                    # CLI script: runs GIS for 20 events → seed_events.json
-```
-
-### 3.2 Key files explained
-
-| File | What it does |
-|---|---|
-| `main.py` | Creates the FastAPI app. On startup: loads the Keras model, preloads CBS population data, and ensures DB schema/reference rows exist. Mounts `/uploads` for backward compatibility with legacy local image paths. |
-| `api/routes/events.py` | `POST /events` runs AI classification immediately, uploads the image to Supabase Storage (`event-images`), stores the returned public URL in DB, and queues GIS as a `BackgroundTask`. `GET /events` and `GET /events/{id}` read from PostgreSQL via repositories/services. |
-| `api/routes/analyze.py` | Legacy endpoint used by integration tests. Runs the full AI+GIS+priority pipeline synchronously and returns raw intermediate values. |
-| `core/ai_logic.py` | Loads `rocket_damage_model.keras` once at startup (via `preload_model()`). `run_inference(image_bytes)` preprocesses the image and returns `{"classification": "Heavy"|"Light", "damage_score": 7|3}`. |
-| `core/priority_logic.py` | Contains `calculate_piecewise_value(distance)` and `get_final_priority_score(damage_score, gis_features)`. The formula is `clamp(damage_score × (1 + S_total), 0.1, 10.0)` where `S_total` is a weighted sum of 5 GIS coefficients. |
-| `services/gis/gis_pipeline.py` | Calls all five proximity functions in sequence and the population density lookup. Caches results by rounded coordinates `(lat±0.001°, lon±0.001°)` to avoid duplicate Overpass queries. |
-| `services/gis/proximity/osm_query.py` | Wraps `osmnx.features_from_point()` with retry logic and automatic failover to two backup Overpass API endpoints if the primary returns HTTP 429. |
-| `services/gis/demographics/population_density.py` | Joins CBS statistical-area shapefiles to population Excel data at startup (`preload_population_data()`). Returns people/km² for any coordinate via a spatial point-in-polygon lookup. |
-| `seed_data.py` | Standalone CLI script. Defines 20 raw event locations, runs each through the full GIS+priority pipeline, and writes the result to `server/seed_events.json`. Run with: `python -m server.src.seed_data` |
+1. **Submit event** — `POST /events` (multipart): coordinates, text, optional tags, optional image (stored per your storage configuration).
+2. **Classification** — Backend sends image bytes to **ML service** `POST /predict`. Response: `Heavy` / `Light`, integer **damage_score** (e.g. 7 / 3), `confidence`. If the service is down, a **randomized fallback** is used ([server/src/core/ai_fallback.py](server/src/core/ai_fallback.py)) and should be treated as non-production behavior.
+3. **Persist** — Event + initial analysis row; `gisStatus` indicates pending GIS.
+4. **GIS (background)** — For the event coordinates: distances to hospital, school, road, military/strategic feature (OSM via Overpass/osmnx patterns), plus **population density** from **CBS** statistical areas + population tables. Results cached per rounded lat/lon.
+5. **Priority** — Weighted formula combines damage score with GIS-derived multiplier; clamped score and explanation text updated in the database.
+6. **Dashboard** — Clients poll `GET /events/{id}` until GIS completes; lists and maps use `GET /events`.
 
 ---
 
-## 4. Frontend — `/client`
+## Tech stack
 
-### 4.1 Source tree
-
-```
-client/src/
-│
-├── main.tsx                    # React DOM entry point
-├── App.tsx                     # Router + role-based route guards
-├── index.css                   # Global Tailwind base styles
-│
-├── config/
-│   ├── api.ts                  # API_BASE_URL constant (reads VITE_API_URL env var)
-│   └── testTemplates.ts        # Pre-filled event scenarios for the Add Event form
-│
-├── types/
-│   └── index.ts                # All shared TypeScript interfaces and enums
-│                               # (DamageEvent, User, Organization, EventStatus, UserRole…)
-│
-├── store/
-│   └── authStore.ts            # Three Zustand stores: Auth, Event, Notification
-│                               # Event store holds all events client-side after backend fetch
-│
-├── hooks/
-│   └── index.ts                # useAuth() — reads from authStore, exposes user + logout
-│
-├── utils/
-│   └── helpers.ts              # Pure formatting functions:
-│                               # formatDate, formatScore, getPriorityLabel,
-│                               # getPriorityColor, getInitials, truncateText
-│
-├── pages/
-│   ├── auth/
-│   │   └── Login.tsx           # Login form with demo credential presets
-│   │
-│   ├── admin/
-│   │   ├── Dashboard.tsx       # Admin overview: stats cards (Critical/Hidden clickable) + map + event table; org filter for Super Admin
-│   │   ├── EventsPage.tsx      # Full event list with filters, heatmap toggle, hide/show
-│   │   ├── UserManagement.tsx  # Create / edit / deactivate users; expandable event brief
-│   │   └── ModelRunner.tsx     # Manual image upload → raw AI+GIS pipeline test
-│   │
-│   ├── operator/
-│   │   ├── OperatorDashboard.tsx   # Operator's org-scoped dashboard
-│   │   ├── NewEventForm.tsx        # Main event submission form; polls GIS status
-│   │   └── FieldMapView.tsx        # Full-screen map view for field use
-│   │
-│   ├── super-admin/
-│   │   ├── SuperAdminDashboard.tsx # Cross-org summary: stats cards (clickable), status modal
-│   │   └── OrgManagement.tsx   # Lists all organizations; live event/user stats; create org
-│   │
-│   └── UserProfile.tsx         # User profile + settings page
-│
-├── components/
-│   ├── layout/
-│   │   ├── Sidebar.tsx         # Navigation sidebar; role-aware menu items
-│   │   ├── Navbar.tsx          # Top bar: notifications dropdown + user menu
-│   │   └── PageContainer.tsx   # Wraps every page with scroll area + Navbar
-│   │
-│   ├── events/
-│   │   ├── EventTable.tsx      # Sortable/searchable table; shows event name, createdByName, role-aware columns
-│   │   ├── EventDetailView.tsx # Full event detail card: image, GIS panel, explanation
-│   │   ├── EditEventModal.tsx  # Modal form (react-hook-form + zod) to edit name/desc/tags
-│   │   └── AIExplanationBox.tsx # Renders the llmExplanation text with formatting
-│   │
-│   ├── maps/
-│   │   ├── MapContainer.tsx    # Leaflet map; supports "pins" and "heatmap" modes
-│   │   ├── EventMarker.tsx     # Colored circle marker; click opens event detail
-│   │   └── LocationPicker.tsx  # Draggable pin used in the NewEventForm to pick coordinates
-│   │
-│   └── ui/                     # Reusable design-system primitives
-│       ├── Badge.tsx           # Status / severity pill
-│       ├── Button.tsx          # Primary / ghost / danger / outline variants
-│       ├── Card.tsx            # White card container with optional header slot
-│       ├── Input.tsx           # Labeled text input with error state
-│       └── Modal.tsx           # Accessible dialog with backdrop
-```
-
-### 4.2 Key files explained
-
-| File | What it does |
-|---|---|
-| `App.tsx` | Defines all routes. `ProtectedRoute` checks authentication and `allowedRoles`. On mount, restores session from `localStorage`. `RootRedirect` sends each role to its home page. |
-| `store/authStore.ts` | Three independent Zustand stores. **AuthStore** holds the logged-in user and org. **EventStore** is the single source of truth for all events in the UI — every dashboard reads from it. **NotificationStore** manages the bell dropdown. |
-| `pages/operator/NewEventForm.tsx` | Submits a `multipart/form-data` POST to `/events`. After the backend responds (with `gisStatus: "pending"`), the component polls `GET /events/{id}` every 4 seconds until `gisStatus` becomes `"done"`, then calls `updateEvent()` in the store. |
-| `config/api.ts` | Exports `API_BASE_URL`. In local dev this is `http://localhost:8000`; in Docker it is `/api` (proxied by Nginx). All `fetch()` calls in the app use this constant. |
-| `types/index.ts` | Single source of truth for all types. `DamageEvent` is the central interface (includes `createdByName?: string`). `UserRole` (`SUPER_ADMIN`, `ADMIN`, `OPERATOR`) and `EventStatus` (`new`, `in_progress`, `done`) are the key enums used for access control and filtering. |
+| Layer | Technologies |
+|--------|----------------|
+| API | Python 3.11, FastAPI, Uvicorn, SQLAlchemy 2, psycopg2, Pydantic |
+| Auth | JWT (`JWT_SECRET`) |
+| GIS / geo | OSM / Overpass (via project wrappers), CBS shapefile + Excel, Shapely / pyogrio ecosystem |
+| ML | TensorFlow Keras (`.keras` weights), PIL, NumPy |
+| Frontend | React 18+, TypeScript, Vite, Tailwind, Leaflet, Zustand |
+| Ops | Docker Compose, Nginx (frontend image), Render blueprint ([render.yaml](render.yaml)) |
 
 ---
 
-## 5. Data Flow: End-to-End Request
+## Setup
 
-### Submitting a new event (happy path)
+### Prerequisites
 
-```
-[Operator fills NewEventForm]
-        │
-        ▼
-POST /events  (multipart: image + lat/lon/description/org)
-        │
-        ├─► AI classification  (≈100 ms)
-        │      ai_logic.py → damage_score = 7 (Heavy) or 3 (Light)
-        │
-        ├─► Upload image to Supabase Storage (event-images bucket)
-        │      store public URL in event_images.image_url
-        │
-        ├─► Return event immediately  ◄── gisStatus: "pending"
-        │      Frontend shows spinner
-        │
-        └─► BackgroundTask: _run_gis_and_update()
-               │
-               ├─► gis_pipeline.py
-               │      ├── closest_hospital.py   (Overpass API via osm_query.py)
-               │      ├── closest_school.py
-               │      ├── closest_road.py
-               │      ├── closest_military_base.py
-               │      └── population_density.py (CBS shapefile, preloaded)
-               │
-               ├─► priority_logic.py
-               │      final_score = clamp(damage_score × (1 + S_total), 0.1, 10)
-               │
-        └─► Persist GIS + score updates in PostgreSQL tables
+- Docker + Docker Compose **or** local Node 20+, Python 3.11+, PostgreSQL 16.
+- For full functionality: Supabase (or compatible) for `DATABASE_URL`, storage keys if using uploads, optional `GROQ_API_KEY` for LLM explanations, and a running **ML service** URL for real inference.
 
-[Frontend polls GET /events/{id} every 4s]
-        │
-        └─► gisStatus == "done"  →  updateEvent() in Zustand store
-                                    Dashboard re-renders with real score
-```
+### Local development (without Docker for API)
 
-### Loading the dashboard
+1. Copy environment template: `cp .env.example .env` and set `DATABASE_URL`, `SUPABASE_*` if used, `JWT_SECRET`, `ML_SERVICE_URL`, optional `ML_SERVICE_API_KEY`, `GROQ_API_KEY`.
+2. **PostgreSQL** running and reachable from `DATABASE_URL`.
+3. Backend (from repo root): `uvicorn server.src.main:app --reload --host 0.0.0.0 --port 8000` (or `python -m server.src.main`). Ensure `ML_SERVICE_URL` points at a running [ml-service](ml-service/) instance (e.g. `http://127.0.0.1:8080`).
+4. Frontend: `cd client && npm ci && npm run dev` — set `VITE_API_URL=http://localhost:8000` in `.env` or shell.
+5. Seed reference data and demo content: `python -m server.src.seed_db` (see Docker below for the container one-liner).
 
-```
-Dashboard / EventsPage mounts
-        │
-        ▼
-fetch GET /events
-        │
-        ├─ 200 OK + data  →  setEvents(data)  →  all views update
-        └─ Network error  →  empty list / UI error (no mock fallback)
-```
+**Note:** [server/src/main.py](server/src/main.py) does not call `load_dotenv()`; Compose injects `env_file: .env`. For bare `uvicorn`, export variables or use a tool that loads `.env`.
 
----
+### Docker (Compose)
 
-## 6. Role Model
-
-| Role | Home Page | Can Do |
-|---|---|---|
-| `SUPER_ADMIN` | `/super-admin/organizations` | View all orgs + all events; manage all users |
-| `ADMIN` | `/admin/dashboard` | View org events; manage org users; hide/show events; change status |
-| `OPERATOR` | `/operator/dashboard` | Create events; edit own events; view org events |
-
-Route guards are enforced in `App.tsx` via `<ProtectedRoute allowedRoles={[...]}>`. The sidebar in `Sidebar.tsx` also hides links the current role cannot access.
-
----
-
-## 7. Priority Score Formula
-
-```
-final_score = clamp( damage_score × (1 + S_total) , 0.1 , 10.0 )
-
-S_total = w₁·C_hospital + w₂·C_school + w₃·C_road + w₄·C_military + w₅·C_density
-
-Weights (w):  hospital=0.30  school=0.15  road=0.20  military=0.20  density=0.15
-
-Piecewise coefficient C for each distance d:
-  d ≤ 5 km      →  C =  (5000 - d) / 5000        (bonus: closer = higher)
-  5–10 km       →  C =  0.0                        (neutral zone)
-  10–15 km      →  C = -(d - 10000) / 5000         (penalty: more isolated)
-  d > 15 km     →  C = -1.0                        (maximum isolation penalty)
-  d = -1 (N/F)  →  C = -1.0                        (not found = worst case)
-```
-
-The formula is implemented in `server/src/core/priority_logic.py`.
-
----
-
-## 8. How to Add a New Feature
-
-### New API endpoint
-
-1. Create or edit a route file in `server/src/api/routes/`
-2. Register the router in `server/src/main.py` via `app.include_router(...)`
-3. Add a Pydantic schema in `server/src/schemas/` if the response shape is new
-
-### New GIS data source
-
-1. Add a new module in `server/src/services/gis/proximity/` (follow the pattern of `closest_hospital.py`)
-2. Call it inside `server/src/services/gis/gis_pipeline.py` → `extract_gis_features()`
-3. Add its weight and piecewise coefficient in `server/src/core/priority_logic.py` → `get_final_priority_score()`
-
-### New frontend page
-
-1. Create the page component in `client/src/pages/<role>/MyPage.tsx`
-2. Add the route in `client/src/App.tsx` inside `<AppRoutes>` with the appropriate `allowedRoles`
-3. Add the nav link in `client/src/components/layout/Sidebar.tsx` with the matching `roles` array
-
-### New shared UI component
-
-1. Add it to `client/src/components/ui/` (keep it stateless and prop-driven)
-2. Import directly where needed — no central re-export required
-
----
-
-## 9. Running the Project
-
-### Local development
+From repo root:
 
 ```bash
-# Backend (from repo root)
-python -m server.src.main
-
-# Frontend (from /client)
-npm install
-npm run dev
+docker compose up --build
 ```
 
-### Docker (recommended)
+When running **locally with Docker**, set repo-root `.env` for services that read it (mainly the backend): `DATABASE_URL=postgresql://prioritai:prioritai@postgres:5432/prioritai` (hostname `postgres` is the Compose database service), `ML_SERVICE_URL=http://ml-service:8080` (`ml-service` is the ML container), and `VITE_API_URL=/api` so the browser uses Nginx’s `/api` proxy. These values are for Compose only and differ from production (Supabase, Render, Cloud Run).
 
-```bash
-docker-compose up --build
-# Frontend: http://localhost
-# Backend:  http://localhost:8000
-# API docs: http://localhost:8000/docs
-```
+- **Frontend:** http://localhost (Nginx → SPA; `/api` proxied to backend).
+- **Backend API:** http://localhost:8000 — OpenAPI docs at `/docs`.
+- **Postgres:** port `5432` (dev credentials in [docker-compose.yml](docker-compose.yml)).
+- **ML service:** port `8080`; Compose sets `ML_SERVICE_URL=http://ml-service:8080` on the backend so CNN inference works without extra `.env` wiring.
 
-### Environment setup
-
-```bash
-cp .env.example .env
-```
-
-Required backend variables:
-
-- `DATABASE_URL` — Supabase Postgres URL (recommended) or local fallback
-- `SUPABASE_URL` — your Supabase project URL
-- `SUPABASE_KEY` — key with storage upload permission for `event-images`
-
-Important:
-- Never commit `.env`
-- For Supabase Postgres, use `?sslmode=require`
-- If DB password has special characters, URL-encode it
-
-### Populate the database (full seed)
-
-Schema comes from **SQLAlchemy models** (`init_db()` → `create_all`). Seed fills data.
-
-**Docker** (after `docker-compose up --build`):
+Populate the database after the stack is up:
 
 ```bash
 docker exec -it prioritai-backend python -m server.src.seed_db
 ```
 
-**Local** (Postgres running, `DATABASE_URL` set):
+Seeded events use **`/uploads/…`** image URLs from [server/seed_events.json](server/seed_events.json). Keep the matching demo JPGs in repo-root **`uploads/`** (see [.gitignore](.gitignore) for allowed filenames) so thumbnails load when running locally without Supabase-hosted images.
+
+Optional helper: [start.sh](start.sh) wraps `docker compose up` and waits for health (bash / Git Bash / WSL).
+
+### ML service only (local binary)
 
 ```bash
-python -m server.src.seed_db
+cd ml-service
+docker build -t prioritai-ml .
+docker run --rm -p 8080:8080 prioritai-ml
 ```
 
-This seeds:
-- **Settlements**: Tel Aviv, South, Jerusalem
-- **Organizations**: Tel Aviv Municipality, South Authority, Jerusalem Municipality (each linked to a settlement)
-- **Users**: Super admins (haimgalata@gmail.com, linoysahalo@gmail.com), admins, operators — all with password `1234`
-- **Events**: 20 events from `seed_events.json` with full AI + GIS data, images, tags, and history
-
-Idempotent: safe to run multiple times; skips existing data.
-
-If an old Postgres volume was created before the schema lived only in SQLAlchemy models and you see missing-column errors, reset data once: `docker compose down -v`, then `up --build` and run `seed_db` again.
-
-### Supabase usage notes
-
-- **Database:** backend reads `DATABASE_URL` from environment; Docker Compose no longer hardcodes DB host.
-- **Storage:** uploaded event images are sent to Supabase Storage bucket `event-images`.
-- **DB image path field:** `event_images.image_url` now stores public Supabase URLs for new uploads.
-- **Legacy compatibility:** old `/uploads/...` paths remain valid historical records and are not auto-migrated.
-
-### Re-generate seed_events.json (optional)
-
-```bash
-# Runs full GIS pipeline for all 20 events and writes seed_events.json
-python -m server.src.seed_data
-# Then run seed_db again to load the fresh events
-```
-
-### Demo login credentials (password: 1234)
-
-| Role | Email |
-|---|---|
-| Super Admin | haimgalata@gmail.com |
-| Super Admin | linoysahalo@gmail.com |
-| Admin (Tel Aviv) | sarah@prioritai.gov |
-| Admin | david@tel-aviv.gov |
-| Operator | miriam@tel-aviv.gov |
+Expose port **8080** (or override `ML_SERVICE_URL`). Optional `ML_SERVICE_API_KEY` must match `X-API-Key` on requests ([ml-service/app/main.py](ml-service/app/main.py)).
 
 ---
 
-## 10. Database Architecture
+## Environment variables
 
-### 10.1 Overview
+| Variable | Where | Purpose |
+|----------|--------|---------|
+| `DATABASE_URL` | Backend | PostgreSQL connection string |
+| `SUPABASE_URL`, `SUPABASE_KEY` | Backend | Storage uploads (`event-images`) |
+| `JWT_SECRET` | Backend | Signing key for access tokens (**required in production**) |
+| `ML_SERVICE_URL` | Backend | Base URL of ML service (no trailing slash); Compose overrides to `http://ml-service:8080` |
+| `ML_SERVICE_API_KEY` | Backend + ML service | Optional shared secret header |
+| `ML_SERVICE_CONNECT_TIMEOUT`, `ML_SERVICE_READ_TIMEOUT` | Backend | HTTP client timeouts |
+| `GROQ_API_KEY` | Backend | Optional LLM explanations |
+| `CORS_ORIGINS` | Backend | Comma-separated extra allowed origins |
+| `VITE_API_URL` | Client build | Browser-visible API base URL |
 
-PrioritAI is a **rocket damage prioritization system** used by municipal authorities. The database persists all damage events, organizations, users, and associated metadata.
+Templates: [.env.example](.env.example), [server/.env.example](server/.env.example). Use placeholders only; never commit real secrets.
 
-**What the database is used for:**
+---
 
-- Stores damage events with geographic coordinates, descriptions, and status
-- Holds AI classification results (damage score, priority score, explanations)
-- Stores GIS-derived features (distances to hospitals, schools, roads, military sites; population density)
-- Maintains organizations, users, and their relationships
-- Records status change history for audit purposes
+## API overview (high level)
 
-The database replaces the previous in-memory store and provides persistence across restarts.
+All business routes use **Bearer JWT** unless noted.
 
-### 10.2 Database Structure
+| Area | Methods | Purpose |
+|------|---------|---------|
+| Health | `GET /health` | Liveness |
+| Auth | `POST /auth/login`, `GET /auth/me`, `PATCH /auth/password`, `GET/POST /auth/users` | Session and user admin |
+| Organizations | `GET/POST /organizations` | Org listing / create (super admin) |
+| Settlements | `GET /settlements` | Reference geography |
+| Events | `POST /events`, `GET /events`, `GET /events/{id}`, `PATCH /events/{id}`, `DELETE /events/{id}` | Core workflow |
+| Analyze | `POST /analyze` | Synchronous full pipeline (testing / Model Runner) |
 
-| Table | Purpose | Main Columns | PK | FKs |
-|-------|---------|--------------|-----|-----|
-| `settlements` | Geographic areas (cities/regions) | id, name, settlement_code | id | — |
-| `roles` | User role lookup (super_admin, admin, operator) | id, name | id | — |
-| `event_status` | Event lifecycle (new, in_progress, done) | id, name | id | — |
-| `organizations` | Municipal authorities | id, name, settlement_id, external_id, created_at | id | settlements.id |
-| `users` | System users | id, name, email, password, role_id, organization_id, external_id, created_at | id | roles.id, organizations.id |
-| `events` | Damage event records | id, lat, lon, address, city, description, organization_id, created_by, status_id, hidden, seed_key, created_at | id | organizations.id, users.id, event_status.id |
-| `event_images` | Event image URLs | id, event_id, image_url | id | events.id |
-| `event_gis` | GIS features per event (1:1) | id, event_id, distance_hospital, distance_school, distance_road, distance_military, population_density, geo_multiplier, created_at | id | events.id |
-| `event_analysis` | AI damage score and explanation | id, event_id, damage_score, damage_classification, priority_score, explanation, ai_model, created_at | id | events.id |
-| `event_tags` | Event tags/categories | id, event_id, tag | id | events.id |
-| `event_history` | Status change audit log | id, event_id, old_status_id, new_status_id, changed_by, changed_at | id | events.id, event_status.id (×2), users.id |
+Interactive schema: `/docs` on the API host.
 
-### 10.3 Relationships Between Tables
+---
 
-**Reference tables** (no foreign keys): `settlements`, `roles`, `event_status` — used as lookups for other entities.
+## ML model
 
-**Core hierarchy:**
+- **What it does:** Binary **damage severity** classification (**Heavy** vs **Light**) from a RGB image, mapped to discrete **damage_score** values used in the priority formula. Output includes **confidence** from softmax.
+- **Evolving:** Architecture, weights, and training data may change; version **in code** (e.g. `ai_model` field) may not track every experiment.
+- **Data / training:** **Training scripts and datasets are not part of this application repo** as shipped here; the service loads a bundled **`.keras`** artifact ([ml-service/model/](ml-service/model/)). If you use **synthetic or augmented** imagery for training, document that in `docs/ml.md` (optional) or your paper — do not claim specifics in the README that are not published with the repo.
 
-- **Settlement** → one-to-many **Organizations** (each org belongs to one settlement)
-- **Organization** → one-to-many **Users** (employs); one-to-many **Events** (owns)
-- **Role** → one-to-many **Users** (each user has one role)
-- **User** → one-to-many **Events** (as creator via `created_by`)
+---
 
-**Event detail tables** (all reference `events`):
+## GIS logic (summary)
 
-- **Event** → one-to-many **EventImages**
-- **Event** → one-to-one **EventGIS**
-- **Event** → one-to-many **EventAnalysis** (typically one active analysis per event)
-- **Event** → one-to-many **EventTags**
-- **Event** → one-to-many **EventHistory**
+- **Infrastructure proximity:** For each coordinate, query OpenStreetMap-derived features and compute distances (meters) to nearest **hospital**, **school**, **road**, and **military / helipad**-style strategic sites (see modules under [server/src/services/gis/proximity/](server/src/services/gis/proximity/)).
+- **Population density:** Point-in-polygon against **CBS** statistical area shapefiles joined to population tables ([server/data/cbs_data/](server/data/cbs_data/)), expressed as people per km².
+- **Scoring:** Distances feed **piecewise coefficients**; weighted sum forms a geographic multiplier combined with `damage_score` ([server/src/core/priority_logic.py](server/src/core/priority_logic.py)). Isolation / “not found” distances map to penalties.
+- **Performance / resilience:** In-memory cache by rounded coordinates; parallel extraction with per-task timeouts in the pipeline ([server/src/services/gis/gis_pipeline.py](server/src/services/gis/gis_pipeline.py)). External Overpass rate limits remain an operational concern.
 
-**EventHistory** links to `event_status` (old and new status) and `users` (who made the change).
+---
 
-### 10.4 ERD Diagram
+## Future improvements
 
-```mermaid
-erDiagram
-    settlements ||--o{ organizations : "belongs_to"
-    roles ||--o{ users : "has"
-    organizations ||--o{ users : "employs"
-    organizations ||--o{ events : "owns"
-    users ||--o{ events : "creates"
-    event_status ||--o{ events : "tracks"
-    events ||--o{ event_images : "has"
-    events ||--|| event_gis : "has"
-    events ||--o{ event_analysis : "has"
-    events ||--o{ event_tags : "has"
-    events ||--o{ event_history : "records"
-    event_status ||--o{ event_history : "old_status"
-    event_status ||--o{ event_history : "new_status"
-    users ||--o{ event_history : "changed_by"
+- **Migrations:** Introduce Alembic (or equivalent) instead of `create_all` only.
+- **Config:** Centralize settings (e.g. Pydantic `BaseSettings`), respect `LOG_LEVEL` from env ([server/src/main.py](server/src/main.py) currently sets `DEBUG` logging unconditionally).
+- **ML ops:** Model registry, versioned artifacts, metrics, and integration tests that **mock** the ML HTTP boundary.
+- **Security:** Remove default `JWT_SECRET`, rotate keys, tighten CORS defaults for production, rate-limit auth.
+- **Observability:** Structured logging, request IDs, RED metrics, GIS/Overpass latency dashboards.
+
+---
+
+## License and attribution
+
+See [LICENSE](LICENSE). CBS and OpenStreetMap data carry their own licenses; cite them when redistributing boundary or map-derived datasets.
+
+---
+
+## Contributing
+
+Issues and PRs welcome. Run server tests from repo root:
+
+```bash
+pytest server/tests
 ```
 
-### 10.5 Example Flow
-
-**Creating an organization, admin, and events:**
-
-1. Insert a **Settlement** (e.g. "Tel Aviv", TAV-001).
-2. Insert an **Organization** linked to that settlement (e.g. "Tel Aviv Municipality", external_id: org-1).
-3. Insert a **User** with role admin and organization_id → that org (e.g. external_id: user-admin-1).
-4. Operator creates an **Event** via `POST /events`: lat, lon, description, organization_id, created_by.
-5. Backend inserts **Event**, **EventAnalysis** (AI damage score), **EventImages** (if any), **EventTags**.
-6. Background task runs GIS and inserts **EventGIS**, updates **EventAnalysis** with priority score and explanation.
-7. When status changes (e.g. new → in_progress), a row is added to **EventHistory**.
-
-### 10.6 Technologies
-
-| Technology | Purpose |
-|------------|---------|
-| **PostgreSQL 16** | Relational database |
-| **SQLAlchemy 2.x** | ORM; models in `server/src/db/models.py` |
-| **psycopg2** | PostgreSQL driver |
-| **Schema** | `init_db()` / `Base.metadata.create_all` from `server/src/db/models.py` |
+Ensure the repository root is on `PYTHONPATH` if imports fail. Keep **secrets** out of git.
