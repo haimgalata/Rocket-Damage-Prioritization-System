@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install dependencies first (cached layer — only re-runs when package files change).
 COPY package.json package-lock.json ./
-RUN npm install --network-timeout=100000 --no-package-lock
+RUN npm ci --network-timeout=100000
 
 
 # Copy source and build.
