@@ -1,0 +1,6 @@
+# CPU-only TensorFlow wheel (no CUDA); smaller install than full tensorflow meta-package on many platforms.
+fastapi==0.115.5
+uvicorn==0.30.6
+tensorflow-cpu==2.18.0
+Pillow==11.0.0
+numpy>=1.26.0,<2.1.0

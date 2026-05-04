@@ -4,8 +4,7 @@ uvicorn[standard]==0.30.6
 python-multipart==0.0.17
 
 # ── AI / ML ───────────────────────────────────────────────────────────────────
-tensorflow==2.18.0
-Pillow==11.0.0
+# TensorFlow runs in ml-service (Cloud Run); backend calls HTTP only.
 numpy>=1.26.0,<2.1.0
 groq>=0.5.0
 # ── GIS / Geospatial ──────────────────────────────────────────────────────────

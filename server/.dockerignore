@@ -1,0 +1,2 @@
+# Exclude Keras artifact from backend image (inference runs on ml-service).
+src/core/rocket_damage_model.keras

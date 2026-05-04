@@ -1,0 +1,7 @@
+# Shrinks upload for `gcloud run deploy --source`.
+.git
+.gitignore
+__pycache__
+*.py[cod]
+*.md
+.env

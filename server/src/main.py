@@ -16,7 +16,6 @@ from server.src.api import (
     events_router,
     analyze_router,
 )
-from server.src.core.ai_logic import preload_model
 from server.src.db.connection import get_db, init_db
 from server.src.db.models import EventStatus, Role
 from server.src.services.gis.demographics.population_density import preload_population_data
@@ -25,7 +24,6 @@ UPLOADS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "uploads")
 os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 logging.basicConfig(level=logging.DEBUG)
-logging.getLogger("server.src.core.ai_logic").setLevel(logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -47,9 +45,6 @@ def _ensure_db_ready() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Pre-loading Keras model on startup...")
-    preload_model()
-    logger.info("Model ready.")
     logger.info("Pre-loading CBS population data...")
     preload_population_data()
     logger.info("CBS data ready.")

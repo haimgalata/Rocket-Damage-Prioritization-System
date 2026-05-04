@@ -21,3 +21,8 @@ services:
         sync: false
       - key: JWT_SECRET
         sync: false
+      # Example: https://prioritai-ml-973722445460.europe-west1.run.app (set value in Dashboard)
+      - key: ML_SERVICE_URL
+        sync: false
+      - key: ML_SERVICE_API_KEY
+        sync: false
