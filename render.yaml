@@ -1,8 +1,11 @@
-# Render Blueprint — PrioritAI FastAPI backend only.
-# Deploy: Dashboard → Blueprints → New Blueprint Instance (select repo), or attach this file when creating a Web Service.
+# Render Blueprint — PrioritAI backend (Docker) + static Vite frontend.
+# Deploy: Dashboard → Blueprints → New Blueprint Instance (select repo), or attach this file when creating services.
 # Docs: https://render.com/docs/blueprint-spec
 #
 # After first deploy, set secret env vars in the Render Dashboard (Blueprint sync: false placeholders below).
+#
+# Frontend: set VITE_API_URL to your live backend HTTPS origin (e.g. https://prioritai-backend.onrender.com),
+# no trailing slash. Required at build time so the browser bundle calls the correct API.
 
 services:
   - type: web
@@ -25,4 +28,18 @@ services:
       - key: ML_SERVICE_URL
         sync: false
       - key: ML_SERVICE_API_KEY
+        sync: false
+
+  - type: web
+    name: prioritai-frontend
+    runtime: static
+    rootDir: client
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./client/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
         sync: false

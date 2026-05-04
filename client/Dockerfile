@@ -12,6 +12,10 @@ RUN npm install --network-timeout=100000 --no-package-lock
 # Copy source and build.
 # VITE_API_URL is injected at build time via --build-arg in docker-compose.yml.
 # Default value keeps local `npm run dev` pointing at the FastAPI dev server directly.
+#
+# Render / standalone container: pass --build-arg VITE_API_URL=https://<your-backend>.onrender.com
+# (full HTTPS URL). nginx.conf proxies /api to http://backend:8000 — that hostname only exists
+# in Docker Compose alongside this image; do not rely on /api in the browser unless that proxy exists.
 ARG VITE_API_URL=http://localhost:8000
 ENV VITE_API_URL=$VITE_API_URL
 

@@ -55,12 +55,18 @@ const AuthBootstrap: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       return;
     }
     let cancelled = false;
-    fetchAuthMe().then((me) => {
-      if (cancelled) return;
-      if (me) setSession(me.user, me.organization, me.accessToken);
-      else logoutUser();
-      setReady(true);
-    });
+    fetchAuthMe()
+      .then((me) => {
+        if (cancelled) return;
+        if (me) setSession(me.user, me.organization, me.accessToken);
+        else logoutUser();
+        setReady(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        logoutUser();
+        setReady(true);
+      });
     return () => {
       cancelled = true;
     };
