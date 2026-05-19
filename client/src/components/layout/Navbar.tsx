@@ -57,7 +57,7 @@ export const Navbar: React.FC<NavbarProps> = ({ pageTitle }) => {
           <Search className="w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Search events..."
+            placeholder="חיפוש אירועים..."
             className="bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none w-full"
           />
         </div>
@@ -79,14 +79,14 @@ export const Navbar: React.FC<NavbarProps> = ({ pageTitle }) => {
           {notifOpen && (
             <div className="absolute right-0 top-12 w-96 bg-white border border-gray-200 rounded-xl shadow-xl z-50">
               <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-                <span className="font-semibold text-gray-900 text-sm">Notifications</span>
+                <span className="font-semibold text-gray-900 text-sm">התראות</span>
                 <div className="flex items-center gap-2">
                   {unread > 0 && (
                     <button
                       onClick={markAllAsRead}
                       className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
                     >
-                      <CheckCheck className="w-3.5 h-3.5" /> Mark all read
+                      <CheckCheck className="w-3.5 h-3.5" /> סמן הכל כנקרא
                     </button>
                   )}
                   <button onClick={() => setNotifOpen(false)} className="text-gray-400 hover:text-gray-600">
@@ -97,7 +97,7 @@ export const Navbar: React.FC<NavbarProps> = ({ pageTitle }) => {
 
               <div className="max-h-80 overflow-y-auto">
                 {notifications.length === 0 ? (
-                  <div className="py-10 text-center text-gray-400 text-sm">No notifications</div>
+                  <div className="py-10 text-center text-gray-400 text-sm">אין התראות</div>
                 ) : (
                   notifications.map((n) => {
                     const cfg = notifTypeConfig[n.type];
@@ -161,14 +161,14 @@ export const Navbar: React.FC<NavbarProps> = ({ pageTitle }) => {
                   className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
                 >
                   <User className="w-4 h-4 text-gray-400" />
-                  My Profile
+                  הפרופיל שלי
                 </button>
                 <button
                   onClick={() => { setUserMenuOpen(false); navigate('/settings'); }}
                   className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition"
                 >
                   <Settings className="w-4 h-4 text-gray-400" />
-                  Account Settings
+                  הגדרות חשבון
                 </button>
                 <div className="border-t border-gray-100 mt-1 pt-1">
                   <button
@@ -176,7 +176,7 @@ export const Navbar: React.FC<NavbarProps> = ({ pageTitle }) => {
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
                   >
                     <LogOut className="w-4 h-4" />
-                    Sign Out
+                    התנתק
                   </button>
                 </div>
               </div>

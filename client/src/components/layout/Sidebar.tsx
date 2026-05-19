@@ -28,61 +28,61 @@ export const Sidebar: React.FC = () => {
 
   const navigationItems: NavItem[] = [
     {
-      label: 'Dashboard',
+      label: 'לוח בקרה',
       path: '/super-admin/dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
       roles: [UserRole.SUPER_ADMIN],
     },
     {
-      label: 'Organizations',
+      label: 'ארגונים',
       path: '/super-admin/organizations',
       icon: <Building2 className="w-5 h-5" />,
       roles: [UserRole.SUPER_ADMIN],
     },
     {
-      label: 'Dashboard',
+      label: 'לוח בקרה',
       path: '/admin/dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
       roles: [UserRole.ADMIN],
     },
     {
-      label: 'Events',
+      label: 'אירועים',
       path: '/admin/events',
       icon: <FileText className="w-5 h-5" />,
       roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.OPERATOR],
     },
     {
-      label: 'Map',
+      label: 'מפה',
       path: '/operator/map',
       icon: <Map className="w-5 h-5" />,
       roles: [UserRole.OPERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN],
     },
     {
-      label: 'New event',
+      label: 'אירוע חדש',
       path: '/operator/events/new',
       icon: <FileText className="w-5 h-5" />,
       roles: [UserRole.OPERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN],
     },
     {
-      label: 'Operator dashboard',
+      label: 'לוח בקרה מפעיל',
       path: '/operator/dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
       roles: [UserRole.OPERATOR],
     },
     {
-      label: 'Management',
+      label: 'ניהול',
       path: '__management__',
       icon: <Settings className="w-5 h-5" />,
       roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
       children: [
         {
-          label: 'Users',
+          label: 'משתמשים',
           path: '/admin/users',
           icon: <Users className="w-4 h-4" />,
           roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
         },
         {
-          label: 'AI models',
+          label: 'מודלי AI',
           path: '/admin/models',
           icon: <BarChart3 className="w-4 h-4" />,
           roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
@@ -163,7 +163,7 @@ export const Sidebar: React.FC = () => {
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="hidden md:block p-1 hover:bg-gray-200 rounded-lg transition ml-auto"
-            title={isOpen ? 'Collapse' : 'Expand'}
+            title={isOpen ? 'כווץ' : 'הרחב'}
           >
             <Menu className="w-5 h-5 text-gray-600" />
           </button>
@@ -191,7 +191,7 @@ export const Sidebar: React.FC = () => {
           <button
             onClick={handleProfileClick}
             className="flex items-center justify-center mt-3 mx-auto w-10 h-10 bg-blue-600 rounded-full text-white font-bold text-sm hover:bg-blue-700 transition"
-            title="Settings"
+            title="הגדרות"
           >
             {getInitials(user.name)}
           </button>
@@ -271,19 +271,19 @@ export const Sidebar: React.FC = () => {
             to="/settings"
             onClick={() => setIsMobileOpen(false)}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-200 transition-all ${isOpen ? '' : 'justify-center'}`}
-            title="Settings"
+            title="הגדרות"
           >
             <Settings className="w-5 h-5" />
-            {isOpen && <span className="text-sm font-medium">Settings</span>}
+            {isOpen && <span className="text-sm font-medium">הגדרות</span>}
           </Link>
           <button
             type="button"
             onClick={handleLogout}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all ${isOpen ? '' : 'justify-center'}`}
-            title="Logout"
+            title="התנתק"
           >
             <LogOut className="w-5 h-5" />
-            {isOpen && <span className="text-sm font-medium">Logout</span>}
+            {isOpen && <span className="text-sm font-medium">התנתק</span>}
           </button>
         </div>
       </aside>

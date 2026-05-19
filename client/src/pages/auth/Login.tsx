@@ -9,8 +9,8 @@ import { loginRequest } from '../../api/auth';
 import { UserRole } from '../../types';
 
 const schema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(4, 'Password must be at least 4 characters'),
+  email: z.string().email('כתובת אימייל לא תקינה'),
+  password: z.string().min(4, 'הסיסמה חייבת להכיל לפחות 4 תווים'),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -22,10 +22,10 @@ function safeReturnPath(raw: string | null): string | null {
 
 /** Quick-fill demo accounts (password: 1234). Primary super admins: Haim, Linoy. */
 const DEMO_ACCOUNTS = [
-  { email: 'haimgalata@gmail.com', password: '1234', label: 'Super Admin (Haim)' },
-  { email: 'linoysahalo@gmail.com', password: '1234', label: 'Super Admin (Linoy)' },
-  { email: 'david@tel-aviv.gov', password: '1234', label: 'Admin' },
-  { email: 'miriam@tel-aviv.gov', password: '1234', label: 'Operator' },
+  { email: 'haimgalata@gmail.com', password: '1234', label: 'מנהל-על (חיים)' },
+  { email: 'linoysahalo@gmail.com', password: '1234', label: 'מנהל-על (לינוי)' },
+  { email: 'david@tel-aviv.gov', password: '1234', label: 'מנהל' },
+  { email: 'miriam@tel-aviv.gov', password: '1234', label: 'מפעיל' },
 ];
 
 export const Login: React.FC = () => {
@@ -58,7 +58,7 @@ export const Login: React.FC = () => {
       else if (user.role === UserRole.ADMIN) navigate('/admin/dashboard', { replace: true });
       else navigate('/operator/dashboard', { replace: true });
     } catch (e) {
-      setLoginError(e instanceof Error ? e.message : 'Network error. Is the API server running?');
+      setLoginError(e instanceof Error ? e.message : 'שגיאת רשת. האם שרת ה-API פועל?');
     }
   };
 
@@ -74,15 +74,15 @@ export const Login: React.FC = () => {
             <Shield className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white">PrioritAI</h1>
-          <p className="text-blue-300 mt-1 text-sm">Professional Damage Assessment System</p>
+          <p className="text-blue-300 mt-1 text-sm">מערכת מקצועית לאומדן נזקים</p>
         </div>
 
         <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl">
-          <h2 className="text-xl font-semibold text-white mb-6">Sign in to your account</h2>
+          <h2 className="text-xl font-semibold text-white mb-6">התחבר לחשבונך</h2>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-blue-200 block mb-1">Email</label>
+              <label className="text-sm font-medium text-blue-200 block mb-1">אימייל</label>
               <input
                 {...register('email')}
                 type="email"
@@ -94,7 +94,7 @@ export const Login: React.FC = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-blue-200 block mb-1">Password</label>
+              <label className="text-sm font-medium text-blue-200 block mb-1">סיסמה</label>
               <div className="relative">
                 <input
                   {...register('password')}
@@ -131,13 +131,13 @@ export const Login: React.FC = () => {
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
               ) : null}
-              {isSubmitting ? 'Signing in...' : 'Sign In'}
+              {isSubmitting ? 'מתחבר...' : 'התחבר'}
             </button>
           </form>
 
           <div className="mt-6 pt-6 border-t border-white/10">
             <p className="text-xs text-blue-300 mb-3 flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5" /> Demo accounts — click to fill (password: 1234)
+              <Zap className="w-3.5 h-3.5" /> חשבונות הדגמה — לחץ למילוי (סיסמה: 1234)
             </p>
             <div className="space-y-2">
               {DEMO_ACCOUNTS.map((cred) => (
