@@ -23,8 +23,8 @@ import { useEventStore } from '../../store/eventStore';
 import { fetchEvents } from '../../api/events';
 
 const orgCreateSchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters'),
-  settlement_id: z.string().min(1, 'Select a settlement'),
+  name: z.string().min(3, 'השם חייב להכיל לפחות 3 תווים'),
+  settlement_id: z.string().min(1, 'יש לבחור יישוב'),
   existingAdminId: z.string().optional(),
 });
 type OrgCreateFormValues = z.infer<typeof orgCreateSchema>;
@@ -82,7 +82,7 @@ export const OrgManagement: React.FC = () => {
     try {
       const settlement_id = Number(data.settlement_id);
       if (!Number.isFinite(settlement_id) || settlement_id < 1) {
-        setCreateError('Select a valid settlement');
+        setCreateError('יש לבחור יישוב תקין');
         setCreateSubmitting(false);
         return;
       }
@@ -95,7 +95,7 @@ export const OrgManagement: React.FC = () => {
       reset({ name: '', settlement_id: '', existingAdminId: '' });
       setIsCreateOpen(false);
     } catch (e) {
-      setCreateError(e instanceof Error ? e.message : 'Failed to create organization');
+      setCreateError(e instanceof Error ? e.message : 'יצירת הארגון נכשלה');
     } finally {
       setCreateSubmitting(false);
     }
@@ -120,25 +120,25 @@ export const OrgManagement: React.FC = () => {
   }, [loadData]);
 
   return (
-    <PageContainer title="Organization Management">
+    <PageContainer title="ניהול ארגונים">
       <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Summary Stats */}
         <div className="grid grid-cols-4 gap-4">
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <p className="text-sm text-gray-500 mb-1">Organizations</p>
+            <p className="text-sm text-gray-500 mb-1">ארגונים</p>
             <p className="text-3xl font-bold text-gray-900">{orgs.length}</p>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <p className="text-sm text-gray-500 mb-1">Total Events</p>
+            <p className="text-sm text-gray-500 mb-1">סה"כ אירועים</p>
             <p className="text-3xl font-bold text-gray-900">{totalEvents}</p>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <p className="text-sm text-gray-500 mb-1">Pending</p>
+            <p className="text-sm text-gray-500 mb-1">ממתינים</p>
             <p className="text-3xl font-bold text-yellow-600">{events.filter(e => e.status === EventStatus.NEW).length}</p>
           </div>
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
-            <p className="text-sm text-gray-500 mb-1">Total Users</p>
+            <p className="text-sm text-gray-500 mb-1">סה"כ משתמשים</p>
             <p className="text-3xl font-bold text-gray-900">{totalUsers}</p>
           </div>
         </div>
@@ -153,14 +153,14 @@ export const OrgManagement: React.FC = () => {
                 <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search name, settlement, code..."
+                  placeholder="חיפוש שם, יישוב, קוד..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-52"
                 />
               </div>
               <Button icon={<Plus className="w-4 h-4" />} size="sm" onClick={() => setIsCreateOpen(true)}>
-                New Org
+                ארגון חדש
               </Button>
             </div>
           }
@@ -169,13 +169,13 @@ export const OrgManagement: React.FC = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Organization</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Code</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Settlement</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Admin</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Events</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Users</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Created</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ארגון</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">קוד</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">יישוב</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">מנהל</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">אירועים</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">משתמשים</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">נוצר</th>
                 </tr>
               </thead>
               <tbody>
@@ -223,7 +223,7 @@ export const OrgManagement: React.FC = () => {
                             </div>
                           </div>
                         ) : (
-                          <span className="text-xs text-red-500 font-medium">No admin assigned</span>
+                          <span className="text-xs text-red-500 font-medium">לא שויך מנהל</span>
                         )}
                       </td>
                       <td className="px-6 py-4">
@@ -286,14 +286,14 @@ export const OrgManagement: React.FC = () => {
                   <div className="bg-gray-50 rounded-xl p-3 text-center">
                     <div className="flex items-center justify-center gap-1.5 mb-1">
                       <AlertTriangle className="w-4 h-4 text-orange-500" />
-                      <p className="text-xs text-gray-500 font-medium">Total Events</p>
+                      <p className="text-xs text-gray-500 font-medium">סה״כ אירועים</p>
                     </div>
                     <p className="text-2xl font-bold text-gray-900">{total}</p>
                   </div>
                   <div className="bg-gray-50 rounded-xl p-3 text-center">
                     <div className="flex items-center justify-center gap-1.5 mb-1">
                       <BarChart3 className="w-4 h-4 text-blue-500" />
-                      <p className="text-xs text-gray-500 font-medium">Avg Priority</p>
+                      <p className="text-xs text-gray-500 font-medium">עדיפות ממוצעת</p>
                     </div>
                     <p className="text-2xl font-bold text-gray-900">{formatScore(avg)}</p>
                   </div>
@@ -309,7 +309,7 @@ export const OrgManagement: React.FC = () => {
                 navigate(`/admin/events?org=${briefOrg.id}`);
               }}
             >
-              View Full Dashboard
+              צפה בלוח הבקרה המלא
             </Button>
           </div>
         </div>
@@ -323,28 +323,28 @@ export const OrgManagement: React.FC = () => {
           setCreateError(null);
           reset({ name: '', settlement_id: '', existingAdminId: '' });
         }}
-        title="Create Organization"
+        title="יצירת ארגון"
         size="sm"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <p className="text-xs text-gray-500">
-            Organizations are saved in PostgreSQL. Choose a settlement that already exists (run seed_db if empty).
+            הארגונים נשמרים ב-PostgreSQL. בחר יישוב קיים (הרץ seed_db אם ריק).
           </p>
           <Input
-            label="Organization Name"
-            placeholder="City Municipality"
+            label="שם הארגון"
+            placeholder="עיריית העיר"
             error={errors.name?.message}
             {...register('name')}
           />
           <div>
             <label className="text-sm font-medium text-gray-700 block mb-1">
-              Settlement <span className="text-red-500">*</span>
+              יישוב <span className="text-red-500">*</span>
             </label>
             <select
               {...register('settlement_id')}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Select settlement...</option>
+              <option value="">בחר יישוב...</option>
               {settlements.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name} ({s.settlement_code})
@@ -359,16 +359,16 @@ export const OrgManagement: React.FC = () => {
           <div className="border-t border-gray-200 pt-3">
             <p className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-1.5">
               <Shield className="w-4 h-4 text-purple-500" />
-              Assign admin (optional)
+              הקצה מנהל (אופציונלי)
             </p>
             <p className="text-xs text-gray-500 mb-2">
-              If you pick an admin, their account is updated to belong to the new organization.
+              אם תבחר מנהל, חשבונו יעודכן לשייכות לארגון החדש.
             </p>
             <select
               {...register('existingAdminId')}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">No reassignment</option>
+              <option value="">ללא שינוי שיוך</option>
               {existingAdmins.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.name} ({u.email})
@@ -393,10 +393,10 @@ export const OrgManagement: React.FC = () => {
                 reset({ name: '', settlement_id: '', existingAdminId: '' });
               }}
             >
-              Cancel
+              ביטול
             </Button>
             <Button type="submit" disabled={createSubmitting}>
-              {createSubmitting ? 'Saving…' : 'Create Organization'}
+              {createSubmitting ? 'שומר…' : 'צור ארגון'}
             </Button>
           </div>
         </form>

@@ -41,23 +41,23 @@ const ROLE_DB_ID: Record<UserRole, number> = {
 
 const makeSchema = (isSuperAdmin: boolean) =>
   z.object({
-    name: z.string().min(2, 'Name must be at least 2 characters'),
-    email: z.string().email('Invalid email address'),
+    name: z.string().min(2, 'השם חייב להכיל לפחות 2 תווים'),
+    email: z.string().email('כתובת אימייל לא תקינה'),
     jobTitle: z.string().optional(),
     role: z.enum(
       isSuperAdmin
         ? [UserRole.OPERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN]
         : [UserRole.OPERATOR]
     ),
-    organizationId: z.string().min(1, 'Organization is required'),
+    organizationId: z.string().min(1, 'יש לבחור ארגון'),
   });
 
 type UserFormData = z.infer<ReturnType<typeof makeSchema>>;
 
 const roleConfig: Record<UserRole, { label: string; variant: 'danger' | 'warning' | 'info'; icon: React.ReactNode }> = {
-  [UserRole.SUPER_ADMIN]: { label: 'Technical Team', variant: 'danger',  icon: <Shield className="w-3 h-3" /> },
-  [UserRole.ADMIN]:       { label: 'Admin',           variant: 'warning', icon: <User className="w-3 h-3" /> },
-  [UserRole.OPERATOR]:    { label: 'Operator',        variant: 'info',    icon: <Wrench className="w-3 h-3" /> },
+  [UserRole.SUPER_ADMIN]: { label: 'צוות טכני', variant: 'danger',  icon: <Shield className="w-3 h-3" /> },
+  [UserRole.ADMIN]:       { label: 'מנהל',      variant: 'warning', icon: <User className="w-3 h-3" /> },
+  [UserRole.OPERATOR]:    { label: 'מפעיל',     variant: 'info',    icon: <Wrench className="w-3 h-3" /> },
 };
 
 export const UserManagement: React.FC = () => {
@@ -204,7 +204,7 @@ export const UserManagement: React.FC = () => {
       setSelectedUser(created);
       setModalMode('password');
     } catch (e) {
-      alert(e instanceof Error ? e.message : 'Failed to create user');
+      alert(e instanceof Error ? e.message : 'יצירת המשתמש נכשלה');
     }
   };
 
@@ -249,7 +249,7 @@ export const UserManagement: React.FC = () => {
         prev.map((u) => u.id === id ? { ...u, isActive: updated.isActive } : u)
       );
     } catch (e) {
-      setToggleError(e instanceof Error ? e.message : 'Failed to update user status');
+      setToggleError(e instanceof Error ? e.message : 'עדכון סטטוס המשתמש נכשל');
     }
   };
 
@@ -265,31 +265,31 @@ export const UserManagement: React.FC = () => {
   const UserFormFields = () => (
     <div className="space-y-4">
       <Input
-        label="Full Name"
-        placeholder="Jane Smith"
+        label="שם מלא"
+        placeholder="ישראל ישראלי"
         error={errors.name?.message}
         {...register('name')}
       />
       <Input
-        label="Email Address"
+        label="כתובת אימייל"
         type="email"
         placeholder="user@authority.gov"
         error={errors.email?.message}
         {...register('email')}
       />
       <Input
-        label="Job Title"
-        placeholder="Field Damage Assessor"
+        label="תפקיד"
+        placeholder="מעריך נזקים שטחי"
         {...register('jobTitle')}
       />
       {isSuperAdmin && (
         <div>
-          <label className="text-sm font-medium text-gray-700 block mb-1">Organization</label>
+          <label className="text-sm font-medium text-gray-700 block mb-1">ארגון</label>
           <select
             {...register('organizationId')}
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">Select organization...</option>
+            <option value="">בחר ארגון...</option>
             {organizations.map((org) => (
               <option key={org.id} value={org.id}>{org.name}</option>
             ))}
@@ -300,17 +300,17 @@ export const UserManagement: React.FC = () => {
         </div>
       )}
       <div>
-        <label className="text-sm font-medium text-gray-700 block mb-1">Role</label>
+        <label className="text-sm font-medium text-gray-700 block mb-1">הרשאה</label>
         <select
           {...register('role')}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value={UserRole.OPERATOR}>Operator</option>
-          {isSuperAdmin && <option value={UserRole.ADMIN}>Admin</option>}
-          {isSuperAdmin && <option value={UserRole.SUPER_ADMIN}>Super Admin</option>}
+          <option value={UserRole.OPERATOR}>מפעיל</option>
+          {isSuperAdmin && <option value={UserRole.ADMIN}>מנהל</option>}
+          {isSuperAdmin && <option value={UserRole.SUPER_ADMIN}>מנהל-על</option>}
         </select>
         <p className="text-xs text-gray-400 mt-1">
-          {isSuperAdmin ? 'Super Admins can create Admins and Operators.' : 'Admins can only create Operators.'}
+          {isSuperAdmin ? 'מנהלי-על יכולים ליצור מנהלים ומפעילים.' : 'מנהלים יכולים ליצור מפעילים בלבד.'}
         </p>
       </div>
     </div>
@@ -320,14 +320,14 @@ export const UserManagement: React.FC = () => {
     isSuperAdmin && selectedOrgId != null ? orgFilteredUsers : isSuperAdmin ? [] : orgFilteredUsers;
 
   return (
-    <PageContainer title="User Management">
+    <PageContainer title="ניהול משתמשים">
       <div className="max-w-5xl mx-auto space-y-6">
 
         {isSuperAdmin && (
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-4">
             <div className="flex-1">
-              <p className="text-sm font-semibold text-blue-900 mb-1">Select Organization</p>
-              <p className="text-xs text-blue-600">As Super Admin, select an organization to view and manage its users.</p>
+              <p className="text-sm font-semibold text-blue-900 mb-1">בחר ארגון</p>
+              <p className="text-xs text-blue-600">כמנהל-על, בחר ארגון לצפייה וניהול המשתמשים שלו.</p>
             </div>
             <div className="relative">
               <select
@@ -337,7 +337,7 @@ export const UserManagement: React.FC = () => {
                 }
                 className="appearance-none border border-blue-300 bg-white rounded-lg px-4 py-2 pr-8 text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]"
               >
-                <option value="">Choose organization...</option>
+                <option value="">בחר ארגון...</option>
                 {organizations.map((org) => (
                   <option key={org.id} value={org.id}>{org.name}</option>
                 ))}
@@ -350,9 +350,9 @@ export const UserManagement: React.FC = () => {
         {(!isSuperAdmin || selectedOrgId != null) && (
           <div className="grid grid-cols-3 gap-4">
             {[
-              { label: 'Total Users',    value: displayUsers.length },
-              { label: 'Active',         value: displayUsers.filter((u) => u.isActive).length },
-              { label: 'Inactive',       value: displayUsers.filter((u) => !u.isActive).length },
+              { label: 'סה"כ משתמשים', value: displayUsers.length },
+              { label: 'פעילים',        value: displayUsers.filter((u) => u.isActive).length },
+              { label: 'לא פעילים',    value: displayUsers.filter((u) => !u.isActive).length },
             ].map(({ label, value }) => (
               <div key={label} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
                 <p className="text-xs text-gray-500 mb-0.5">{label}</p>
@@ -371,12 +371,12 @@ export const UserManagement: React.FC = () => {
 
         {isSuperAdmin && selectedOrgId == null ? (
           <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-            <p className="text-gray-400 text-sm">Select an organization above to view its users.</p>
+            <p className="text-gray-400 text-sm">בחר ארגון למעלה לצפייה במשתמשיו.</p>
           </div>
         ) : (
           <Card
-            title="Team Members"
-            subtitle={`${filtered.length} of ${displayUsers.length} users · Admin first`}
+            title="חברי צוות"
+            subtitle={`${filtered.length} מתוך ${displayUsers.length} משתמשים · מנהלים ראשונים`}
             noPadding
             headerRight={
               <div className="flex items-center gap-3">
@@ -384,14 +384,14 @@ export const UserManagement: React.FC = () => {
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
-                    placeholder="Search users..."
+                    placeholder="חיפוש משתמשים..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
                   />
                 </div>
                 <Button icon={<UserPlus className="w-4 h-4" />} size="sm" onClick={openCreate}>
-                  Add User
+                  הוסף משתמש
                 </Button>
               </div>
             }
@@ -400,19 +400,19 @@ export const UserManagement: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50">
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Role</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Events</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Joined</th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">משתמש</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">הרשאה</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">אירועים</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">סטטוס</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">הצטרף</th>
+                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">פעולות</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.length === 0 && (
                     <tr>
                       <td colSpan={6} className="text-center py-10 text-gray-400 text-sm">
-                        No users found.
+                        לא נמצאו משתמשים.
                       </td>
                     </tr>
                   )}
@@ -433,7 +433,7 @@ export const UserManagement: React.FC = () => {
                                 className="text-sm font-medium text-gray-900 hover:text-blue-700 hover:underline text-left"
                               >
                                 {u.name}
-                                {isSelf && <span className="ml-1.5 text-xs text-blue-500 font-normal">(you)</span>}
+                                {isSelf && <span className="ml-1.5 text-xs text-blue-500 font-normal">(אתה)</span>}
                               </button>
                               <p className="text-xs text-gray-500">{u.email}</p>
                               {u.jobTitle && <p className="text-xs text-gray-400 italic">{u.jobTitle}</p>}
@@ -451,7 +451,7 @@ export const UserManagement: React.FC = () => {
                               onClick={() => setExpandedUserId(expandedUserId === u.id ? null : u.id)}
                               className="flex items-center gap-1.5 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-full transition"
                             >
-                              {userEventCount[u.id]} event{userEventCount[u.id] !== 1 ? 's' : ''}
+                              {userEventCount[u.id]} {userEventCount[u.id] !== 1 ? 'אירועים' : 'אירוע'}
                             </button>
                           ) : (
                             <span className="text-xs text-gray-400">—</span>
@@ -462,13 +462,13 @@ export const UserManagement: React.FC = () => {
                             onClick={() => !isSelf && toggleActive(u.id)}
                             disabled={isSelf}
                             className="flex items-center gap-1.5 text-sm transition"
-                            title={isSelf ? 'Cannot deactivate yourself' : u.isActive ? 'Deactivate' : 'Activate'}
+                            title={isSelf ? 'לא ניתן להשבית את עצמך' : u.isActive ? 'השבת' : 'הפעל'}
                           >
                             {u.isActive
                               ? <ToggleRight className="w-5 h-5 text-green-500" />
                               : <ToggleLeft className="w-5 h-5 text-gray-400" />}
                             <span className={`text-xs font-medium ${u.isActive ? 'text-green-600' : 'text-gray-400'}`}>
-                              {u.isActive ? 'Active' : 'Inactive'}
+                              {u.isActive ? 'פעיל' : 'לא פעיל'}
                             </span>
                           </button>
                         </td>
@@ -478,7 +478,7 @@ export const UserManagement: React.FC = () => {
                             <button
                               onClick={() => openEdit(u)}
                               className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition"
-                              title="Edit user"
+                              title="ערוך משתמש"
                             >
                               <Pencil className="w-4 h-4" />
                             </button>
@@ -486,7 +486,7 @@ export const UserManagement: React.FC = () => {
                               onClick={() => !isSelf && openDelete(u)}
                               disabled={isSelf}
                               className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition disabled:opacity-30 disabled:cursor-not-allowed"
-                              title={isSelf ? 'Cannot delete yourself' : 'Delete user'}
+                              title={isSelf ? 'לא ניתן למחוק את עצמך' : 'מחק משתמש'}
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -497,11 +497,11 @@ export const UserManagement: React.FC = () => {
                         <tr className="bg-blue-50 border-b border-blue-100">
                           <td colSpan={6} className="px-6 py-3">
                             {(userEventList[u.id] || []).length === 0 ? (
-                              <p className="text-xs text-gray-400 italic">No events created yet.</p>
+                              <p className="text-xs text-gray-400 italic">טרם נוצרו אירועים.</p>
                             ) : (
                               <div>
                                 <p className="text-xs font-semibold text-gray-600 mb-2">
-                                  Events created by {u.name}:
+                                  אירועים שנוצרו על ידי {u.name}:
                                 </p>
                                 <div className="flex flex-wrap gap-2">
                                   {(userEventList[u.id] || []).map((ev, idx) => (
@@ -527,33 +527,33 @@ export const UserManagement: React.FC = () => {
         )}
       </div>
 
-      <Modal isOpen={modalMode === 'create'} onClose={closeModal} title="Add New User" size="sm"
+      <Modal isOpen={modalMode === 'create'} onClose={closeModal} title="הוסף משתמש חדש" size="sm"
         footer={
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={closeModal}>Cancel</Button>
-            <Button onClick={handleSubmit(onCreate)}>Create User</Button>
+            <Button variant="outline" onClick={closeModal}>ביטול</Button>
+            <Button onClick={handleSubmit(onCreate)}>צור משתמש</Button>
           </div>
         }
       >
         <UserFormFields />
       </Modal>
 
-      <Modal isOpen={modalMode === 'password'} onClose={closeModal} title="User Created Successfully" size="sm">
+      <Modal isOpen={modalMode === 'password'} onClose={closeModal} title="המשתמש נוצר בהצלחה" size="sm">
         <div className="space-y-4">
           <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-lg p-3">
             <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
               <Check className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-green-800">{selectedUser?.name} has been created</p>
+              <p className="text-sm font-semibold text-green-800">המשתמש {selectedUser?.name} נוצר</p>
               <p className="text-xs text-green-600">{selectedUser?.email}</p>
             </div>
           </div>
 
           <div>
-            <p className="text-sm font-semibold text-gray-900 mb-1">Initial Password</p>
+            <p className="text-sm font-semibold text-gray-900 mb-1">סיסמה ראשונית</p>
             <p className="text-xs text-gray-500 mb-2">
-              Share this password securely. The user should change it upon first login.
+              שתף סיסמה זו בצורה מאובטחת. על המשתמש לשנות אותה בהתחברות הראשונה.
             </p>
             <div className="flex items-center gap-2 bg-gray-900 rounded-lg px-4 py-3">
               <code className="flex-1 text-green-400 font-mono text-sm tracking-widest select-all">
@@ -562,7 +562,7 @@ export const UserManagement: React.FC = () => {
               <button
                 onClick={copyPassword}
                 className="text-gray-400 hover:text-white transition flex-shrink-0"
-                title="Copy password"
+                title="העתק סיסמה"
               >
                 {passwordCopied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
               </button>
@@ -571,32 +571,32 @@ export const UserManagement: React.FC = () => {
 
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">
             <p className="text-xs text-yellow-800 font-medium">
-              ⚠ This password will not be shown again. Copy it now.
+              ⚠ סיסמה זו לא תוצג שוב. העתק אותה עכשיו.
             </p>
           </div>
 
           <div className="flex justify-end">
-            <Button onClick={closeModal}>Done</Button>
+            <Button onClick={closeModal}>סיום</Button>
           </div>
         </div>
       </Modal>
 
-      <Modal isOpen={modalMode === 'edit'} onClose={closeModal} title={`Edit: ${selectedUser?.name}`} size="sm"
+      <Modal isOpen={modalMode === 'edit'} onClose={closeModal} title={`עריכה: ${selectedUser?.name}`} size="sm"
         footer={
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={closeModal}>Cancel</Button>
-            <Button onClick={handleSubmit(onEdit)}>Save Changes</Button>
+            <Button variant="outline" onClick={closeModal}>ביטול</Button>
+            <Button onClick={handleSubmit(onEdit)}>שמור שינויים</Button>
           </div>
         }
       >
         <UserFormFields />
       </Modal>
 
-      <Modal isOpen={modalMode === 'delete'} onClose={closeModal} title="Delete User" size="sm"
+      <Modal isOpen={modalMode === 'delete'} onClose={closeModal} title="מחיקת משתמש" size="sm"
         footer={
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={closeModal}>Cancel</Button>
-            <Button variant="danger" onClick={onDelete}>Delete User</Button>
+            <Button variant="outline" onClick={closeModal}>ביטול</Button>
+            <Button variant="danger" onClick={onDelete}>מחק משתמש</Button>
           </div>
         }
       >
@@ -605,10 +605,10 @@ export const UserManagement: React.FC = () => {
             <Trash2 className="w-6 h-6 text-red-500" />
           </div>
           <p className="text-gray-700 text-sm">
-            Are you sure you want to delete{' '}
+            האם אתה בטוח שברצונך למחוק את{' '}
             <span className="font-semibold text-gray-900">{selectedUser?.name}</span>?
           </p>
-          <p className="text-gray-400 text-xs mt-1">This action cannot be undone.</p>
+          <p className="text-gray-400 text-xs mt-1">פעולה זו אינה ניתנת לביטול.</p>
         </div>
       </Modal>
     </PageContainer>
