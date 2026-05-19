@@ -19,8 +19,8 @@ import { fetchOrganizations } from '../../api/organizations';
 import { TEST_TEMPLATES } from '../../config/testTemplates';
 
 const schema = z.object({
-  name: z.string().min(3, 'Event name must be at least 3 characters').max(80),
-  description: z.string().min(20, 'Description must be at least 20 characters').max(500),
+  name: z.string().min(3, 'שם האירוע חייב להכיל לפחות 3 תווים').max(80),
+  description: z.string().min(20, 'התיאור חייב להכיל לפחות 20 תווים').max(500),
   tags: z.string().optional(),
 });
 type FormData = z.infer<typeof schema>;
@@ -101,7 +101,7 @@ export const NewEventForm: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file.');
+      alert('אנא בחר קובץ תמונה.');
       return;
     }
     setImageFile(file);
@@ -125,7 +125,7 @@ export const NewEventForm: React.FC = () => {
       const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
       const data = await res.json();
       if (data.length === 0) {
-        setGeoError('Address not found. Try a more specific query.');
+        setGeoError('הכתובת לא נמצאה. נסה שאילתה ספציפית יותר.');
         return;
       }
       const { lat, lon, display_name } = data[0];
@@ -137,7 +137,7 @@ export const NewEventForm: React.FC = () => {
         city: parts[parts.length - 2]?.trim() || 'Israel',
       });
     } catch {
-      setGeoError('Could not search address. Check your connection.');
+      setGeoError('לא ניתן לחפש כתובת. בדוק את החיבור לרשת.');
     } finally {
       setAddressSearching(false);
     }
@@ -145,7 +145,7 @@ export const NewEventForm: React.FC = () => {
 
   const handleGeolocation = () => {
     if (!navigator.geolocation) {
-      setGeoError('Geolocation is not supported by your browser.');
+      setGeoError('מיקום גיאוגרפי אינו נתמך בדפדפן זה.');
       return;
     }
     setGeoLoading(true);
@@ -157,15 +157,15 @@ export const NewEventForm: React.FC = () => {
           lat: parseFloat(latitude.toFixed(5)),
           lng: parseFloat(longitude.toFixed(5)),
           address: `GPS ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`,
-          city: 'Current Location',
+          city: 'מיקום נוכחי',
         });
         setGeoLoading(false);
       },
       (err) => {
         setGeoError(
           err.code === 1
-            ? 'Location permission denied. Allow access in browser settings.'
-            : 'Unable to retrieve location. Please try again.'
+            ? 'הרשאת מיקום נדחתה. אפשר גישה בהגדרות הדפדפן.'
+            : 'לא ניתן לאחזר מיקום. נסה שוב.'
         );
         setGeoLoading(false);
       },
@@ -231,20 +231,20 @@ export const NewEventForm: React.FC = () => {
   };
 
   const onSubmit = async (data: FormData) => {
-    const loc = location || { lat: 32.0853, lng: 34.7818, address: 'Unspecified', city: 'Tel Aviv' };
+    const loc = location || { lat: 32.0853, lng: 34.7818, address: 'לא צוין', city: 'Tel Aviv' };
 
     let organizationIdNum: number;
     if (user?.role === UserRole.SUPER_ADMIN) {
       const n = Number(superAdminOrgId);
       if (!Number.isFinite(n) || n < 1) {
-        setApiError('Select an organization for this event.');
+        setApiError('יש לבחור ארגון עבור אירוע זה.');
         return;
       }
       organizationIdNum = n;
     } else {
       const n = user?.organizationId;
       if (n == null || !Number.isFinite(n) || n < 1) {
-        setApiError('Your account has no organization assigned. Contact an administrator.');
+        setApiError('לחשבונך לא שויך ארגון. פנה למנהל.');
         return;
       }
       organizationIdNum = n;
@@ -291,7 +291,7 @@ export const NewEventForm: React.FC = () => {
       };
     } catch (_err) {
       usedFallback = true;
-      setApiError('Backend unavailable — scoring locally (offline mode).');
+      setApiError('השרת אינו זמין — ניקוד מקומי (מצב לא מקוון).');
       const { classification, damageScore } = simulateAIClassification();
       const gisDetails = simulateGISMultiplier(loc.lat, loc.lng);
       const finalScore = Math.min(10, Math.max(0.1, Math.round(damageScore * gisDetails.geoMultiplier * 10) / 10));
@@ -339,8 +339,8 @@ export const NewEventForm: React.FC = () => {
     if (score >= 7.5) {
       addNotification({
         id: `notif-${Date.now()}`,
-        title: 'Critical Event Detected',
-        message: `New event at ${loc.address} scored ${score.toFixed(1)}/10. Immediate response required.`,
+        title: 'אירוע קריטי זוהה',
+        message: `אירוע חדש ב-${loc.address} קיבל ציון ${score.toFixed(1)}/10. נדרשת תגובה מיידית.`,
         type: 'critical',
         read: false,
         createdAt: new Date(),
@@ -349,8 +349,8 @@ export const NewEventForm: React.FC = () => {
     } else if (score >= 5.0) {
       addNotification({
         id: `notif-${Date.now()}`,
-        title: 'High-Priority Event',
-        message: `New event at ${loc.address} has been assessed with priority ${score.toFixed(1)}/10.`,
+        title: 'אירוע בעדיפות גבוהה',
+        message: `אירוע חדש ב-${loc.address} הוערך בעדיפות ${score.toFixed(1)}/10.`,
         type: 'warning',
         read: false,
         createdAt: new Date(),
@@ -361,8 +361,8 @@ export const NewEventForm: React.FC = () => {
     if (usedFallback) {
       addNotification({
         id: `notif-offline-${Date.now()}`,
-        title: 'Offline Mode',
-        message: 'Backend server unavailable. Event scored locally using simulation.',
+        title: 'מצב לא מקוון',
+        message: 'שרת ה-Backend אינו זמין. האירוע נוקד מקומית באמצעות סימולציה.',
         type: 'info',
         read: false,
         createdAt: new Date(),
@@ -386,16 +386,16 @@ export const NewEventForm: React.FC = () => {
 
   if (aiStatus === 'analyzing') {
     return (
-      <PageContainer title="Report New Damage Event">
+      <PageContainer title="דיווח על אירוע נזק חדש">
         <div className="max-w-2xl mx-auto mt-20 text-center">
           <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">AI Model Running</h2>
-          <p className="text-gray-500 mb-1">Sending to backend · classifying damage · computing GIS priority score...</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">מודל AI פועל</h2>
+          <p className="text-gray-500 mb-1">שולח לשרת · מסווג נזק · מחשב ציון עדיפות GIS...</p>
           <div className="flex items-center justify-center gap-2 mt-4">
             <Brain className="w-4 h-4 text-blue-500 animate-pulse" />
-            <span className="text-sm text-blue-600 font-medium">Vision AI → GIS Analysis → Final Score</span>
+            <span className="text-sm text-blue-600 font-medium">Vision AI → ניתוח GIS → ציון סופי</span>
           </div>
           {apiError && (
             <div className="mt-6 flex items-center gap-2 justify-center text-amber-600 text-sm">
@@ -409,32 +409,32 @@ export const NewEventForm: React.FC = () => {
 
   if (submitted) {
     return (
-      <PageContainer title="New Damage Event">
+      <PageContainer title="אירוע נזק חדש">
         <div className="max-w-2xl mx-auto mt-20 text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Event Submitted & Scored</h2>
-          <p className="text-gray-500">Your report has been analyzed by AI and added to the priority queue.</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">האירוע נשלח ונוקד</h2>
+          <p className="text-gray-500">הדוח נותח על ידי AI והוסף לתור העדיפויות.</p>
         </div>
       </PageContainer>
     );
   }
 
   return (
-    <PageContainer title="Report New Damage Event">
+    <PageContainer title="דיווח על אירוע נזק חדש">
       <div className="max-w-2xl mx-auto">
         <div className="mb-4 flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5">
           <Brain className="w-4 h-4 text-blue-500 flex-shrink-0" />
           <p className="text-xs text-blue-700">
-            Upon submission, the AI model will automatically classify the damage and compute the priority score using GIS data.
+            עם שליחה, מודל ה-AI יסווג את הנזק ויחשב את ציון העדיפות באמצעות נתוני GIS.
           </p>
         </div>
 
         <div className="mb-4 border border-amber-200 bg-amber-50 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-2">
             <FlaskConical className="w-4 h-4 text-amber-600 flex-shrink-0" />
-            <span className="text-sm font-semibold text-amber-800">Quick Load Test Template</span>
+            <span className="text-sm font-semibold text-amber-800">טעינה מהירה של תבנית בדיקה</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {TEST_TEMPLATES.map((tpl) => (
@@ -450,7 +450,7 @@ export const NewEventForm: React.FC = () => {
           </div>
           {templateImagePath && (
             <div className="mt-2 p-2 bg-white border border-amber-300 rounded text-xs text-amber-700">
-              <strong>📂 Manual image required:</strong> Please click the photo upload area and select:
+              <strong>📂 נדרשת תמונה ידנית:</strong> אנא לחץ על אזור העלאת התמונה ובחר:
               <br />
               <code className="bg-amber-100 px-1 rounded">{templateImagePath.replace('/test-images/', 'client/public/test-images/')}</code>
             </div>
@@ -459,15 +459,15 @@ export const NewEventForm: React.FC = () => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
-          <Card title="Event Description">
+          <Card title="תיאור האירוע">
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">
-                  Event Name <span className="text-red-500">*</span>
+                  שם האירוע <span className="text-red-500">*</span>
                 </label>
                 <input
                   {...register('name')}
-                  placeholder="e.g. Dizengoff Facade Collapse"
+                  placeholder="לדוגמה: קריסת חזית דיזנגוף"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 {errors.name && (
@@ -476,12 +476,12 @@ export const NewEventForm: React.FC = () => {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">
-                  Damage Description <span className="text-red-500">*</span>
+                  תיאור הנזק <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   {...register('description')}
                   rows={4}
-                  placeholder="Describe the damage — type, affected area, visible hazards, estimated scope..."
+                  placeholder="תאר את הנזק — סוג, אזור מושפע, סכנות גלויות, היקף משוער..."
                   className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
                 {errors.description && (
@@ -489,18 +489,18 @@ export const NewEventForm: React.FC = () => {
                 )}
               </div>
               <Input
-                label="Tags (comma-separated)"
-                placeholder="structural, urgent, residential"
+                label="תגיות (מופרדות בפסיקים)"
+                placeholder="מבני, דחוף, מגורים"
                 {...register('tags')}
               />
             </div>
           </Card>
 
           {user?.role === UserRole.SUPER_ADMIN && (
-            <Card title="Organization">
+            <Card title="ארגון">
               <div>
                 <label className="text-sm font-medium text-gray-700 block mb-1">
-                  Organization for this event <span className="text-red-500">*</span>
+                  ארגון עבור אירוע זה <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={superAdminOrgId}
@@ -508,7 +508,7 @@ export const NewEventForm: React.FC = () => {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
-                  <option value="">Select organization…</option>
+                  <option value="">בחר ארגון…</option>
                   {superAdminOrgs.map((o) => (
                     <option key={o.id} value={String(o.id)}>
                       {o.name}
@@ -517,23 +517,23 @@ export const NewEventForm: React.FC = () => {
                   ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-1.5">
-                  Super admins are not tied to one organization. Choose which organization owns this event.
+                  מנהלי-על אינם קשורים לארגון אחד. בחר לאיזה ארגון שייך אירוע זה.
                 </p>
               </div>
             </Card>
           )}
 
-          <Card title="Location">
+          <Card title="מיקום">
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">Address</label>
+                <label className="text-sm font-medium text-gray-700 block mb-1">כתובת</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={addressInput}
                     onChange={(e) => setAddressInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddressSearch(); } }}
-                    placeholder="Type an address and press Search..."
+                    placeholder="הקלד כתובת ולחץ חיפוש..."
                     className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
@@ -545,7 +545,7 @@ export const NewEventForm: React.FC = () => {
                     {addressSearching
                       ? <Loader2 className="w-4 h-4 animate-spin" />
                       : <Search className="w-4 h-4" />}
-                    {addressSearching ? 'Searching...' : 'Search'}
+                    {addressSearching ? 'מחפש...' : 'חיפוש'}
                   </button>
                 </div>
               </div>
@@ -557,7 +557,7 @@ export const NewEventForm: React.FC = () => {
                 className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-blue-300 hover:border-blue-500 hover:bg-blue-50 text-blue-600 rounded-lg text-sm font-medium transition disabled:opacity-60"
               >
                 <Navigation className={`w-4 h-4 ${geoLoading ? 'animate-pulse' : ''}`} />
-                {geoLoading ? 'Getting your location...' : 'Use My Current Location'}
+                {geoLoading ? 'מאתר מיקומך...' : 'השתמש במיקום הנוכחי'}
               </button>
               {geoError && <p className="text-xs text-red-500">{geoError}</p>}
 
@@ -565,18 +565,18 @@ export const NewEventForm: React.FC = () => {
 
               {location && (
                 <p className="text-xs text-green-600 font-medium">
-                  Location set: {location.address}
+                  מיקום נקבע: {location.address}
                 </p>
               )}
             </div>
           </Card>
 
-          <Card title="Photo Evidence">
+          <Card title="עדות צילומית">
             {imagePreview ? (
               <div className="relative">
                 <img
                   src={imagePreview}
-                  alt="Damage preview"
+                  alt="תצוגה מקדימה של נזק"
                   className="w-full h-56 object-cover rounded-xl border border-gray-200"
                 />
                 <button
@@ -601,7 +601,7 @@ export const NewEventForm: React.FC = () => {
                     <ImageIcon className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition" />
                   </div>
                   <p className="text-sm font-medium text-gray-600 group-hover:text-blue-600">
-                    Click to upload a photo
+                    לחץ להעלאת תמונה
                   </p>
                   <p className="text-xs text-gray-400">PNG, JPG, WEBP</p>
                 </div>
@@ -617,7 +617,7 @@ export const NewEventForm: React.FC = () => {
           </Card>
 
           <Button type="submit" loading={isSubmitting} size="lg" className="w-full justify-center">
-            Submit & Run AI Assessment
+            שלח והפעל ניתוח AI
           </Button>
         </form>
       </div>
