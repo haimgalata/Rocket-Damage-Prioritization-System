@@ -50,32 +50,32 @@ export const SuperAdminDashboard: React.FC = () => {
   }), [events]);
 
   return (
-    <PageContainer title="System Overview">
+    <PageContainer title="סקירת מערכת">
       {/* ── Top 3 nav cards ─────────────────────────────────────────── */}
       <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           {
-            title: 'Organizations',
+            title: 'ארגונים',
             count: orgs.length,
-            sub: 'Registered orgs',
+            sub: 'ארגונים רשומים',
             icon: <Building2 className="w-6 h-6 text-blue-600" />,
             iconBg: 'bg-blue-100',
             chevronColor: 'group-hover:text-blue-500',
             route: '/super-admin/organizations',
           },
           {
-            title: 'Users',
+            title: 'משתמשים',
             count: users.length,
-            sub: 'All roles',
+            sub: 'כל התפקידים',
             icon: <Users className="w-6 h-6 text-violet-600" />,
             iconBg: 'bg-violet-100',
             chevronColor: 'group-hover:text-violet-500',
             route: '/admin/users',
           },
           {
-            title: 'Events',
+            title: 'אירועים',
             count: events.length,
-            sub: 'Total damage events',
+            sub: 'סה״כ אירועי נזק',
             icon: <FileText className="w-6 h-6 text-amber-600" />,
             iconBg: 'bg-amber-100',
             chevronColor: 'group-hover:text-amber-500',
@@ -106,7 +106,7 @@ export const SuperAdminDashboard: React.FC = () => {
 
       {/* ── Status breakdown (clickable) ────────────────────────────── */}
       <div className="max-w-5xl mx-auto mt-6">
-        <Card title="Events by Status" subtitle="Click a status to view its events">
+        <Card title="אירועים לפי סטטוס" subtitle="לחץ על סטטוס לצפייה באירועים">
           <div className="grid grid-cols-3 gap-4">
             {[
               {
@@ -154,7 +154,7 @@ export const SuperAdminDashboard: React.FC = () => {
         {statusModal && (
           <div className="space-y-1 max-h-96 overflow-y-auto">
             {statusModal.events.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-6">No events in this status.</p>
+              <p className="text-sm text-gray-400 text-center py-6">אין אירועים בסטטוס זה.</p>
             ) : (
               statusModal.events.map((ev) => (
                 <Link

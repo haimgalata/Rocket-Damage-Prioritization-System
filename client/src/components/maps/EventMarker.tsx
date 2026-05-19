@@ -46,7 +46,7 @@ export const EventMarker: React.FC<EventMarkerProps> = ({ event, onClick }) => {
           <p className="text-xs text-gray-500 mb-2">{event.location.city}</p>
           <div className="flex gap-2 mb-2">
             <span className="text-xs font-medium" style={{ color }}>
-              Priority: {event.priorityScore.toFixed(1)}/10 ({getPriorityLabel(event.priorityScore)})
+              עדיפות: {event.priorityScore.toFixed(1)}/10 ({getPriorityLabel(event.priorityScore)})
             </span>
           </div>
           <span className={`text-xs px-2 py-0.5 rounded-full border ${getStatusColor(event.status)}`}>
