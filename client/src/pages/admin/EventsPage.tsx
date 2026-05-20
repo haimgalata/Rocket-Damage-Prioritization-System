@@ -131,7 +131,7 @@ export const EventsPage: React.FC = () => {
                 }`}
               >
                 {btn.label}
-                <span className={`ml-1.5 text-xs ${filterStatus === btn.value ? 'text-blue-200' : 'text-gray-400'}`}>
+                <span className={`mr-1.5 text-xs ${filterStatus === btn.value ? 'text-blue-200' : 'text-gray-400'}`}>
                   {btn.count}
                 </span>
               </button>

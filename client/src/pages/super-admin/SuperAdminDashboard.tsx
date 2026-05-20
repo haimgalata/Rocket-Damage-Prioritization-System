@@ -98,7 +98,7 @@ export const SuperAdminDashboard: React.FC = () => {
                 <p className="text-3xl font-bold text-gray-900">{count}</p>
                 <p className="text-sm text-gray-500">{sub}</p>
               </div>
-              <ChevronRight className={`w-4 h-4 text-gray-400 transition ${chevronColor}`} />
+              <ChevronRight className={`w-4 h-4 text-gray-400 transition scale-x-[-1] ${chevronColor}`} />
             </div>
           </div>
         ))}
@@ -177,7 +177,7 @@ export const SuperAdminDashboard: React.FC = () => {
                     }`}>
                       {ev.priorityScore.toFixed(1)}
                     </span>
-                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 scale-x-[-1]" />
                   </div>
                 </Link>
               ))

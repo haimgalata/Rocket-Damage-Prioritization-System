@@ -101,12 +101,12 @@ export const Login: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 pr-10 text-white placeholder-blue-300/60 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                  className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 pl-10 text-white placeholder-blue-300/60 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-300 hover:text-white"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -145,7 +145,7 @@ export const Login: React.FC = () => {
                   key={cred.email}
                   type="button"
                   onClick={() => { setValue('email', cred.email); setValue('password', cred.password); }}
-                  className="w-full flex items-center justify-between bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-left transition"
+                  className="w-full flex items-center justify-between bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-3 py-2 transition"
                 >
                   <div>
                     <p className="text-xs font-semibold text-blue-200">{cred.label}</p>

@@ -128,7 +128,7 @@ export const Sidebar: React.FC = () => {
     <>
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="fixed md:hidden top-4 left-4 z-50 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        className="fixed md:hidden top-4 right-4 z-50 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
       >
         {isMobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
@@ -142,12 +142,12 @@ export const Sidebar: React.FC = () => {
 
       <aside
         className={`
-          fixed left-0 top-0 h-screen bg-gradient-to-b from-blue-50 to-gray-50
-          border-r border-gray-200 shadow-lg transition-all duration-300 z-40
+          fixed right-0 top-0 h-screen bg-gradient-to-b from-blue-50 to-gray-50
+          border-l border-gray-200 shadow-lg transition-all duration-300 z-40
           flex flex-col
           ${isOpen ? 'w-64' : 'w-20'}
           md:static md:h-screen md:translate-x-0 md:z-auto md:flex-shrink-0
-          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          ${isMobileOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
         `}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-200 h-16">
@@ -162,7 +162,7 @@ export const Sidebar: React.FC = () => {
           </button>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="hidden md:block p-1 hover:bg-gray-200 rounded-lg transition ml-auto"
+            className="hidden md:block p-1 hover:bg-gray-200 rounded-lg transition mr-auto"
             title={isOpen ? 'כווץ' : 'הרחב'}
           >
             <Menu className="w-5 h-5 text-gray-600" />
@@ -172,7 +172,7 @@ export const Sidebar: React.FC = () => {
         {isOpen && user && (
           <button
             onClick={handleProfileClick}
-            className="p-4 border-b border-gray-200 bg-white mx-2 mt-2 rounded-lg hover:bg-blue-50 transition text-left w-auto"
+            className="p-4 border-b border-gray-200 bg-white mx-2 mt-2 rounded-lg hover:bg-blue-50 transition w-auto"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
@@ -201,7 +201,7 @@ export const Sidebar: React.FC = () => {
           <ul className="space-y-2">
             {visibleItems.map((item) => {
               const navItemClass = `
-                flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 w-full text-left
+                flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 w-full
                 ${item.children
                   ? expandedMenu === item.path || item.children.some((c) => isActive(c.path))
                     ? 'bg-blue-50 text-blue-700'
@@ -240,7 +240,7 @@ export const Sidebar: React.FC = () => {
                   )}
 
                   {item.children && expandedMenu === item.path && isOpen && (
-                    <ul className="mt-1 ml-3 space-y-1 border-l-2 border-blue-300 pl-2">
+                    <ul className="mt-1 mr-3 space-y-1 border-r-2 border-blue-300 pr-2">
                       {item.children.map((child) => (
                         <li key={child.path}>
                           <Link

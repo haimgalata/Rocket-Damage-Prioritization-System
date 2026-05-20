@@ -342,7 +342,7 @@ export const UserManagement: React.FC = () => {
                   <option key={org.id} value={org.id}>{org.name}</option>
                 ))}
               </select>
-              <ChevronDown className="w-4 h-4 text-gray-500 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <ChevronDown className="w-4 h-4 text-gray-500 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
           </div>
         )}
@@ -365,7 +365,7 @@ export const UserManagement: React.FC = () => {
         {toggleError && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 flex items-start gap-2">
             <span className="text-red-600 text-sm font-medium">{toggleError}</span>
-            <button onClick={() => setToggleError(null)} className="ml-auto text-red-400 hover:text-red-600 text-xs">✕</button>
+            <button onClick={() => setToggleError(null)} className="mr-auto text-red-400 hover:text-red-600 text-xs">✕</button>
           </div>
         )}
 
@@ -381,13 +381,13 @@ export const UserManagement: React.FC = () => {
             headerRight={
               <div className="flex items-center gap-3">
                 <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
                     placeholder="חיפוש משתמשים..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
+                    className="pr-9 pl-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
                   />
                 </div>
                 <Button icon={<UserPlus className="w-4 h-4" />} size="sm" onClick={openCreate}>
@@ -400,12 +400,12 @@ export const UserManagement: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50">
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">משתמש</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">הרשאה</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">אירועים</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">סטטוס</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">הצטרף</th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">פעולות</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">משתמש</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">הרשאה</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">אירועים</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">סטטוס</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">הצטרף</th>
+                    <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">פעולות</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -430,7 +430,7 @@ export const UserManagement: React.FC = () => {
                             <div>
                               <button
                                 onClick={() => setExpandedUserId(expandedUserId === u.id ? null : u.id)}
-                                className="text-sm font-medium text-gray-900 hover:text-blue-700 hover:underline text-left"
+                                className="text-sm font-medium text-gray-900 hover:text-blue-700 hover:underline"
                               >
                                 {u.name}
                                 {isSelf && <span className="ml-1.5 text-xs text-blue-500 font-normal">(אתה)</span>}

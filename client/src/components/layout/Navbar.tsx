@@ -70,14 +70,14 @@ export const Navbar: React.FC<NavbarProps> = ({ pageTitle }) => {
           >
             <Bell className="w-5 h-5" />
             {unread > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center">
+              <span className="absolute top-1 left-1 w-4 h-4 bg-red-500 rounded-full text-white text-[9px] font-bold flex items-center justify-center">
                 {unread > 9 ? '9+' : unread}
               </span>
             )}
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 top-12 w-96 bg-white border border-gray-200 rounded-xl shadow-xl z-50">
+            <div className="absolute left-0 top-12 w-96 bg-white border border-gray-200 rounded-xl shadow-xl z-50">
               <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
                 <span className="font-semibold text-gray-900 text-sm">התראות</span>
                 <div className="flex items-center gap-2">
@@ -134,9 +134,9 @@ export const Navbar: React.FC<NavbarProps> = ({ pageTitle }) => {
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => { setUserMenuOpen((v) => !v); setNotifOpen(false); }}
-              className="flex items-center gap-2 pl-3 border-l border-gray-200 hover:bg-gray-50 rounded-lg px-2 py-1 transition"
+              className="flex items-center gap-2 pr-3 border-r border-gray-200 hover:bg-gray-50 rounded-lg px-2 py-1 transition"
             >
-              <div className="text-right hidden sm:block">
+              <div className="hidden sm:block">
                 <p className="text-sm font-medium text-gray-900">{user.name}</p>
                 <p className="text-xs text-gray-500">{formatRole(user.role)}</p>
                 {user.jobTitle && <p className="text-[10px] text-blue-500 truncate max-w-[120px]">{user.jobTitle}</p>}
@@ -148,7 +148,7 @@ export const Navbar: React.FC<NavbarProps> = ({ pageTitle }) => {
             </button>
 
             {userMenuOpen && (
-              <div className="absolute right-0 top-12 w-52 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1">
+              <div className="absolute left-0 top-12 w-52 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-1">
                 <div className="px-4 py-2.5 border-b border-gray-100">
                   <p className="text-sm font-semibold text-gray-900">{user.name}</p>
                   <p className="text-xs text-gray-500 truncate">{user.email}</p>

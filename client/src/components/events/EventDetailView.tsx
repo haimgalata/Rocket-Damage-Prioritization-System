@@ -73,7 +73,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
               >
                 <button
                   onClick={() => setLightboxOpen(false)}
-                  className="absolute -top-3 -right-3 z-10 bg-white rounded-full p-1 shadow-lg hover:bg-gray-100"
+                  className="absolute -top-3 -left-3 z-10 bg-white rounded-full p-1 shadow-lg hover:bg-gray-100"
                 >
                   <X className="w-5 h-5 text-gray-700" />
                 </button>
@@ -108,7 +108,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         )}
         {event.tags?.map((tag) => (
           <Badge key={tag} variant="default">
-            <Tag className="w-3 h-3 mr-1" />
+            <Tag className="w-3 h-3 ml-1" />
             {tag}
           </Badge>
         ))}
@@ -144,7 +144,7 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
 
       <div>
         <h4 className="text-sm font-semibold text-gray-700 mb-1">תיאור</h4>
-        <p className="text-sm text-gray-600">{event.description}</p>
+        <p className="text-sm text-gray-600" dir="auto">{event.description}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 text-sm">

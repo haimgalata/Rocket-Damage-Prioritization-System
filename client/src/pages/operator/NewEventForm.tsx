@@ -582,7 +582,7 @@ export const NewEventForm: React.FC = () => {
                 <button
                   type="button"
                   onClick={clearImage}
-                  className="absolute top-2 right-2 w-8 h-8 bg-white/90 hover:bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm transition"
+                  className="absolute top-2 left-2 w-8 h-8 bg-white/90 hover:bg-white border border-gray-200 rounded-full flex items-center justify-center shadow-sm transition"
                 >
                   <X className="w-4 h-4 text-gray-600" />
                 </button>

@@ -145,18 +145,18 @@ export const OrgManagement: React.FC = () => {
 
         {/* Table */}
         <Card
-          title="Organizations"
+          title="ארגונים"
           noPadding
           headerRight={
             <div className="flex items-center gap-3">
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
                   placeholder="חיפוש שם, יישוב, קוד..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-52"
+                  className="pr-9 pl-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-52"
                 />
               </div>
               <Button icon={<Plus className="w-4 h-4" />} size="sm" onClick={() => setIsCreateOpen(true)}>
@@ -169,13 +169,13 @@ export const OrgManagement: React.FC = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ארגון</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">קוד</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">יישוב</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">מנהל</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">אירועים</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">משתמשים</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">נוצר</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">ארגון</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">קוד</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">יישוב</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">מנהל</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">אירועים</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">משתמשים</th>
+                  <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">נוצר</th>
                 </tr>
               </thead>
               <tbody>
@@ -195,7 +195,7 @@ export const OrgManagement: React.FC = () => {
                           <div>
                             <button
                               onClick={() => setBriefOrg(org)}
-                              className="text-sm font-semibold text-blue-700 hover:underline text-left"
+                              className="text-sm font-semibold text-blue-700 hover:underline"
                             >
                               {org.name}
                             </button>

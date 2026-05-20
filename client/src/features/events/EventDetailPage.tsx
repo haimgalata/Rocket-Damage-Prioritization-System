@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { PageContainer } from '../../components/layout/PageContainer';
 import { EventDetailView } from '../../components/events/EventDetailView';
 import { Button } from '../../components/ui/Button';
@@ -45,7 +45,7 @@ export const EventDetailPage: React.FC = () => {
         </p>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={() => navigate(-1)} className="inline-flex items-center gap-1">
-            <ArrowLeft className="w-4 h-4" /> חזור
+            <ArrowRight className="w-4 h-4" /> חזור
           </Button>
           <Button variant="secondary" type="button" onClick={() => navigate('/admin/events')}>
             כל האירועים

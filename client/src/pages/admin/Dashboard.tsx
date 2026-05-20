@@ -49,7 +49,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, icon, iconBg, delta, 
     )}
     {onClick && (
       <p className="text-xs mt-1.5 text-blue-500 flex items-center gap-0.5">
-        הצג אירועים <ChevronRight className="w-3 h-3" />
+        הצג אירועים <ChevronRight className="w-3 h-3 scale-x-[-1]" />
       </p>
     )}
   </div>
@@ -175,7 +175,7 @@ export const Dashboard: React.FC = () => {
           </div>
           <button
             onClick={() => setStatusModal({ label: 'אירועים קריטיים (≥7.5)', events: orgEvents.filter(e => e.priorityScore >= 7.5) })}
-            className="bg-gradient-to-br from-red-500 to-rose-600 rounded-xl p-5 text-white shadow-sm text-left hover:opacity-90 transition cursor-pointer"
+            className="bg-gradient-to-br from-red-500 to-rose-600 rounded-xl p-5 text-white shadow-sm hover:opacity-90 transition cursor-pointer"
           >
             <p className="text-red-100 text-sm mb-1">אירועים קריטיים (≥7.5)</p>
             <p className="text-4xl font-bold">{criticalCount}</p>
@@ -186,7 +186,7 @@ export const Dashboard: React.FC = () => {
           <div className="bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl p-5 text-white shadow-sm flex flex-col justify-between">
             <button
               onClick={() => hiddenCount > 0 && setStatusModal({ label: 'אירועים מוסתרים', events: orgEvents.filter(e => e.hidden) })}
-              className={`text-left ${hiddenCount > 0 ? 'cursor-pointer hover:opacity-90' : 'cursor-default'} transition`}
+              className={`${hiddenCount > 0 ? 'cursor-pointer hover:opacity-90' : 'cursor-default'} transition`}
             >
               <p className="text-slate-400 text-sm mb-1">אירועים מוסתרים</p>
               <p className="text-4xl font-bold">{hiddenCount}</p>
@@ -247,7 +247,7 @@ export const Dashboard: React.FC = () => {
             />
             {mapMode === 'pins' && (
               <div className="flex items-center gap-4 mt-3 px-1">
-                <span className="text-xs text-gray-500 font-medium">Legend:</span>
+                <span className="text-xs text-gray-500 font-medium">מקרא:</span>
                 {[
                   { color: 'bg-red-500',    label: 'קריטי (≥7.5)'      },
                   { color: 'bg-orange-500', label: 'גבוה (5–7.4)'     },
@@ -284,7 +284,7 @@ export const Dashboard: React.FC = () => {
                         : 'text-gray-500 hover:text-gray-700'
                     }`}>
                     {btn.label}
-                    <span className={`ml-1 text-xs ${filterStatus === btn.value ? 'text-blue-500' : 'text-gray-400'}`}>
+                    <span className={`mr-1 text-xs ${filterStatus === btn.value ? 'text-blue-500' : 'text-gray-400'}`}>
                       {btn.count}
                     </span>
                   </button>
@@ -316,7 +316,7 @@ export const Dashboard: React.FC = () => {
               <span><span className="font-semibold text-red-600">{orgEvents.filter((e) => e.priorityScore >= 7.5).length}</span> קריטי</span>
               <span><span className="font-semibold text-orange-500">{orgEvents.filter((e) => e.priorityScore >= 5.0 && e.priorityScore < 7.5).length}</span> גבוה</span>
               <span><span className="font-semibold text-green-600">{orgEvents.filter((e) => e.priorityScore < 5.0).length}</span> נמוך–בינוני</span>
-              <span className="ml-auto text-gray-400">ממוצע: {formatScore(avgPriority)}</span>
+              <span className="mr-auto text-gray-400">ממוצע: {formatScore(avgPriority)}</span>
             </div>
           </Card>
         )}
@@ -359,7 +359,7 @@ export const Dashboard: React.FC = () => {
                     <span className={`text-xs font-semibold ${ev.priorityScore >= 7.5 ? 'text-red-600' : ev.priorityScore >= 5 ? 'text-orange-500' : 'text-green-600'}`}>
                       {ev.priorityScore.toFixed(1)}
                     </span>
-                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 scale-x-[-1]" />
                   </div>
                 </Link>
               ))

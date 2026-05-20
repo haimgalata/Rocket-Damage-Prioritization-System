@@ -95,26 +95,26 @@ export const EventTable: React.FC<EventTableProps> = ({
   const isOperator = currentUserRole === UserRole.OPERATOR;
 
   const SortIcon: React.FC<{ field: SortField }> = ({ field }) => {
-    if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-gray-400 inline" />;
+    if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 mr-1 text-gray-400 inline" />;
     return sortOrder === 'asc'
-      ? <ArrowUp className="w-3.5 h-3.5 ml-1 text-blue-500 inline" />
-      : <ArrowDown className="w-3.5 h-3.5 ml-1 text-blue-500 inline" />;
+      ? <ArrowUp className="w-3.5 h-3.5 mr-1 text-blue-500 inline" />
+      : <ArrowDown className="w-3.5 h-3.5 mr-1 text-blue-500 inline" />;
   };
 
-  const thClass = 'px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 select-none';
+  const thClass = 'px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 select-none';
   const tdClass = 'px-4 py-3 text-sm text-gray-700 align-middle';
 
   return (
     <div>
       <div className="px-4 py-3 border-b border-gray-100">
         <div className="relative max-w-sm">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <input
             type="text"
             placeholder="חיפוש לפי שם או כתובת…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white
+            className="w-full pr-8 pl-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white
               focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-text placeholder-gray-400"
           />
         </div>
@@ -169,7 +169,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                   ? <span className="text-xs"><span className="text-gray-400">מאת: {creatorName}</span> <span className="text-blue-500 font-medium">(אתה)</span></span>
                   : <span className="text-gray-400 text-xs">מאת: {creatorName}</span>;
               } else if (isOwner) {
-                creatorLine = <span className="text-blue-500 text-xs font-medium">(You)</span>;
+                creatorLine = <span className="text-blue-500 text-xs font-medium">(אתה)</span>;
               }
 
               return (
@@ -185,7 +185,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                       <div>
                         <button
                           onClick={() => onSelectEvent?.(event)}
-                          className="font-medium text-blue-700 hover:text-blue-900 hover:underline text-xs text-left cursor-pointer transition"
+                          className="font-medium text-blue-700 hover:text-blue-900 hover:underline text-xs cursor-pointer transition"
                         >
                           {event.name || event.location.address || `Event #${String(event.id).slice(-3)}`}
                         </button>
@@ -237,7 +237,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                     <span className="text-xs font-medium text-gray-700">
                       {event.damageScore}/10
                       {event.damageClassification && (
-                        <span className={`ml-1 text-xs px-1 py-0.5 rounded ${
+                        <span className={`mr-1 text-xs px-1 py-0.5 rounded ${
                           event.damageClassification === 'Heavy'
                             ? 'bg-red-100 text-red-700'
                             : 'bg-yellow-100 text-yellow-700'
