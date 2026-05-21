@@ -297,15 +297,16 @@ export const NewEventForm: React.FC = () => {
       const finalScore = Math.min(10, Math.max(0.1, Math.round(damageScore * gisDetails.geoMultiplier * 10) / 10));
       const eventId = Date.now();
 
-      const llmExplanation = `${classification} damage classification detected. AI analysis identified structural characteristics consistent with ${classification.toLowerCase()} damage patterns. ${
+      const damageLabel = classification === 'Heavy' ? 'כבד' : 'קל';
+      const llmExplanation = `זוהה נזק ${damageLabel} על ידי מודל ראייה ממוחשבת. ${
         classification === 'Heavy'
-          ? 'Significant structural compromise observed — immediate assessment recommended.'
-          : 'Minor structural impact — standard repair scheduling appropriate.'
-      } Geographic context: population density ${gisDetails.populationDensity.toLocaleString()} persons/km², nearest hospital ${
+          ? 'נמצאו סימנים לפגיעה מבנית משמעותית — מומלץ הערכה מיידית.'
+          : 'נמצאה פגיעה מינורית — תיקון רגיל מתאים.'
+      } צפיפות אוכלוסין: ${gisDetails.populationDensity.toLocaleString('he-IL')} נפש/קמ"ר, בית חולים קרוב ${
         gisDetails.distHospitalM >= 1000
-          ? `${(gisDetails.distHospitalM / 1000).toFixed(1)} km`
-          : `${gisDetails.distHospitalM} m`
-      } away. Geographic multiplier: ×${gisDetails.geoMultiplier.toFixed(2)}. Final priority score: ${finalScore.toFixed(1)}/10. (Offline mode — backend unavailable)`;
+          ? `${(gisDetails.distHospitalM / 1000).toFixed(1)} ק"מ`
+          : `${gisDetails.distHospitalM} מ'`
+      }. מכפיל גיאוגרפי: ×${gisDetails.geoMultiplier.toFixed(2)}. ציון עדיפות סופי: ${finalScore.toFixed(1)}/10. (מצב לא מקוון — שרת אינו זמין)`;
 
       newEvent = {
         id:                   eventId,

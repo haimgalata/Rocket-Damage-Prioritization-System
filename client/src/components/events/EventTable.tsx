@@ -11,6 +11,7 @@ import {
   getPriorityLabel,
   getPriorityColor,
   getStatusLabel,
+  getDamageLabel,
   formatDate,
   truncateText,
 } from '../../utils/helpers';
@@ -242,7 +243,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                             ? 'bg-red-100 text-red-700'
                             : 'bg-yellow-100 text-yellow-700'
                         }`}>
-                          {event.damageClassification}
+                          {getDamageLabel(event.damageClassification ?? '')}
                         </span>
                       )}
                     </span>

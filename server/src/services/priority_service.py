@@ -1,4 +1,4 @@
-"""Priority service layer — wraps priority_logic and builds score explanations."""
+﻿"""Priority service layer — wraps priority_logic and builds score explanations."""
 
 import os
 from server.src.core.priority_logic import get_final_priority_score
@@ -16,29 +16,30 @@ def build_explanation(
     final_score: float,
     multiplier: float,
 ) -> str:
-    """Generate a human-readable explanation of the priority score (static fallback)."""
+    """Generate a human-readable Hebrew explanation of the priority score (static fallback)."""
 
     def fmt_m(v: float) -> str:
         if v < 0:
-            return "not found within 15 km"
-        return f"{v / 1000:.1f} km" if v >= 1000 else f"{int(v)} m"
+            return 'לא נמצא בטווח 15 ק"מ'
+        return f'{v / 1000:.1f} ק"מ' if v >= 1000 else f"{int(v)} מ'"
 
-    severity = "critical" if final_score >= 7.5 else "high" if final_score >= 5.0 else "moderate"
+    damage_label = "כבד" if classification == "Heavy" else "קל"
+    severity = "קריטי" if final_score >= 7.5 else "גבוה" if final_score >= 5.0 else "בינוני"
     density  = int(gis_features.get("population_density", 0))
+    assessment_note = "מומלץ הערכה מבנית מיידית." if classification == "Heavy" else "תיקון רגיל מתאים לנזק מסוג זה."
 
     return (
-        f"{classification} damage classification detected by vision AI model. "
-        f"Structural characteristics are consistent with {classification.lower()} damage patterns — "
-        f"{'immediate structural assessment recommended.' if classification == 'Heavy' else 'standard repair scheduling is appropriate.'} "
-        f"Geographic context: "
-        f"nearest hospital {fmt_m(gis_features.get('dist_hospital_m', -1))}, "
-        f"nearest school {fmt_m(gis_features.get('dist_school_m', -1))}, "
-        f"nearest road {fmt_m(gis_features.get('dist_roads_m', -1))}, "
-        f"nearest strategic site {fmt_m(gis_features.get('dist_military_base_m', -1))}, "
-        f"population density {density:,} persons/km². "
-        f"Geographic multiplier: \u00d7{multiplier:.2f}. "
-        f"Final priority score: {final_score:.1f}/10 ({severity} priority). "
-        f"Score formula: damage({damage_score}) \u00d7 geo_multiplier({multiplier:.2f}) = {final_score:.1f}."
+        f"זוהה נזק {damage_label} על ידי מודל ראייה ממוחשבת. "
+        f"המאפיינים המבניים עקביים עם דפוסי נזק {damage_label} — {assessment_note} "
+        f"הקשר גיאוגרפי: "
+        f"בית חולים קרוב {fmt_m(gis_features.get('dist_hospital_m', -1))}, "
+        f"בית ספר קרוב {fmt_m(gis_features.get('dist_school_m', -1))}, "
+        f"כביש קרוב {fmt_m(gis_features.get('dist_roads_m', -1))}, "
+        f"אתר אסטרטגי קרוב {fmt_m(gis_features.get('dist_military_base_m', -1))}, "
+        f'צפיפות אוכלוסין {density:,} נפש/קמ"ר. '
+        f"מכפיל גיאוגרפי: ×{multiplier:.2f}. "
+        f"ציון עדיפות סופי: {final_score:.1f}/10 (עדיפות {severity}). "
+        f"נוסחת ניקוד: נזק({damage_score}) × מכפיל_גיאוגרפי({multiplier:.2f}) = {final_score:.1f}."
     )
 
 
@@ -60,41 +61,39 @@ def build_llm_explanation(
 
     def fmt_m(v: float) -> str:
         if v < 0:
-            return "not available within 15 km"
-        return f"{v / 1000:.1f} km" if v >= 1000 else f"{int(v)} m"
+            return 'לא נמצא בטווח 15 ק"מ'
+        return f'{v / 1000:.1f} ק"מ' if v >= 1000 else f"{int(v)} מ'"
 
-    severity = "critical" if final_score >= 7.5 else "high" if final_score >= 5.0 else "moderate"
+    damage_label = "כבד" if classification == "Heavy" else "קל"
+    severity = "קריטי" if final_score >= 7.5 else "גבוה" if final_score >= 5.0 else "בינוני"
     density  = int(gis_features.get("population_density", 0))
 
     system_prompt = (
-        "You are a professional urban emergency analyst for the PrioritAI system, "
-        "which prioritizes rehabilitation of rocket-damaged buildings in Israel. "
-        "Your role is to write a concise, objective, and humanitarian-focused explanation "
-        "of why a building received its rehabilitation priority score. "
+        "אתה אנליסט חירום עירוני מקצועי במערכת PrioritAI, המתעדפת שיקום מבנים שנפגעו בישראל. "
+        "תפקידך לכתוב הסבר תמציתי, מקצועי ומבוסס-נתונים על מדוע קיבל הבניין את ציון העדיפות שקיבל."
         "\n\n"
-        "STRICT RULES:\n"
-        "- Base your explanation ONLY on the data provided in the user message. "
-        "Do NOT invent, assume, or hallucinate any geographic features, distances, "
-        "population figures, or damage details that are not explicitly given.\n"
-        "- If a facility (hospital, school, etc.) is listed as 'not available within 15 km', "
-        "treat it as absent from the proximity calculation.\n"
-        "- Write 3–5 sentences maximum. Be direct and professional.\n"
-        "- Do not use bullet points or headers — output plain prose only.\n"
-        "- Conclude with the final score and its severity level."
+        "כללים מחייבים:\n"
+        "- התבסס אך ורק על הנתונים שסופקו בהודעת המשתמש. אל תמציא, תניח או תהלוצין על מרחקים, "
+        "נתוני אוכלוסיה או פרטי נזק שלא ניתנו.\n"
+        '- אם מתקן (בית חולים, בית ספר וכד\') מופיע כ"לא נמצא בטווח 15 ק"מ", התייחס אליו כאל נעדר מחישוב הקרבה.\n'
+        "- כתוב 3-4 משפטים לכל היותר. היה ישיר ומקצועי.\n"
+        "- אל תשתמש בנקודות קליעה או כותרות — פרוזה בלבד.\n"
+        "- סיים עם ציון העדיפות הסופי ורמת החומרה שלו.\n"
+        "- כתוב בעברית תקנית, ברורה ומתאימה להנהלת חירום."
     )
 
     user_message = (
-        f"Building damage assessment data:\n"
-        f"- Damage classification (Computer Vision): {classification} (score {damage_score}/10)\n"
-        f"- Nearest hospital: {fmt_m(gis_features.get('dist_hospital_m', -1))}\n"
-        f"- Nearest school: {fmt_m(gis_features.get('dist_school_m', -1))}\n"
-        f"- Nearest road: {fmt_m(gis_features.get('dist_roads_m', -1))}\n"
-        f"- Nearest strategic site: {fmt_m(gis_features.get('dist_military_base_m', -1))}\n"
-        f"- Population density: {density:,} persons/km²\n"
-        f"- Geographic multiplier applied: ×{multiplier:.2f}\n"
-        f"- Final priority score: {final_score:.1f}/10 (severity: {severity})\n"
+        f"נתוני הערכת נזק לבניין:\n"
+        f"- סיווג נזק (ראייה ממוחשבת): {damage_label} (ציון {damage_score}/10)\n"
+        f"- בית חולים קרוב: {fmt_m(gis_features.get('dist_hospital_m', -1))}\n"
+        f"- בית ספר קרוב: {fmt_m(gis_features.get('dist_school_m', -1))}\n"
+        f"- כביש קרוב: {fmt_m(gis_features.get('dist_roads_m', -1))}\n"
+        f"- אתר אסטרטגי קרוב: {fmt_m(gis_features.get('dist_military_base_m', -1))}\n"
+        f'- צפיפות אוכלוסין: {density:,} נפש/קמ"ר\n'
+        f"- מכפיל גיאוגרפי: ×{multiplier:.2f}\n"
+        f"- ציון עדיפות סופי: {final_score:.1f}/10 (חומרה: {severity})\n"
         f"\n"
-        f"Explain why this building received a {severity} priority score based solely on the data above."
+        f"הסבר מדוע קיבל הבניין ציון עדיפות {severity} על סמך הנתונים לעיל בלבד."
     )
 
     try:

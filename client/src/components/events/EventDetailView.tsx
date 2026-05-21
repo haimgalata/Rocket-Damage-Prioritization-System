@@ -6,11 +6,14 @@ import { AIExplanationBox } from './AIExplanationBox';
 import { API_BASE_URL } from '../../config/api';
 import {
   getStatusColor,
+  getStatusLabel,
   getPriorityLabel,
   getPriorityColor,
+  getDamageLabel,
   formatDateTime,
   formatCurrency,
 } from '../../utils/helpers';
+import { EventStatus } from '../../types';
 
 const resolveImageUrl = (url: string): string => {
   if (!url) return '';
@@ -96,14 +99,14 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
         <span
           className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(event.status)}`}
         >
-          {event.status.replace('_', ' ').toUpperCase()}
+          {getStatusLabel(event.status as EventStatus)}
         </span>
         <Badge variant={priorityColorMap[priorityLabel] || 'default'}>
           {priorityLabel} עדיפות · {event.priorityScore.toFixed(1)}/10
         </Badge>
         {event.damageClassification && (
           <Badge variant={event.damageClassification === 'Heavy' ? 'danger' : 'warning'}>
-            AI: {event.damageClassification} ({event.damageScore}/10)
+            AI: {getDamageLabel(event.damageClassification ?? '')} ({event.damageScore}/10)
           </Badge>
         )}
         {event.tags?.map((tag) => (
@@ -216,9 +219,9 @@ export const EventDetailView: React.FC<EventDetailViewProps> = ({ event }) => {
           <ul className="space-y-2 text-sm border border-gray-100 rounded-lg divide-y divide-gray-100">
             {event.history.map((h, i) => (
               <li key={`${h.changedAt}-${i}`} className="px-3 py-2 text-gray-600">
-                <span className="font-medium text-gray-800">{h.oldStatus || '—'}</span>
+                <span className="font-medium text-gray-800">{h.oldStatus ? getStatusLabel(h.oldStatus as EventStatus) : '—'}</span>
                 {' → '}
-                <span className="font-medium text-gray-800">{h.newStatus}</span>
+                <span className="font-medium text-gray-800">{getStatusLabel(h.newStatus as EventStatus)}</span>
                 <span className="text-gray-400"> · </span>
                 {h.changedByName || `User #${h.changedBy}`}
                 <span className="text-gray-400"> · </span>
