@@ -41,20 +41,20 @@ export const FieldMapView: React.FC = () => {
   };
 
   return (
-    <PageContainer title="Field Map View">
+    <PageContainer title="תצוגת מפה שטחית">
       <div className="max-w-6xl mx-auto space-y-4">
         {criticalEvents.length > 0 && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-5 py-3 flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
             <p className="text-sm text-red-700">
-              <span className="font-semibold">{criticalEvents.length} critical event{criticalEvents.length !== 1 ? 's' : ''}</span>
-              {' '}require immediate attention in your area.
+              <span className="font-semibold">{criticalEvents.length !== 1 ? `${criticalEvents.length} אירועים קריטיים` : 'אירוע קריטי אחד'}</span>
+              {' '}דורשים תשומת לב מיידית באזורך.
             </p>
           </div>
         )}
 
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">{orgEvents.length} events in your organization</p>
+          <p className="text-sm text-gray-500">{orgEvents.length} אירועים בארגונך</p>
           <div className="flex items-center bg-gray-100 rounded-lg p-1 gap-1">
             <button
               onClick={() => setView('map')}
@@ -62,7 +62,7 @@ export const FieldMapView: React.FC = () => {
                 view === 'map' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <MapIcon className="w-4 h-4" /> Map
+              <MapIcon className="w-4 h-4" /> מפה
             </button>
             <button
               onClick={() => setView('list')}
@@ -70,13 +70,13 @@ export const FieldMapView: React.FC = () => {
                 view === 'list' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              <List className="w-4 h-4" /> List
+              <List className="w-4 h-4" /> רשימה
             </button>
           </div>
         </div>
 
         {view === 'map' ? (
-          <Card title="Event Map" subtitle="Click a marker for details" noPadding>
+          <Card title="מפת אירועים" subtitle="לחץ על סמן לפרטים" noPadding>
             <div className="p-4">
               <EventMap
                 events={orgEvents}
@@ -85,9 +85,9 @@ export const FieldMapView: React.FC = () => {
               />
               <div className="flex flex-wrap items-center gap-4 mt-3">
                 {[
-                  { color: 'bg-red-500', label: 'Critical (≥7.5)', count: orgEvents.filter((e) => e.priorityScore >= 7.5).length },
-                  { color: 'bg-orange-500', label: 'High (5–7.4)', count: orgEvents.filter((e) => e.priorityScore >= 5.0 && e.priorityScore < 7.5).length },
-                  { color: 'bg-green-500', label: 'Low–Med (<5)', count: orgEvents.filter((e) => e.priorityScore < 5.0).length },
+                  { color: 'bg-red-500', label: 'קריטי (≥7.5)', count: orgEvents.filter((e) => e.priorityScore >= 7.5).length },
+                  { color: 'bg-orange-500', label: 'גבוה (5–7.4)', count: orgEvents.filter((e) => e.priorityScore >= 5.0 && e.priorityScore < 7.5).length },
+                  { color: 'bg-green-500', label: 'נמוך–בינוני (<5)', count: orgEvents.filter((e) => e.priorityScore < 5.0).length },
                 ].map(({ color, label, count }) => (
                   <div key={label} className="flex items-center gap-1.5">
                     <div className={`w-3 h-3 rounded-full ${color}`} />
@@ -98,7 +98,7 @@ export const FieldMapView: React.FC = () => {
             </div>
           </Card>
         ) : (
-          <Card title="All Events" noPadding>
+          <Card title="כל האירועים" noPadding>
             <EventTable events={orgEvents} onSelectEvent={handleSelectEvent} selectedEventId={selectedEvent?.id} />
           </Card>
         )}
@@ -107,7 +107,7 @@ export const FieldMapView: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={selectedEvent ? selectedEvent.name : 'Event Detail'}
+        title={selectedEvent ? selectedEvent.name : 'פרטי אירוע'}
         size="lg"
       >
         {selectedEvent && <EventDetailView event={selectedEvent} />}

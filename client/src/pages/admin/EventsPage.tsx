@@ -108,14 +108,14 @@ export const EventsPage: React.FC = () => {
   };
 
   const filterButtons: { label: string; value: FilterStatus; count: number }[] = [
-    { label: 'All',         value: 'all',                   count: orgEvents.length },
-    { label: 'New',         value: EventStatus.NEW,         count: orgEvents.filter((e) => e.status === EventStatus.NEW).length },
-    { label: 'In Progress', value: EventStatus.IN_PROGRESS, count: orgEvents.filter((e) => e.status === EventStatus.IN_PROGRESS).length },
-    { label: 'Done',        value: EventStatus.DONE,        count: orgEvents.filter((e) => e.status === EventStatus.DONE).length },
+    { label: 'הכל',    value: 'all',                   count: orgEvents.length },
+    { label: 'חדש',    value: EventStatus.NEW,         count: orgEvents.filter((e) => e.status === EventStatus.NEW).length },
+    { label: 'בטיפול', value: EventStatus.IN_PROGRESS, count: orgEvents.filter((e) => e.status === EventStatus.IN_PROGRESS).length },
+    { label: 'הושלם',  value: EventStatus.DONE,        count: orgEvents.filter((e) => e.status === EventStatus.DONE).length },
   ];
 
   return (
-    <PageContainer title="Events">
+    <PageContainer title="אירועים">
       <div className="max-w-[1400px] mx-auto space-y-6">
 
         <div className="flex items-center gap-3 flex-wrap">
@@ -131,7 +131,7 @@ export const EventsPage: React.FC = () => {
                 }`}
               >
                 {btn.label}
-                <span className={`ml-1.5 text-xs ${filterStatus === btn.value ? 'text-blue-200' : 'text-gray-400'}`}>
+                <span className={`mr-1.5 text-xs ${filterStatus === btn.value ? 'text-blue-200' : 'text-gray-400'}`}>
                   {btn.count}
                 </span>
               </button>
@@ -142,14 +142,14 @@ export const EventsPage: React.FC = () => {
               onClick={() => setFilterStatus('all')}
               className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 transition"
             >
-              <X className="w-4 h-4" /> Clear filter
+              <X className="w-4 h-4" /> נקה סינון
             </button>
           )}
         </div>
 
         <Card
-          title="Map View"
-          subtitle={mapMode === 'pins' ? 'Color-coded by priority' : 'Damage heatmap'}
+          title="תצוגת מפה"
+          subtitle={mapMode === 'pins' ? 'צבעוני לפי עדיפות' : 'מפת חום נזקים'}
           noPadding
           headerRight={
             <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
@@ -157,13 +157,13 @@ export const EventsPage: React.FC = () => {
                 onClick={() => setMapMode('pins')}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${mapMode === 'pins' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
               >
-                <Map className="w-3.5 h-3.5" /> Pins
+                <Map className="w-3.5 h-3.5" /> סיכות
               </button>
               <button
                 onClick={() => setMapMode('heatmap')}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${mapMode === 'heatmap' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
               >
-                <Layers className="w-3.5 h-3.5" /> Heatmap
+                <Layers className="w-3.5 h-3.5" /> מפת חום
               </button>
             </div>
           }
@@ -179,9 +179,9 @@ export const EventsPage: React.FC = () => {
             {mapMode === 'pins' && (
               <div className="flex items-center gap-4 mt-3">
                 {[
-                  { color: 'bg-red-500',    label: 'Critical (≥7.5)' },
-                  { color: 'bg-orange-500', label: 'High (5–7.4)'    },
-                  { color: 'bg-green-500',  label: 'Low–Med (<5)'    },
+                  { color: 'bg-red-500',    label: 'קריטי (≥7.5)'       },
+                  { color: 'bg-orange-500', label: 'גבוה (5–7.4)'      },
+                  { color: 'bg-green-500',  label: 'נמוך–בינוני (<5)'  },
                 ].map(({ color, label }) => (
                   <div key={label} className="flex items-center gap-1.5">
                     <div className={`w-3 h-3 rounded-full ${color}`} />
@@ -194,15 +194,15 @@ export const EventsPage: React.FC = () => {
         </Card>
 
         <Card
-          title="Event List"
-          subtitle={`${displayEvents.length} records · sorted by priority`}
+          title="רשימת אירועים"
+          subtitle={`${displayEvents.length} רשומות · ממוינות לפי עדיפות`}
           noPadding
           headerRight={
             <button
               onClick={() => setShowHidden((v) => !v)}
               className="text-xs text-gray-500 hover:text-gray-700 underline cursor-pointer"
             >
-              {showHidden ? 'Hide hidden' : 'Show hidden'}
+              {showHidden ? 'הסתר מוסתרים' : 'הצג מוסתרים'}
             </button>
           }
         >
@@ -232,7 +232,7 @@ export const EventsPage: React.FC = () => {
       <Modal
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
-        title={selectedEvent?.name ?? 'Event Detail'}
+        title={selectedEvent?.name ?? 'פרטי אירוע'}
         size="lg"
       >
         {selectedEvent && <EventDetailView event={selectedEvent} />}

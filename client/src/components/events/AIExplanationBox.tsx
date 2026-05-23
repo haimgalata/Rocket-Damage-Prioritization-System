@@ -21,21 +21,21 @@ export const AIExplanationBox: React.FC<AIExplanationBoxProps> = ({
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-5 py-3 text-left hover:bg-white/5 transition"
+        className="w-full flex items-center justify-between px-5 py-3 hover:bg-white/5 transition"
       >
         <div className="flex items-center gap-2">
           <Brain className="w-5 h-5 text-blue-400" />
-          <span className="text-sm font-semibold text-blue-300">AI Assessment</span>
-          <span className="text-xs text-slate-500 ml-1">· {model}</span>
+          <span className="text-sm font-semibold text-blue-300">הערכת AI</span>
+          <span className="text-xs text-slate-500 mr-1">· {model}</span>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3 text-xs">
             <span className="text-slate-400">
-              Damage:{' '}
+              נזק:{' '}
               <span className="font-bold text-orange-400">{damageScore}/10</span>
             </span>
             <span className="text-slate-400">
-              Priority:{' '}
+              עדיפות:{' '}
               <span className="font-bold text-red-400">{priorityScore.toFixed(1)}/10</span>
             </span>
           </div>
@@ -53,7 +53,7 @@ export const AIExplanationBox: React.FC<AIExplanationBoxProps> = ({
           <div className="flex gap-4 mb-4">
             {/* Damage Score Bar */}
             <div className="flex-1">
-              <p className="text-xs text-slate-500 mb-1">Damage Score</p>
+              <p className="text-xs text-slate-500 mb-1">ציון נזק</p>
               <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all"
@@ -64,7 +64,7 @@ export const AIExplanationBox: React.FC<AIExplanationBoxProps> = ({
             </div>
             {/* Priority Score Bar */}
             <div className="flex-1">
-              <p className="text-xs text-slate-500 mb-1">Priority Score</p>
+              <p className="text-xs text-slate-500 mb-1">ציון עדיפות</p>
               <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-yellow-500 to-red-600 rounded-full transition-all"
@@ -74,7 +74,7 @@ export const AIExplanationBox: React.FC<AIExplanationBoxProps> = ({
               <p className="text-sm font-bold text-red-400 mt-1">{priorityScore.toFixed(1)}/10</p>
             </div>
           </div>
-          <p className="text-sm text-slate-300 leading-relaxed">{explanation}</p>
+          <p className="text-sm text-slate-300 leading-relaxed" dir="auto">{explanation}</p>
         </div>
       )}
     </div>

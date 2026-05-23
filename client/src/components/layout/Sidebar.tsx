@@ -28,61 +28,61 @@ export const Sidebar: React.FC = () => {
 
   const navigationItems: NavItem[] = [
     {
-      label: 'Dashboard',
+      label: 'לוח בקרה',
       path: '/super-admin/dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
       roles: [UserRole.SUPER_ADMIN],
     },
     {
-      label: 'Organizations',
+      label: 'ארגונים',
       path: '/super-admin/organizations',
       icon: <Building2 className="w-5 h-5" />,
       roles: [UserRole.SUPER_ADMIN],
     },
     {
-      label: 'Dashboard',
+      label: 'לוח בקרה',
       path: '/admin/dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
       roles: [UserRole.ADMIN],
     },
     {
-      label: 'Events',
+      label: 'אירועים',
       path: '/admin/events',
       icon: <FileText className="w-5 h-5" />,
       roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.OPERATOR],
     },
     {
-      label: 'Map',
+      label: 'מפה',
       path: '/operator/map',
       icon: <Map className="w-5 h-5" />,
       roles: [UserRole.OPERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN],
     },
     {
-      label: 'New event',
+      label: 'אירוע חדש',
       path: '/operator/events/new',
       icon: <FileText className="w-5 h-5" />,
       roles: [UserRole.OPERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN],
     },
     {
-      label: 'Operator dashboard',
+      label: 'לוח בקרה מפעיל',
       path: '/operator/dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
       roles: [UserRole.OPERATOR],
     },
     {
-      label: 'Management',
+      label: 'ניהול',
       path: '__management__',
       icon: <Settings className="w-5 h-5" />,
       roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
       children: [
         {
-          label: 'Users',
+          label: 'משתמשים',
           path: '/admin/users',
           icon: <Users className="w-4 h-4" />,
           roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
         },
         {
-          label: 'AI models',
+          label: 'מודלי AI',
           path: '/admin/models',
           icon: <BarChart3 className="w-4 h-4" />,
           roles: [UserRole.ADMIN, UserRole.SUPER_ADMIN],
@@ -128,7 +128,7 @@ export const Sidebar: React.FC = () => {
     <>
       <button
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="fixed md:hidden top-4 left-4 z-50 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        className="fixed md:hidden top-4 right-4 z-50 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
       >
         {isMobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
@@ -142,12 +142,12 @@ export const Sidebar: React.FC = () => {
 
       <aside
         className={`
-          fixed left-0 top-0 h-screen bg-gradient-to-b from-blue-50 to-gray-50
-          border-r border-gray-200 shadow-lg transition-all duration-300 z-40
+          fixed right-0 top-0 h-screen bg-gradient-to-b from-blue-50 to-gray-50
+          border-l border-gray-200 shadow-lg transition-all duration-300 z-40
           flex flex-col
           ${isOpen ? 'w-64' : 'w-20'}
           md:static md:h-screen md:translate-x-0 md:z-auto md:flex-shrink-0
-          ${isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          ${isMobileOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
         `}
       >
         <div className="flex items-center justify-between p-4 border-b border-gray-200 h-16">
@@ -162,8 +162,8 @@ export const Sidebar: React.FC = () => {
           </button>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="hidden md:block p-1 hover:bg-gray-200 rounded-lg transition ml-auto"
-            title={isOpen ? 'Collapse' : 'Expand'}
+            className="hidden md:block p-1 hover:bg-gray-200 rounded-lg transition mr-auto"
+            title={isOpen ? 'כווץ' : 'הרחב'}
           >
             <Menu className="w-5 h-5 text-gray-600" />
           </button>
@@ -172,7 +172,7 @@ export const Sidebar: React.FC = () => {
         {isOpen && user && (
           <button
             onClick={handleProfileClick}
-            className="p-4 border-b border-gray-200 bg-white mx-2 mt-2 rounded-lg hover:bg-blue-50 transition text-left w-auto"
+            className="p-4 border-b border-gray-200 bg-white mx-2 mt-2 rounded-lg hover:bg-blue-50 transition w-auto"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
@@ -191,7 +191,7 @@ export const Sidebar: React.FC = () => {
           <button
             onClick={handleProfileClick}
             className="flex items-center justify-center mt-3 mx-auto w-10 h-10 bg-blue-600 rounded-full text-white font-bold text-sm hover:bg-blue-700 transition"
-            title="Settings"
+            title="הגדרות"
           >
             {getInitials(user.name)}
           </button>
@@ -201,7 +201,7 @@ export const Sidebar: React.FC = () => {
           <ul className="space-y-2">
             {visibleItems.map((item) => {
               const navItemClass = `
-                flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 w-full text-left
+                flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 w-full
                 ${item.children
                   ? expandedMenu === item.path || item.children.some((c) => isActive(c.path))
                     ? 'bg-blue-50 text-blue-700'
@@ -240,7 +240,7 @@ export const Sidebar: React.FC = () => {
                   )}
 
                   {item.children && expandedMenu === item.path && isOpen && (
-                    <ul className="mt-1 ml-3 space-y-1 border-l-2 border-blue-300 pl-2">
+                    <ul className="mt-1 mr-3 space-y-1 border-r-2 border-blue-300 pr-2">
                       {item.children.map((child) => (
                         <li key={child.path}>
                           <Link
@@ -271,19 +271,19 @@ export const Sidebar: React.FC = () => {
             to="/settings"
             onClick={() => setIsMobileOpen(false)}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-200 transition-all ${isOpen ? '' : 'justify-center'}`}
-            title="Settings"
+            title="הגדרות"
           >
             <Settings className="w-5 h-5" />
-            {isOpen && <span className="text-sm font-medium">Settings</span>}
+            {isOpen && <span className="text-sm font-medium">הגדרות</span>}
           </Link>
           <button
             type="button"
             onClick={handleLogout}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all ${isOpen ? '' : 'justify-center'}`}
-            title="Logout"
+            title="התנתק"
           >
             <LogOut className="w-5 h-5" />
-            {isOpen && <span className="text-sm font-medium">Logout</span>}
+            {isOpen && <span className="text-sm font-medium">התנתק</span>}
           </button>
         </div>
       </aside>

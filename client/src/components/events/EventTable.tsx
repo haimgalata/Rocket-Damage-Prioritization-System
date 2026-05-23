@@ -11,6 +11,7 @@ import {
   getPriorityLabel,
   getPriorityColor,
   getStatusLabel,
+  getDamageLabel,
   formatDate,
   truncateText,
 } from '../../utils/helpers';
@@ -41,7 +42,7 @@ const statusVariantMap: Record<EventStatus, 'warning' | 'info' | 'success'> = {
 const GisSpinner: React.FC = () => (
   <span className="inline-flex items-center gap-1 text-xs text-blue-500">
     <Loader2 className="w-3 h-3 animate-spin" />
-    Loading…
+    טוען…
   </span>
 );
 
@@ -95,26 +96,26 @@ export const EventTable: React.FC<EventTableProps> = ({
   const isOperator = currentUserRole === UserRole.OPERATOR;
 
   const SortIcon: React.FC<{ field: SortField }> = ({ field }) => {
-    if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 ml-1 text-gray-400 inline" />;
+    if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 mr-1 text-gray-400 inline" />;
     return sortOrder === 'asc'
-      ? <ArrowUp className="w-3.5 h-3.5 ml-1 text-blue-500 inline" />
-      : <ArrowDown className="w-3.5 h-3.5 ml-1 text-blue-500 inline" />;
+      ? <ArrowUp className="w-3.5 h-3.5 mr-1 text-blue-500 inline" />
+      : <ArrowDown className="w-3.5 h-3.5 mr-1 text-blue-500 inline" />;
   };
 
-  const thClass = 'px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 select-none';
+  const thClass = 'px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 select-none';
   const tdClass = 'px-4 py-3 text-sm text-gray-700 align-middle';
 
   return (
     <div>
       <div className="px-4 py-3 border-b border-gray-100">
         <div className="relative max-w-sm">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <input
             type="text"
-            placeholder="Search by name or address…"
+            placeholder="חיפוש לפי שם או כתובת…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white
+            className="w-full pr-8 pl-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white
               focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-text placeholder-gray-400"
           />
         </div>
@@ -124,23 +125,23 @@ export const EventTable: React.FC<EventTableProps> = ({
         <table className="w-full border-collapse">
           <thead>
             <tr className="border-b border-gray-200">
-              <th className={thClass}>Event</th>
-              {!compact && <th className={thClass}>Description</th>}
+              <th className={thClass}>אירוע</th>
+              {!compact && <th className={thClass}>תיאור</th>}
               <th className={`${thClass} cursor-pointer hover:bg-gray-100`} onClick={() => handleSort('priorityScore')}>
-                Priority <SortIcon field="priorityScore" />
+                עדיפות <SortIcon field="priorityScore" />
               </th>
               <th className={`${thClass} cursor-pointer hover:bg-gray-100`} onClick={() => handleSort('damageScore')}>
-                Damage <SortIcon field="damageScore" />
+                נזק <SortIcon field="damageScore" />
               </th>
               <th className={`${thClass} cursor-pointer hover:bg-gray-100`} onClick={() => handleSort('status')}>
-                Status <SortIcon field="status" />
+                סטטוס <SortIcon field="status" />
               </th>
               {!compact && (
                 <th className={`${thClass} cursor-pointer hover:bg-gray-100`} onClick={() => handleSort('createdAt')}>
-                  Date <SortIcon field="createdAt" />
+                  תאריך <SortIcon field="createdAt" />
                 </th>
               )}
-              <th className={thClass}>Actions</th>
+              <th className={thClass}>פעולות</th>
             </tr>
           </thead>
 
@@ -148,7 +149,7 @@ export const EventTable: React.FC<EventTableProps> = ({
             {sorted.length === 0 && (
               <tr>
                 <td colSpan={compact ? 5 : 7} className="text-center py-12 text-gray-400 text-sm">
-                  {term ? `No events match "${searchTerm}".` : 'No events found.'}
+                  {term ? `לא נמצאו אירועים התואמים "${searchTerm}".` : 'לא נמצאו אירועים.'}
                 </td>
               </tr>
             )}
@@ -166,10 +167,10 @@ export const EventTable: React.FC<EventTableProps> = ({
               let creatorLine: React.ReactNode = null;
               if (creatorName) {
                 creatorLine = isOwner
-                  ? <span className="text-xs"><span className="text-gray-400">By: {creatorName}</span> <span className="text-blue-500 font-medium">(You)</span></span>
-                  : <span className="text-gray-400 text-xs">By: {creatorName}</span>;
+                  ? <span className="text-xs"><span className="text-gray-400">מאת: {creatorName}</span> <span className="text-blue-500 font-medium">(אתה)</span></span>
+                  : <span className="text-gray-400 text-xs">מאת: {creatorName}</span>;
               } else if (isOwner) {
-                creatorLine = <span className="text-blue-500 text-xs font-medium">(You)</span>;
+                creatorLine = <span className="text-blue-500 text-xs font-medium">(אתה)</span>;
               }
 
               return (
@@ -185,7 +186,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                       <div>
                         <button
                           onClick={() => onSelectEvent?.(event)}
-                          className="font-medium text-blue-700 hover:text-blue-900 hover:underline text-xs text-left cursor-pointer transition"
+                          className="font-medium text-blue-700 hover:text-blue-900 hover:underline text-xs cursor-pointer transition"
                         >
                           {event.name || event.location.address || `Event #${String(event.id).slice(-3)}`}
                         </button>
@@ -237,12 +238,12 @@ export const EventTable: React.FC<EventTableProps> = ({
                     <span className="text-xs font-medium text-gray-700">
                       {event.damageScore}/10
                       {event.damageClassification && (
-                        <span className={`ml-1 text-xs px-1 py-0.5 rounded ${
+                        <span className={`mr-1 text-xs px-1 py-0.5 rounded ${
                           event.damageClassification === 'Heavy'
                             ? 'bg-red-100 text-red-700'
                             : 'bg-yellow-100 text-yellow-700'
                         }`}>
-                          {event.damageClassification}
+                          {getDamageLabel(event.damageClassification ?? '')}
                         </span>
                       )}
                     </span>
@@ -263,9 +264,9 @@ export const EventTable: React.FC<EventTableProps> = ({
                             : 'bg-green-100 text-green-800 border-green-300'
                         }`}
                       >
-                        <option value={EventStatus.NEW}>New</option>
-                        <option value={EventStatus.IN_PROGRESS}>In progress</option>
-                        <option value={EventStatus.DONE}>Done</option>
+                        <option value={EventStatus.NEW}>חדש</option>
+                        <option value={EventStatus.IN_PROGRESS}>בטיפול</option>
+                        <option value={EventStatus.DONE}>בוצע</option>
                       </select>
                     ) : (
                       <Badge variant={statusVariantMap[event.status]}>
@@ -291,14 +292,14 @@ export const EventTable: React.FC<EventTableProps> = ({
                         className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 font-medium transition cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        Quick View
+                        תצוגה מהירה
                       </button>
 
                       <Link
                         to={`/events/${event.id}`}
                         className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium transition"
                       >
-                        Event Details
+                        פרטי אירוע
                       </Link>
 
                       {isAdmin && onEditEvent && (
@@ -308,14 +309,14 @@ export const EventTable: React.FC<EventTableProps> = ({
                           className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900 font-medium transition cursor-pointer"
                         >
                           <Pencil className="w-3.5 h-3.5" />
-                          Edit
+                          עריכה
                         </button>
                       )}
 
                       {onToggleHide && isAdmin && (
                         <button
                           onClick={() => onToggleHide(event.id)}
-                          title={isHidden ? 'Show event' : 'Hide event'}
+                          title={isHidden ? 'הצג אירוע' : 'הסתר אירוע'}
                           className={`p-1 rounded transition cursor-pointer ${
                             isHidden
                               ? 'text-blue-500 hover:text-blue-700 hover:bg-blue-50'

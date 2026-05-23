@@ -7,7 +7,7 @@ from server.src.db.connection import get_db
 from server.src.db.repositories.event_repository import EventRepository
 from server.src.services.ai_service import run_classification
 from server.src.services.gis_service import get_gis_features
-from server.src.services.priority_service import compute_priority, build_explanation
+from server.src.services.priority_service import compute_priority, build_llm_explanation
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +29,8 @@ def create_event(
     ai_result = run_classification(image_bytes)
     tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
 
-    initial_explanation = (
-        f"{ai_result['classification']} damage detected. GIS analysis in progress..."
-    )
+    damage_label = "כבד" if ai_result["classification"] == "Heavy" else "קל"
+    initial_explanation = f"זוהה נזק {damage_label}. ניתוח GIS בתהליך..."
 
     with get_db() as db:
         event = EventRepository.create_event(
@@ -75,7 +74,7 @@ def run_gis_and_update(event_id: int, lat: float, lon: float, damage_score: floa
                 return
 
             classification = event.analysis[0].damage_classification if event.analysis else ""
-            explanation = build_explanation(
+            explanation = build_llm_explanation(
                 classification, int(damage_score), gis_features, final_score, multiplier
             )
 

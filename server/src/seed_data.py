@@ -30,12 +30,11 @@ SEED_JSON    = os.path.join(_REPO_ROOT, "server", "seed_events.json")
 _RAW_EVENTS = [
 
     dict(
-        name="Dizengoff Center Strike",
+        name="פגיעה במרכז דיזנגוף",
         description=(
-            "Direct rocket impact on the northern facade of Dizengoff Center shopping mall. "
-            "Structural columns on floors 2–4 show visible shear cracks. Glass facade "
-            "collapsed across a 30-metre section. Multiple utility lines severed. "
-            "Surrounding area heavily populated; evacuation in progress."
+            "פגיעה ישירה של טיל בחזית הצפונית של קניון מרכז דיזנגוף. "
+            "עמודי שלד בקומות 2-4 מציגים סדקי גזירה גלויים. חזית הזכוכית קרסה לאורך 30 מטר. "
+            "מספר קווי תשתית נותקו. האזור צפוף מאוד; פינוי בתהליך."
         ),
         lat=32.0785, lon=34.7740,
         organizationId="org-1", createdBy="user-op-1",
@@ -45,12 +44,11 @@ _RAW_EVENTS = [
         status="in_progress", createdAt_offset_days=-1,
     ),
     dict(
-        name="Rothschild Boulevard Building Collapse",
+        name="קריסת מבנה בשדרות רוטשילד",
         description=(
-            "Residential tower on Rothschild Blvd sustained a near-miss that caused partial "
-            "collapse of the eastern stairwell. Three upper floors compromised. Gas leak "
-            "detected on ground floor. Boutique district highly accessible — emergency "
-            "vehicles on scene. Building is a registered heritage structure."
+            "מגדל מגורים בשדרות רוטשילד ספג מכה קרובה שגרמה לקריסה חלקית של גרם המדרגות המזרחי. "
+            "שלוש קומות עליונות פגומות. דליפת גז זוהתה בקומת הקרקע. "
+            "האזור המסחרי נגיש — כלי חירום בשטח. המבנה רשום כמורשת."
         ),
         lat=32.0627, lon=34.7739,
         organizationId="org-1", createdBy="user-op-1",
@@ -60,12 +58,12 @@ _RAW_EVENTS = [
         status="pending", createdAt_offset_days=0,
     ),
     dict(
-        name="Jaffa Port Warehouse Fire",
+        name="שריפה במחסן נמל יפו",
         description=(
-            "Rocket strike ignited a warehouse on the Jaffa Port waterfront. "
-            "Fire has spread to two adjacent storage units containing flammable materials. "
-            "Port operations suspended. Fire brigade and hazmat team deployed. "
-            "Historic old city structures within 200 m at risk of thermal damage."
+            "פגיעת טיל הצתה מחסן בחוף נמל יפו. "
+            "האש התפשטה לשתי יחידות אחסון סמוכות המכילות חומרים דליקים. "
+            "פעילות הנמל הושעתה. כבאות וצוות חומ\"ס פרוסים. "
+            "מבנים היסטוריים של העיר העתיקה בטווח 200 מ' בסיכון לנזק חום."
         ),
         lat=32.0530, lon=34.7510,
         organizationId="org-1", createdBy="user-op-1",
@@ -75,12 +73,11 @@ _RAW_EVENTS = [
         status="in_progress", createdAt_offset_days=-2,
     ),
     dict(
-        name="Florentin Workshop Roof Damage",
+        name="נזק גג בבית מלאכה פלורנטין",
         description=(
-            "Rocket fragment landed on the flat roof of a two-story artisan workshop in "
-            "Florentin neighbourhood. Roof membrane punctured; minor structural cracks on "
-            "parapet wall. No injuries. Power supply interrupted for 12 units in the block. "
-            "Area accessible via main roads."
+            "רסיס טיל נחת על גג שטוח של בית מלאכה דו-קומתי בשכונת פלורנטין. "
+            "קרום הגג ניקב; סדקים מבניים קלים בקיר הגדר. אין נפגעים. "
+            "אספקת חשמל הופסקה ל-12 יחידות בבניין. האזור נגיש בכבישים ראשיים."
         ),
         lat=32.0555, lon=34.7660,
         organizationId="org-1", createdBy="user-op-1",
@@ -90,12 +87,11 @@ _RAW_EVENTS = [
         status="completed", createdAt_offset_days=-3,
     ),
     dict(
-        name="Ramat Aviv Residential Shrapnel",
+        name="שרפרל ברמת אביב — מגורים",
         description=(
-            "Shrapnel from an intercepted rocket scattered across a residential courtyard "
-            "in Ramat Aviv. Light facade damage on three apartment buildings — cracked "
-            "plaster and broken windows. No structural risk identified. Residents allowed "
-            "to return after initial safety check."
+            "שרפרל מטיל מיורט פוזר בחצר מגורים ברמת אביב. "
+            "נזק קל לחזית שלושה בנייני מגורים — סדקים בטיח וחלונות שבורים. "
+            "לא זוהה סיכון מבני. הדיירים הורשו לשוב לאחר בדיקת בטיחות ראשונית."
         ),
         lat=32.1100, lon=34.8050,
         organizationId="org-1", createdBy="user-op-1",
@@ -105,12 +101,12 @@ _RAW_EVENTS = [
         status="completed", createdAt_offset_days=-4,
     ),
     dict(
-        name="HaYarkon Park Infrastructure Hit",
+        name="פגיעה בתשתית פארק הירקון",
         description=(
-            "Rocket struck an open area in HaYarkon Park near the sports facilities. "
-            "Irrigation pipes ruptured; electrical box serving the tennis courts destroyed. "
-            "No casualties. Footpaths and one footbridge show surface cratering. "
-            "Park temporarily closed to the public."
+            "טיל פגע בשטח פתוח בפארק הירקון ליד מתקני הספורט. "
+            "צינורות השקיה נפרצו; ארון חשמל המשרת את מגרשי הטניס הושמד. "
+            "אין נפגעים. שבילים וגשרון אחד מציגים בורות שטח. "
+            "הפארק נסגר זמנית לציבור."
         ),
         lat=32.0982, lon=34.7962,
         organizationId="org-1", createdBy="user-op-1",
@@ -120,12 +116,12 @@ _RAW_EVENTS = [
         status="pending", createdAt_offset_days=0,
     ),
     dict(
-        name="Beer Sheva Central Bus Station Impact",
+        name="פגיעה בתחנה המרכזית באר שבע",
         description=(
-            "Direct hit on the upper deck of Beer Sheva Central Bus Station. "
-            "Reinforced concrete slab over terminal 3 partially collapsed. "
-            "Heavy debris on platforms. Water and power severed for the northern wing. "
-            "Hospital 1.2 km away — access roads partially blocked by debris."
+            "פגיעה ישירה בסיפון העליון של התחנה המרכזית באר שבע. "
+            "מצע הבטון המזוין מעל טרמינל 3 קרס חלקית. הריסות כבדות על הרציפים. "
+            "מים וחשמל נותקו לאגף הצפוני. "
+            "בית חולים במרחק 1.2 ק\"מ — כבישי גישה חסומים חלקית על ידי הריסות."
         ),
         lat=31.2432, lon=34.7925,
         organizationId="org-2", createdBy="user-admin-2",
@@ -135,12 +131,12 @@ _RAW_EVENTS = [
         status="in_progress", createdAt_offset_days=-1,
     ),
     dict(
-        name="Dimona Industrial Zone Strike",
+        name="פגיעה באזור התעשייה דימונה",
         description=(
-            "Rocket impacted the perimeter fence of the Dimona industrial zone. "
-            "Two factory units sustained heavy structural damage — roof collapse on unit B. "
-            "Chemical storage proximity requires hazmat assessment before access. "
-            "Road access from south available; northern approach blocked."
+            "טיל פגע בגדר ההיקף של אזור התעשייה בדימונה. "
+            "שתי יחידות מפעל ספגו נזק מבני כבד — קריסת גג ביחידה ב'. "
+            "קרבת אחסון כימי מחייבת הערכת חומ\"ס לפני כניסה. "
+            "גישה בכביש דרומי זמינה; גישה צפונית חסומה."
         ),
         lat=31.0676, lon=35.0333,
         organizationId="org-2", createdBy="user-admin-2",
@@ -150,12 +146,12 @@ _RAW_EVENTS = [
         status="pending", createdAt_offset_days=0,
     ),
     dict(
-        name="Kibbutz Nir Oz Residential Block",
+        name="פגיעה ברובע המגורים קיבוץ ניר עוז",
         description=(
-            "Multiple rocket hits on the residential quarter of Kibbutz Nir Oz. "
-            "Four homes suffered direct impacts with roof and wall collapse. "
-            "Communal dining hall partially destroyed. Community of ~400 residents evacuated. "
-            "Access via Route 232 is clear. Nearest hospital in Sderot (8 km)."
+            "מספר פגיעות טיל ברובע המגורים של קיבוץ ניר עוז. "
+            "ארבעה בתים ספגו פגיעות ישירות עם קריסת גג וקירות. "
+            "חדר האוכל הקהילתי הושמד חלקית. קהילה של כ-400 תושבים פונתה. "
+            "גישה בכביש 232 פנויה. בית החולים הקרוב בשדרות (8 ק\"מ)."
         ),
         lat=31.3667, lon=34.4333,
         organizationId="org-2", createdBy="user-admin-2",
@@ -165,12 +161,12 @@ _RAW_EVENTS = [
         status="in_progress", createdAt_offset_days=-2,
     ),
     dict(
-        name="Ofakim School Perimeter Damage",
+        name="נזק להיקף בית ספר באופקים",
         description=(
-            "Rocket landed in the schoolyard of an elementary school in Ofakim. "
-            "Perimeter wall destroyed over 15 m; two portable classrooms have shrapnel holes. "
-            "No injuries — school was evacuated before impact. Main structure intact. "
-            "Repairs estimated at 2–3 days."
+            "טיל נחת בחצר בית ספר יסודי באופקים. "
+            "חומת ההיקף נהרסה לאורך 15 מ'; שתי כיתות ניידות עם חורי שרפרל. "
+            "אין נפגעים — בית הספר פונה לפני הפגיעה. המבנה הראשי תקין. "
+            "תיקונים מוערכים ב-2-3 ימים."
         ),
         lat=31.3193, lon=34.6222,
         organizationId="org-2", createdBy="user-admin-2",
@@ -180,12 +176,12 @@ _RAW_EVENTS = [
         status="completed", createdAt_offset_days=-3,
     ),
     dict(
-        name="Kibbutz Revivim Perimeter Fence",
+        name="גדר היקף קיבוץ רביבים",
         description=(
-            "Rocket struck the agricultural perimeter of Kibbutz Revivim in the central Negev. "
-            "Fence line destroyed over 80 m; irrigation pump station damaged. "
-            "No injuries. Kibbutz is a small community (~350 residents) in an isolated desert area. "
-            "Nearest paved road 4 km; nearest hospital over 40 km (Beer Sheva)."
+            "טיל פגע בהיקף החקלאי של קיבוץ רביבים בנגב המרכזי. "
+            "קו הגדר נהרס לאורך 80 מ'; תחנת משאבות השקיה נפגעה. "
+            "אין נפגעים. קיבוץ קטן (~350 תושבים) באזור מדברי מבודד. "
+            "כביש סלול קרוב 4 ק\"מ; בית חולים קרוב מעל 40 ק\"מ (באר שבע)."
         ),
         lat=31.0000, lon=34.8833,
         organizationId="org-2", createdBy="user-admin-2",
@@ -195,12 +191,12 @@ _RAW_EVENTS = [
         status="pending", createdAt_offset_days=0,
     ),
     dict(
-        name="Mitzpe Ramon Visitor Center Strike",
+        name="פגיעה במרכז המבקרים מצפה רמון",
         description=(
-            "Rocket impacted the parking area of the Mitzpe Ramon Ramon Crater visitor center. "
-            "Asphalt surface cratered; one vehicle destroyed. Visitor center glass facade cracked. "
-            "Remote location — 25 km from nearest hospital in Yeruham. "
-            "Population density near zero. Access via Route 40 only."
+            "טיל פגע בחניון מרכז המבקרים מכתש רמון במצפה רמון. "
+            "פני האספלט נפגעו; רכב אחד הושמד. חזית הזכוכית של מרכז המבקרים נסדקה. "
+            "מיקום מרוחק — 25 ק\"מ מבית החולים הקרוב בירוחם. "
+            "צפיפות אוכלוסין כמעט אפס. גישה בכביש 40 בלבד."
         ),
         lat=30.6100, lon=34.8010,
         organizationId="org-2", createdBy="user-admin-2",
@@ -210,13 +206,13 @@ _RAW_EVENTS = [
         status="completed", createdAt_offset_days=-5,
     ),
     dict(
-        name="Sde Boker Research Station Damage",
+        name="נזק לתחנת המחקר שדה בוקר",
         description=(
-            "Shrapnel from intercepted rocket damaged a research greenhouse at the Sde Boker "
-            "academic campus (Ben-Gurion University desert research). "
-            "Three greenhouse panels destroyed; experimental crops lost. "
-            "Minimal infrastructure — no roads within 3 km, nearest hospital 35 km away. "
-            "Staff evacuated safely."
+            "שרפרל מטיל מיורט פגע בחממת מחקר בקמפוס שדה בוקר "
+            "(מחקר מדבר של אוניברסיטת בן גוריון). "
+            "שלושה לוחות חממה הושמדו; גידולים ניסיוניים אבדו. "
+            "תשתית מינימלית — אין כבישים במרחק 3 ק\"מ, בית חולים קרוב 35 ק\"מ. "
+            "הצוות פונה בשלום."
         ),
         lat=30.8517, lon=34.7861,
         organizationId="org-2", createdBy="user-admin-2",
@@ -226,12 +222,12 @@ _RAW_EVENTS = [
         status="pending", createdAt_offset_days=-1,
     ),
     dict(
-        name="Mahane Yehuda Market Direct Hit",
+        name="פגיעה ישירה בשוק מחנה יהודה",
         description=(
-            "Rocket impacted the covered section of Mahane Yehuda market during morning hours. "
-            "Iron roof over 40 stalls collapsed. Two support columns fractured. "
-            "Market is in the heart of West Jerusalem — densely populated neighbourhood. "
-            "Hadassah Ein Kerem hospital 4 km away. Main access roads partially blocked."
+            "טיל פגע בקטע המקורה של שוק מחנה יהודה בשעות הבוקר. "
+            "גג ברזל על 40 דוכנים קרס. שני עמודי תמך נשברו. "
+            "השוק בלב ירושלים המערבית — שכונה צפופה מאוד. "
+            "בית חולים הדסה עין כרם במרחק 4 ק\"מ. כבישי גישה ראשיים חסומים חלקית."
         ),
         lat=31.7845, lon=35.2133,
         organizationId="org-3", createdBy="user-admin-3",
@@ -241,12 +237,12 @@ _RAW_EVENTS = [
         status="in_progress", createdAt_offset_days=-1,
     ),
     dict(
-        name="Givat Shaul Apartment Tower",
+        name="מגדל מגורים גבעת שאול",
         description=(
-            "Rocket struck floors 8–10 of a 14-storey apartment tower in Givat Shaul. "
-            "Three floors structurally compromised; exterior wall breach on eastern face. "
-            "Building evacuated — 120 residents displaced. Shaare Zedek hospital 2 km away. "
-            "Access via Begin Highway clear."
+            "טיל פגע בקומות 8-10 של מגדל מגורים בן 14 קומות בגבעת שאול. "
+            "שלוש קומות ספגו פגיעה מבנית; פרצה בקיר חיצוני בחזית המזרחית. "
+            "המבנה פונה — 120 דיירים עקורים. בית חולים שערי צדק במרחק 2 ק\"מ. "
+            "גישה בכביש בגין פנויה."
         ),
         lat=31.7950, lon=35.1872,
         organizationId="org-3", createdBy="user-admin-3",
@@ -256,12 +252,12 @@ _RAW_EVENTS = [
         status="pending", createdAt_offset_days=0,
     ),
     dict(
-        name="Talpiot Industrial Building Collapse",
+        name="קריסת מבנה תעשייתי בתלפיות",
         description=(
-            "Heavy rocket hit on a 3-storey industrial building in Talpiot industrial zone. "
-            "Complete roof collapse on top floor; walls of second floor partially failed. "
-            "Electrical substation serving the zone destroyed — 800 units without power. "
-            "Nearest hospital 3 km. Good road access via Hebron Road."
+            "פגיעת טיל כבדה על מבנה תעשייתי בן 3 קומות באזור התעשייה תלפיות. "
+            "קריסה מוחלטת של גג הקומה העליונה; קירות הקומה השנייה כשלו חלקית. "
+            "תחנת חשמל משנית המשרתת את האזור הושמדה — 800 יחידות ללא חשמל. "
+            "בית חולים קרוב 3 ק\"מ. גישה טובה בכביש חברון."
         ),
         lat=31.7483, lon=35.2236,
         organizationId="org-3", createdBy="user-admin-3",
@@ -271,12 +267,12 @@ _RAW_EVENTS = [
         status="in_progress", createdAt_offset_days=-2,
     ),
     dict(
-        name="Pisgat Ze'ev Northern Tower Strike",
+        name="פגיעה במגדל הצפוני פסגת זאב",
         description=(
-            "Rocket impacted a residential block in Pisgat Ze'ev northern suburb. "
-            "Floors 3–5 of a 7-storey building show severe wall cracking and partial floor "
-            "collapse. Gas supply severed for entire block. ~60 residents evacuated. "
-            "French Hill hospital 6 km; access via Route 60 available."
+            "טיל פגע ברובע מגורים בפרבר הצפוני פסגת זאב. "
+            "קומות 3-5 של מבנה בן 7 קומות מציגות סדיקת קירות חמורה וקריסה חלקית של רצפות. "
+            "אספקת גז נותקה לכל הרובע. כ-60 דיירים פונו. "
+            "בית חולים הר הצופים 6 ק\"מ; גישה בכביש 60 זמינה."
         ),
         lat=31.8391, lon=35.2369,
         organizationId="org-3", createdBy="user-admin-3",
@@ -286,12 +282,12 @@ _RAW_EVENTS = [
         status="pending", createdAt_offset_days=0,
     ),
     dict(
-        name="German Colony Garden Wall Damage",
+        name="נזק לגדר גינה במושבה הגרמנית",
         description=(
-            "Rocket fragment destroyed a garden wall and vehicle carport in the German Colony "
-            "neighbourhood. Shrapnel caused surface damage to nearby facade. "
-            "No structural risk to the building. One parked car destroyed. "
-            "Emek Refaim street remains accessible."
+            "רסיס טיל הרס גדר גינה ומחסה רכב בשכונת המושבה הגרמנית. "
+            "שרפרל גרם לנזק שטחי לחזית סמוכה. "
+            "אין סיכון מבני למבנה. רכב חנוי אחד הושמד. "
+            "רחוב עמק רפאים נותר נגיש."
         ),
         lat=31.7624, lon=35.2181,
         organizationId="org-3", createdBy="user-admin-3",
@@ -301,12 +297,12 @@ _RAW_EVENTS = [
         status="completed", createdAt_offset_days=-4,
     ),
     dict(
-        name="Hadassah Mount Scopus Perimeter",
+        name="היקף הדסה הר הצופים",
         description=(
-            "Shrapnel from intercepted missile struck the outer parking area of Hadassah "
-            "Mount Scopus hospital campus. Five vehicles damaged; perimeter fence breached. "
-            "Hospital operations unaffected — internal structures intact. "
-            "Hebrew University campus nearby. Road access fully open."
+            "שרפרל מטיל מיורט פגע בחניון החיצוני של קמפוס בית החולים הדסה הר הצופים. "
+            "חמישה כלי רכב ניזוקו; גדר ההיקף נפרצה. "
+            "פעילות בית החולים לא הושפעה — מבנים פנימיים תקינים. "
+            "קמפוס האוניברסיטה העברית בסמוך. גישה לדרכים פתוחה לחלוטין."
         ),
         lat=31.7936, lon=35.2453,
         organizationId="org-3", createdBy="user-admin-3",
@@ -316,12 +312,12 @@ _RAW_EVENTS = [
         status="completed", createdAt_offset_days=-3,
     ),
     dict(
-        name="Ramot Residential Shrapnel Scatter",
+        name="פיזור שרפרל — רמות מגורים",
         description=(
-            "Intercepted rocket debris scattered across a residential street in Ramot Allon. "
-            "Windows and balcony railings on 6 apartments damaged. One ground-floor unit "
-            "sustained minor wall penetration. No injuries. Infrastructure intact. "
-            "Main road access via Golda Meir Boulevard available."
+            "הריסות טיל מיורט פוזרו ברחוב מגורים ברמות אלון. "
+            "חלונות ומעקות מרפסות ב-6 דירות ניזוקו. "
+            "יחידה אחת בקומת הקרקע ספגה חדירת קיר קלה. "
+            "אין נפגעים. תשתיות תקינות. גישה ראשית בשדרות גולדה מאיר זמינה."
         ),
         lat=31.8289, lon=35.1946,
         organizationId="org-3", createdBy="user-admin-3",
@@ -345,7 +341,7 @@ def _iso(offset_days: int) -> str:
 
 
 def _city_for_org(org_id: str) -> str:
-    return {"org-1": "Tel Aviv", "org-2": "South", "org-3": "Jerusalem"}.get(org_id, "Israel")
+    return {"org-1": "תל אביב", "org-2": "דרום", "org-3": "ירושלים"}.get(org_id, "ישראל")
 
 
 def run_seed() -> None:
@@ -387,10 +383,7 @@ def run_seed() -> None:
             }
             score = float(raw["damageScore"])
             multiplier = 1.0
-            explanation = (
-                f"{raw['damageClassification']} damage detected. "
-                f"GIS data unavailable — using base damage score."
-            )
+            explanation = "זוהה נזק — נתוני GIS אינם זמינים. מתבסס על ציון נזק בסיסי."
 
         event = {
             "id":                   _make_id(),

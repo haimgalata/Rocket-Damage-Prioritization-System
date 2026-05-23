@@ -49,7 +49,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, icon, iconBg, delta, 
     )}
     {onClick && (
       <p className="text-xs mt-1.5 text-blue-500 flex items-center gap-0.5">
-        View events <ChevronRight className="w-3 h-3" />
+        הצג אירועים <ChevronRight className="w-3 h-3 scale-x-[-1]" />
       </p>
     )}
   </div>
@@ -136,75 +136,75 @@ export const Dashboard: React.FC = () => {
   };
 
   const filterButtons: { label: string; value: FilterStatus; count: number }[] = [
-    { label: 'All',         value: 'all',                   count: total },
-    { label: 'New',         value: EventStatus.NEW,         count: pending },
-    { label: 'In Progress', value: EventStatus.IN_PROGRESS, count: inProgress },
-    { label: 'Done',        value: EventStatus.DONE,        count: completed },
+    { label: 'הכל',    value: 'all',                   count: total },
+    { label: 'חדש',    value: EventStatus.NEW,         count: pending },
+    { label: 'בטיפול', value: EventStatus.IN_PROGRESS, count: inProgress },
+    { label: 'הושלם',  value: EventStatus.DONE,        count: completed },
   ];
 
   return (
-    <PageContainer title="Operations Dashboard">
+    <PageContainer title="לוח בקרה מבצעי">
       <div className="space-y-6 max-w-[1400px] mx-auto">
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="Total Events" value={total}
+          <StatCard label="סה״כ אירועים" value={total}
             icon={<Activity className="w-5 h-5 text-blue-600" />} iconBg="bg-blue-100"
-            onClick={() => setStatusModal({ label: 'All Events', events: orgEvents })} />
-          <StatCard label="New" value={pending}
+            onClick={() => setStatusModal({ label: 'כל האירועים', events: orgEvents })} />
+          <StatCard label="חדש" value={pending}
             icon={<Clock className="w-5 h-5 text-yellow-600" />} iconBg="bg-yellow-100"
-            delta={criticalCount > 0 ? `${criticalCount} critical` : undefined} deltaPositive={false}
+            delta={criticalCount > 0 ? `${criticalCount} קריטי` : undefined} deltaPositive={false}
             onClick={() => setStatusModal({ label: getStatusLabel(EventStatus.NEW), events: orgEvents.filter(e => e.status === EventStatus.NEW) })} />
-          <StatCard label="In Progress" value={inProgress}
+          <StatCard label="בטיפול" value={inProgress}
             icon={<RefreshCw className="w-5 h-5 text-indigo-600" />} iconBg="bg-indigo-100"
             onClick={() => setStatusModal({ label: getStatusLabel(EventStatus.IN_PROGRESS), events: orgEvents.filter(e => e.status === EventStatus.IN_PROGRESS) })} />
-          <StatCard label="Done" value={completed}
+          <StatCard label="הושלם" value={completed}
             icon={<CheckCircle2 className="w-5 h-5 text-green-600" />} iconBg="bg-green-100"
-            delta={total > 0 ? `${Math.round((completed / total) * 100)}% resolution rate` : undefined}
+            delta={total > 0 ? `${Math.round((completed / total) * 100)}% שיעור סגירה` : undefined}
             deltaPositive
             onClick={() => setStatusModal({ label: getStatusLabel(EventStatus.DONE), events: orgEvents.filter(e => e.status === EventStatus.DONE) })} />
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-5 text-white shadow-sm">
-            <p className="text-blue-200 text-sm mb-1">Avg Priority Score</p>
+            <p className="text-blue-200 text-sm mb-1">ציון עדיפות ממוצע</p>
             <p className="text-4xl font-bold">{avgPriority.toFixed(1)}</p>
             <div className="mt-2 h-1.5 bg-blue-500/50 rounded-full">
               <div className="h-full bg-white rounded-full" style={{ width: `${(avgPriority / 10) * 100}%` }} />
             </div>
-            <p className="text-blue-200 text-xs mt-1">Out of 10</p>
+            <p className="text-blue-200 text-xs mt-1">מתוך 10</p>
           </div>
           <button
-            onClick={() => setStatusModal({ label: 'Critical Events (≥7.5)', events: orgEvents.filter(e => e.priorityScore >= 7.5) })}
-            className="bg-gradient-to-br from-red-500 to-rose-600 rounded-xl p-5 text-white shadow-sm text-left hover:opacity-90 transition cursor-pointer"
+            onClick={() => setStatusModal({ label: 'אירועים קריטיים (≥7.5)', events: orgEvents.filter(e => e.priorityScore >= 7.5) })}
+            className="bg-gradient-to-br from-red-500 to-rose-600 rounded-xl p-5 text-white shadow-sm hover:opacity-90 transition cursor-pointer"
           >
-            <p className="text-red-100 text-sm mb-1">Critical Events (≥7.5)</p>
+            <p className="text-red-100 text-sm mb-1">אירועים קריטיים (≥7.5)</p>
             <p className="text-4xl font-bold">{criticalCount}</p>
             <p className="text-red-200 text-xs mt-2 flex items-center gap-1">
-              <AlertTriangle className="w-3.5 h-3.5" /> Click to view events
+              <AlertTriangle className="w-3.5 h-3.5" /> לחץ לצפייה באירועים
             </p>
           </button>
           <div className="bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl p-5 text-white shadow-sm flex flex-col justify-between">
             <button
-              onClick={() => hiddenCount > 0 && setStatusModal({ label: 'Hidden Events', events: orgEvents.filter(e => e.hidden) })}
-              className={`text-left ${hiddenCount > 0 ? 'cursor-pointer hover:opacity-90' : 'cursor-default'} transition`}
+              onClick={() => hiddenCount > 0 && setStatusModal({ label: 'אירועים מוסתרים', events: orgEvents.filter(e => e.hidden) })}
+              className={`${hiddenCount > 0 ? 'cursor-pointer hover:opacity-90' : 'cursor-default'} transition`}
             >
-              <p className="text-slate-400 text-sm mb-1">Hidden Events</p>
+              <p className="text-slate-400 text-sm mb-1">אירועים מוסתרים</p>
               <p className="text-4xl font-bold">{hiddenCount}</p>
-              <p className="text-slate-400 text-xs mt-1">{hiddenCount > 0 ? 'Click to view' : 'Filtered from view'}</p>
+              <p className="text-slate-400 text-xs mt-1">{hiddenCount > 0 ? 'לחץ לצפייה' : 'מוסנן מהתצוגה'}</p>
             </button>
             {hiddenCount > 0 && (
               <button onClick={() => setShowHidden((v) => !v)}
                 className="mt-3 flex items-center gap-2 text-sm text-slate-300 hover:text-white transition">
                 {showHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                {showHidden ? 'Hide hidden events' : 'Show hidden events'}
+                {showHidden ? 'הסתר מוסתרים' : 'הצג מוסתרים'}
               </button>
             )}
           </div>
         </div>
 
         <Card
-          title="Event Map"
-          subtitle={mapMode === 'pins' ? 'Click a row to zoom in · color-coded by priority' : 'Damage density heatmap'}
+          title="מפת אירועים"
+          subtitle={mapMode === 'pins' ? 'לחץ על שורה לזום · צבעוני לפי עדיפות' : 'מפת צפיפות נזקים'}
           noPadding
           headerRight={
             <div className="flex items-center gap-2">
@@ -214,7 +214,7 @@ export const Dashboard: React.FC = () => {
                   onChange={(e) => setMapOrgFilter(e.target.value === '' ? null : Number(e.target.value))}
                   className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-300"
                 >
-                  <option value="">National view</option>
+                  <option value="">תצוגה ארצית</option>
                   {organizations.map((org) => (
                     <option key={org.id} value={org.id}>{org.name}</option>
                   ))}
@@ -225,13 +225,13 @@ export const Dashboard: React.FC = () => {
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
                     mapMode === 'pins' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
                   }`}>
-                  <Map className="w-3.5 h-3.5" /> Pins
+                  <Map className="w-3.5 h-3.5" /> סיכות
                 </button>
                 <button onClick={() => setMapMode('heatmap')}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
                     mapMode === 'heatmap' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
                   }`}>
-                  <Layers className="w-3.5 h-3.5" /> Heatmap
+                  <Layers className="w-3.5 h-3.5" /> מפת חום
                 </button>
               </div>
             </div>
@@ -247,11 +247,11 @@ export const Dashboard: React.FC = () => {
             />
             {mapMode === 'pins' && (
               <div className="flex items-center gap-4 mt-3 px-1">
-                <span className="text-xs text-gray-500 font-medium">Legend:</span>
+                <span className="text-xs text-gray-500 font-medium">מקרא:</span>
                 {[
-                  { color: 'bg-red-500',    label: 'Critical (≥7.5)' },
-                  { color: 'bg-orange-500', label: 'High (5–7.4)' },
-                  { color: 'bg-green-500',  label: 'Low–Med (<5)' },
+                  { color: 'bg-red-500',    label: 'קריטי (≥7.5)'      },
+                  { color: 'bg-orange-500', label: 'גבוה (5–7.4)'     },
+                  { color: 'bg-green-500',  label: 'נמוך–בינוני (<5)' },
                 ].map(({ color, label }) => (
                   <div key={label} className="flex items-center gap-1.5">
                     <div className={`w-3 h-3 rounded-full ${color}`} />
@@ -264,15 +264,15 @@ export const Dashboard: React.FC = () => {
         </Card>
 
         <Card
-          title="Damage Events"
-          subtitle={`${displayEvents.length} records · sorted by priority`}
+          title="אירועי נזק"
+          subtitle={`${displayEvents.length} רשומות · ממוינות לפי עדיפות`}
           noPadding
           headerRight={
             <div className="flex items-center gap-2">
               {filterStatus !== 'all' && (
                 <button onClick={() => setFilterStatus('all')}
                   className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1">
-                  <X className="w-3.5 h-3.5" /> Clear
+                  <X className="w-3.5 h-3.5" /> נקה
                 </button>
               )}
               <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
@@ -284,7 +284,7 @@ export const Dashboard: React.FC = () => {
                         : 'text-gray-500 hover:text-gray-700'
                     }`}>
                     {btn.label}
-                    <span className={`ml-1 text-xs ${filterStatus === btn.value ? 'text-blue-500' : 'text-gray-400'}`}>
+                    <span className={`mr-1 text-xs ${filterStatus === btn.value ? 'text-blue-500' : 'text-gray-400'}`}>
                       {btn.count}
                     </span>
                   </button>
@@ -303,7 +303,7 @@ export const Dashboard: React.FC = () => {
         </Card>
 
         {total > 0 && (
-          <Card title="Priority Distribution">
+          <Card title="התפלגות עדיפויות">
             <div className="flex gap-0 rounded-full overflow-hidden h-4 mb-3">
               <div className="bg-red-500 transition-all"
                 style={{ width: `${(orgEvents.filter((e) => e.priorityScore >= 7.5).length / total) * 100}%` }} />
@@ -313,10 +313,10 @@ export const Dashboard: React.FC = () => {
                 style={{ width: `${(orgEvents.filter((e) => e.priorityScore < 5.0).length / total) * 100}%` }} />
             </div>
             <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-              <span><span className="font-semibold text-red-600">{orgEvents.filter((e) => e.priorityScore >= 7.5).length}</span> Critical</span>
-              <span><span className="font-semibold text-orange-500">{orgEvents.filter((e) => e.priorityScore >= 5.0 && e.priorityScore < 7.5).length}</span> High</span>
-              <span><span className="font-semibold text-green-600">{orgEvents.filter((e) => e.priorityScore < 5.0).length}</span> Low–Medium</span>
-              <span className="ml-auto text-gray-400">Avg: {formatScore(avgPriority)}</span>
+              <span><span className="font-semibold text-red-600">{orgEvents.filter((e) => e.priorityScore >= 7.5).length}</span> קריטי</span>
+              <span><span className="font-semibold text-orange-500">{orgEvents.filter((e) => e.priorityScore >= 5.0 && e.priorityScore < 7.5).length}</span> גבוה</span>
+              <span><span className="font-semibold text-green-600">{orgEvents.filter((e) => e.priorityScore < 5.0).length}</span> נמוך–בינוני</span>
+              <span className="mr-auto text-gray-400">ממוצע: {formatScore(avgPriority)}</span>
             </div>
           </Card>
         )}
@@ -325,7 +325,7 @@ export const Dashboard: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={selectedEvent ? `Event: ${selectedEvent.name}` : 'Event Detail'}
+        title={selectedEvent ? `אירוע: ${selectedEvent.name}` : 'פרטי אירוע'}
         size="lg"
       >
         {selectedEvent && <EventDetailView event={selectedEvent} />}
@@ -340,7 +340,7 @@ export const Dashboard: React.FC = () => {
         {statusModal && (
           <div className="space-y-1 max-h-96 overflow-y-auto">
             {statusModal.events.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-6">No events in this status.</p>
+              <p className="text-sm text-gray-400 text-center py-6">אין אירועים בסטטוס זה.</p>
             ) : (
               statusModal.events.map((ev) => (
                 <Link
@@ -359,7 +359,7 @@ export const Dashboard: React.FC = () => {
                     <span className={`text-xs font-semibold ${ev.priorityScore >= 7.5 ? 'text-red-600' : ev.priorityScore >= 5 ? 'text-orange-500' : 'text-green-600'}`}>
                       {ev.priorityScore.toFixed(1)}
                     </span>
-                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 scale-x-[-1]" />
                   </div>
                 </Link>
               ))

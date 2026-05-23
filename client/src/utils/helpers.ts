@@ -3,9 +3,9 @@ import type { DamageEvent, DashboardStats } from '../types';
 
 export const getStatusLabel = (status: EventStatus): string => {
   switch (status) {
-    case EventStatus.NEW:         return 'New';
-    case EventStatus.IN_PROGRESS: return 'In Progress';
-    case EventStatus.DONE:        return 'Done';
+    case EventStatus.NEW:         return 'חדש';
+    case EventStatus.IN_PROGRESS: return 'בטיפול';
+    case EventStatus.DONE:        return 'הושלם';
     default:                      return status;
   }
 };
@@ -51,10 +51,16 @@ export const getPriorityTextColor = (score: number): string => {
 };
 
 export const getPriorityLabel = (score: number): string => {
-  if (score >= 7.5) return 'Critical';
-  if (score >= 5.0) return 'High';
-  if (score >= 2.5) return 'Medium';
-  return 'Low';
+  if (score >= 7.5) return 'קריטי';
+  if (score >= 5.0) return 'גבוה';
+  if (score >= 2.5) return 'בינוני';
+  return 'נמוך';
+};
+
+export const getDamageLabel = (cls: string): string => {
+  if (cls === 'Heavy') return 'נזק כבד';
+  if (cls === 'Light') return 'נזק קל';
+  return cls;
 };
 
 export const getMarkerColor = (score: number): string => {
@@ -65,7 +71,7 @@ export const getMarkerColor = (score: number): string => {
 
 export const formatDate = (date: Date | string): string => {
   const d = new Date(date);
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString('he-IL', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -74,7 +80,7 @@ export const formatDate = (date: Date | string): string => {
 
 export const formatDateTime = (date: Date | string): string => {
   const d = new Date(date);
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString('he-IL', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -88,13 +94,13 @@ export const formatTimeAgo = (date: Date | string): string => {
   const now = new Date();
   const seconds = Math.floor((now.getTime() - d.getTime()) / 1000);
 
-  if (seconds < 60) return 'Just now';
+  if (seconds < 60) return 'זה עתה';
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return `לפני ${minutes} דק'`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return `לפני ${hours} שע'`;
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
+  if (days < 7) return `לפני ${days} ימים`;
 
   return formatDate(d);
 };
@@ -108,7 +114,9 @@ export const capitalizeFirstLetter = (str: string): string => {
 };
 
 export const formatRole = (role: string): string => {
-  if (role === 'SUPER_ADMIN') return 'Technical Team';
+  if (role === 'SUPER_ADMIN') return 'צוות טכני';
+  if (role === 'ADMIN') return 'מנהל';
+  if (role === 'OPERATOR') return 'מפעיל';
   return role
     .split('_')
     .map((word) => capitalizeFirstLetter(word.toLowerCase()))
@@ -138,7 +146,7 @@ export const formatCurrency = (amount: number): string => {
 };
 
 export const formatNumber = (num: number): string => {
-  return num.toLocaleString('en-US');
+  return num.toLocaleString('he-IL');
 };
 
 export const formatAddress = (
@@ -246,6 +254,7 @@ export default {
   getPriorityColor,
   getPriorityTextColor,
   getPriorityLabel,
+  getDamageLabel,
   getMarkerColor,
   formatDate,
   formatDateTime,

@@ -51,8 +51,8 @@ export const LocationPicker: React.FC<LocationPickerProps> = ({
       <div className="flex items-center gap-2 mb-2 text-sm text-gray-600">
         <MapPin className="w-4 h-4 text-blue-500" />
         {marker
-          ? <span className="font-medium text-blue-700">{marker[0].toFixed(5)}, {marker[1].toFixed(5)}</span>
-          : <span className="text-gray-400">Click the map, type an address, or use GPS below</span>}
+          ? <span className="font-medium text-blue-700" dir="ltr">{marker[0].toFixed(5)}, {marker[1].toFixed(5)}</span>
+          : <span className="text-gray-400">לחץ על המפה, הקלד כתובת, או השתמש ב-GPS למטה</span>}
       </div>
       <div style={{ height }} className="rounded-xl overflow-hidden border border-gray-200">
         <LeafletMapContainer center={marker || [32.0853, 34.7818]} zoom={13} style={{ height: '100%', width: '100%' }}>

@@ -45,15 +45,15 @@ SEED_JSON = _REPO_ROOT / "server" / "seed_events.json"
 
 # (display name, unique settlement_code) — idempotent by name; orgs may use only a subset.
 SEED_SETTLEMENTS: list[tuple[str, str]] = [
-    ("Tel Aviv", "TAV-001"),
-    ("South", "STH-002"),
-    ("Jerusalem", "JRS-003"),
-    ("Haifa", "HFA-004"),
-    ("Herzliya", "HRZ-005"),
-    ("Be'er Sheva", "BVS-006"),
-    ("Netanya", "NTN-007"),
-    ("Netivot", "NTV-008"),
-    ("Kiryat Gat", "KTG-009"),
+    ("תל אביב", "TAV-001"),
+    ("דרום", "STH-002"),
+    ("ירושלים", "JRS-003"),
+    ("חיפה", "HFA-004"),
+    ("הרצליה", "HRZ-005"),
+    ("באר שבע", "BVS-006"),
+    ("נתניה", "NTN-007"),
+    ("נתיבות", "NTV-008"),
+    ("קריית גת", "KTG-009"),
 ]
 
 
@@ -101,9 +101,9 @@ def seed_organizations(db, settlement_ids: dict[str, int]) -> dict[str, int]:
         return result
 
     orgs = [
-        ("Tel Aviv Municipality", "Tel Aviv", "org-1"),
-        ("South Authority", "South", "org-2"),
-        ("Jerusalem Municipality", "Jerusalem", "org-3"),
+        ("עיריית תל אביב", "תל אביב", "org-1"),
+        ("רשות הדרום", "דרום", "org-2"),
+        ("עיריית ירושלים", "ירושלים", "org-3"),
     ]
     for name, settlement_name, ext_id in orgs:
         if ext_id in result:

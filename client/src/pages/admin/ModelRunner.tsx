@@ -81,7 +81,7 @@ export const ModelRunner: React.FC = () => {
   };
 
   return (
-    <PageContainer title="AI Model Runner">
+    <PageContainer title="מריץ מודל AI">
       <div className="max-w-4xl mx-auto space-y-6">
         <Card>
           <div className="flex items-start gap-5">
@@ -91,37 +91,37 @@ export const ModelRunner: React.FC = () => {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
                 <h3 className="text-lg font-bold text-gray-900">PrioritAI-v2.1</h3>
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Active</span>
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">פעיל</span>
               </div>
               <p className="text-sm text-gray-500 mb-4">
-                Damage assessment and priority scoring model trained on 50,000+ building damage events.
-                Combines visual analysis with location and contextual factors.
+                מודל הערכת נזקים ותיעדוף, אומן על 50,000+ אירועי נזק בניינים.
+                משלב ניתוח חזותי עם גורמי מיקום והקשר.
               </p>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-2xl font-bold text-gray-900">94.7%</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Accuracy</p>
+                  <p className="text-xs text-gray-500 mt-0.5">דיוק</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-2xl font-bold text-gray-900">~0.4s</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Per Event</p>
+                  <p className="text-xs text-gray-500 mt-0.5">לאירוע</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-2xl font-bold text-gray-900">v2.1</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Version</p>
+                  <p className="text-xs text-gray-500 mt-0.5">גרסה</p>
                 </div>
               </div>
             </div>
           </div>
         </Card>
 
-        <Card title="Run Assessment" subtitle={`${pendingEvents.length} events in "new" status (demo batch update)`}>
+        <Card title="הפעל הערכה" subtitle={`${pendingEvents.length} אירועים בסטטוס 'חדש' (עדכון אצווה לדוגמה)`}>
           {isRunning ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between text-sm mb-1">
                 <span className="text-gray-600 flex items-center gap-2">
                   <Cpu className="w-4 h-4 animate-pulse text-blue-500" />
-                  Processing events...
+                  מעבד אירועים...
                 </span>
                 <span className="font-semibold text-blue-600">{progress}%</span>
               </div>
@@ -132,7 +132,7 @@ export const ModelRunner: React.FC = () => {
                 />
               </div>
               <p className="text-xs text-gray-400">
-                Assessed {Math.round((progress / 100) * pendingEvents.length)} of {pendingEvents.length} events
+                הוערכו {Math.round((progress / 100) * pendingEvents.length)} מתוך {pendingEvents.length} אירועים
               </p>
             </div>
           ) : (
@@ -143,12 +143,12 @@ export const ModelRunner: React.FC = () => {
                 disabled={pendingEvents.length === 0}
                 size="lg"
               >
-                {pendingEvents.length === 0 ? 'No events in New status' : `Run on ${pendingEvents.length} events`}
+                {pendingEvents.length === 0 ? 'אין אירועים בסטטוס חדש' : `הפעל על ${pendingEvents.length} אירועים`}
               </Button>
               {pendingEvents.length === 0 && (
                 <p className="text-sm text-gray-500 flex items-center gap-1.5">
                   <CheckCircle className="w-4 h-4 text-green-500" />
-                  All events have been scored
+                  כל האירועים קיבלו ציון
                 </p>
               )}
             </div>
@@ -156,7 +156,7 @@ export const ModelRunner: React.FC = () => {
         </Card>
 
         {runs.length > 0 && (
-          <Card title="Run History" subtitle="Previous model executions">
+          <Card title="היסטוריית הרצות" subtitle="הרצות מודל קודמות">
             <div className="space-y-3">
               {runs.map((run) => (
                 <div key={run.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
@@ -165,19 +165,19 @@ export const ModelRunner: React.FC = () => {
                   </div>
                   <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                     <div>
-                      <p className="text-xs text-gray-500">Timestamp</p>
+                      <p className="text-xs text-gray-500">חותמת זמן</p>
                       <p className="font-medium text-gray-900">{run.timestamp.toLocaleTimeString()}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Events</p>
-                      <p className="font-medium text-gray-900">{run.eventsProcessed} scored</p>
+                      <p className="text-xs text-gray-500">אירועים</p>
+                      <p className="font-medium text-gray-900">{run.eventsProcessed} הוערכו</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Duration</p>
+                      <p className="text-xs text-gray-500">משך</p>
                       <p className="font-medium text-gray-900">{run.duration}s</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Avg Priority</p>
+                      <p className="text-xs text-gray-500">עדיפות ממוצעת</p>
                       <p className="font-medium text-gray-900">{run.avgPriorityBefore} → {run.avgPriorityAfter}</p>
                     </div>
                   </div>

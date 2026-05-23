@@ -18,7 +18,7 @@ export interface TestTemplate {
 export const TEST_TEMPLATES: TestTemplate[] = [
   {
     id: 'tpl-heavy-tlv',
-    name: 'Tel Aviv — Heavy Structural Collapse',
+    name: 'תל אביב — קריסה מבנית כבדה',
     description:
       '[TEST] Severe structural collapse of a 4-story residential building following direct impact. ' +
       'Roof completely destroyed, outer walls cracked beyond repair, debris blocking adjacent street. ' +
@@ -26,8 +26,8 @@ export const TEST_TEMPLATES: TestTemplate[] = [
     tags: 'structural, heavy, test',
     lat: 32.08320,
     lng: 34.78710,
-    address: 'Dizengoff St, Tel Aviv',
-    city: 'Tel Aviv',
+    address: 'רחוב דיזנגוף, תל אביב',
+    city: 'תל אביב',
     imagePath: '/test-images/heavy_01.jpg',
     expected: {
       aiClassification: 'Heavy',
@@ -37,7 +37,7 @@ export const TEST_TEMPLATES: TestTemplate[] = [
   },
   {
     id: 'tpl-light-rg',
-    name: 'Ramat Gan — Light Facade Damage',
+    name: 'רמת גן — נזק קל לחזית',
     description:
       '[TEST] Minor facade cracking and broken windows on a commercial building. ' +
       'Structural integrity intact, no risk of collapse. Interior operations unaffected. ' +
@@ -45,8 +45,8 @@ export const TEST_TEMPLATES: TestTemplate[] = [
     tags: 'facade, light, test',
     lat: 32.08500,
     lng: 34.81200,
-    address: 'Jabotinsky St, Ramat Gan',
-    city: 'Ramat Gan',
+    address: 'רחוב ז\'בוטינסקי, רמת גן',
+    city: 'רמת גן',
     imagePath: '/test-images/light_01.jpg',
     expected: {
       aiClassification: 'Light',
@@ -56,7 +56,7 @@ export const TEST_TEMPLATES: TestTemplate[] = [
   },
   {
     id: 'tpl-heavy-haifa',
-    name: 'Haifa — Heavy Industrial Damage',
+    name: 'חיפה — נזק תעשייתי כבד',
     description:
       '[TEST] Severe damage to an industrial warehouse — roof partially collapsed, ' +
       'structural beams exposed, hazardous material storage area compromised. ' +
@@ -64,8 +64,8 @@ export const TEST_TEMPLATES: TestTemplate[] = [
     tags: 'industrial, heavy, hazmat, test',
     lat: 32.81948,
     lng: 34.99862,
-    address: 'Port Area, Haifa',
-    city: 'Haifa',
+    address: 'אזור הנמל, חיפה',
+    city: 'חיפה',
     imagePath: '/test-images/heavy_02.jpg',
     expected: {
       aiClassification: 'Heavy',
@@ -75,7 +75,7 @@ export const TEST_TEMPLATES: TestTemplate[] = [
   },
   {
     id: 'tpl-light-revivim',
-    name: 'Kibbutz Revivim — Isolated Light Damage',
+    name: 'קיבוץ רביבים — נזק קל מבודד',
     description:
       '[TEST] Minor perimeter fence and irrigation damage at Kibbutz Revivim in the central Negev desert. ' +
       'No structural risk. Small rural community far from hospitals and roads. ' +
@@ -83,8 +83,8 @@ export const TEST_TEMPLATES: TestTemplate[] = [
     tags: 'isolated, light, negev, test',
     lat: 31.0000,
     lng: 34.8833,
-    address: 'Kibbutz Revivim, Negev',
-    city: 'South',
+    address: 'קיבוץ רביבים, נגב',
+    city: 'דרום',
     imagePath: '/test-images/light_01.jpg',
     expected: {
       aiClassification: 'Light',
@@ -94,7 +94,7 @@ export const TEST_TEMPLATES: TestTemplate[] = [
   },
   {
     id: 'tpl-light-mitzpe',
-    name: 'Mitzpe Ramon — Remote Light Damage',
+    name: 'מצפה רמון — נזק קל מרוחק',
     description:
       '[TEST] Surface cratering in parking area of the Ramon Crater visitor centre. ' +
       'Glass facade cracked; no structural damage. Location is 25 km from nearest hospital, ' +
@@ -103,8 +103,8 @@ export const TEST_TEMPLATES: TestTemplate[] = [
     tags: 'isolated, remote, tourism, test',
     lat: 30.6100,
     lng: 34.8010,
-    address: 'Ramon Crater, Mitzpe Ramon',
-    city: 'South',
+    address: 'מכתש רמון, מצפה רמון',
+    city: 'דרום',
     imagePath: '/test-images/light_01.jpg',
     expected: {
       aiClassification: 'Light',
@@ -114,7 +114,7 @@ export const TEST_TEMPLATES: TestTemplate[] = [
   },
   {
     id: 'tpl-heavy-jerusalem',
-    name: 'Jerusalem — Heavy Market Collapse',
+    name: 'ירושלים — קריסת גג בשוק',
     description:
       '[TEST] Roof collapse over 40 stalls in Mahane Yehuda market. ' +
       'Two support columns fractured, dense pedestrian zone, hospital within 4 km. ' +
@@ -122,8 +122,8 @@ export const TEST_TEMPLATES: TestTemplate[] = [
     tags: 'structural, heavy, urban, test',
     lat: 31.7845,
     lng: 35.2133,
-    address: 'Mahane Yehuda Market, Jerusalem',
-    city: 'Jerusalem',
+    address: 'שוק מחנה יהודה, ירושלים',
+    city: 'ירושלים',
     imagePath: '/test-images/heavy_01.jpg',
     expected: {
       aiClassification: 'Heavy',

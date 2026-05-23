@@ -76,25 +76,25 @@ export const OperatorDashboard: React.FC = () => {
   };
 
   return (
-    <PageContainer title="My Organization — Dashboard">
+    <PageContainer title="הארגון שלי — לוח בקרה">
       <div className="max-w-[1200px] mx-auto space-y-6">
 
         {critical > 0 && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-5 py-3 flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
             <p className="text-sm text-red-700">
-              <span className="font-semibold">{critical} critical event{critical !== 1 ? 's' : ''}</span>
-              {' '}require immediate attention in your area.
+              <span className="font-semibold">{critical} {critical !== 1 ? 'אירועים קריטיים' : 'אירוע קריטי'}</span>
+              {' '}דורשים תשומת לב מיידית באזורך.
             </p>
           </div>
         )}
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: 'Total Events', value: total,      icon: <Activity className="w-5 h-5 text-blue-600" />,       bg: 'bg-blue-100'   },
-            { label: 'New',            value: pending,    icon: <Clock className="w-5 h-5 text-yellow-600" />,       bg: 'bg-yellow-100' },
-            { label: 'In Progress',  value: inProgress, icon: <Activity className="w-5 h-5 text-indigo-600" />,    bg: 'bg-indigo-100' },
-            { label: 'Done',           value: completed,  icon: <CheckCircle2 className="w-5 h-5 text-green-600" />, bg: 'bg-green-100'  },
+            { label: 'סה"כ אירועים', value: total,      icon: <Activity className="w-5 h-5 text-blue-600" />,       bg: 'bg-blue-100'   },
+            { label: 'חדשים',         value: pending,    icon: <Clock className="w-5 h-5 text-yellow-600" />,       bg: 'bg-yellow-100' },
+            { label: 'בטיפול',        value: inProgress, icon: <Activity className="w-5 h-5 text-indigo-600" />,    bg: 'bg-indigo-100' },
+            { label: 'בוצע',          value: completed,  icon: <CheckCircle2 className="w-5 h-5 text-green-600" />, bg: 'bg-green-100'  },
           ].map(({ label, value, icon, bg }) => (
             <div key={label} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
               <div className="flex items-center justify-between mb-3">
@@ -106,7 +106,7 @@ export const OperatorDashboard: React.FC = () => {
           ))}
         </div>
 
-        <Card title="Event Map" subtitle="Color-coded by priority · click a marker for details" noPadding>
+        <Card title="מפת אירועים" subtitle="מקודד צבעים לפי עדיפות · לחץ על סמן לפרטים" noPadding>
           <div className="p-4">
             <EventMap
               events={orgEvents}
@@ -117,9 +117,9 @@ export const OperatorDashboard: React.FC = () => {
             />
             <div className="flex items-center gap-4 mt-3">
               {[
-                { color: 'bg-red-500',    label: 'Critical (≥7.5)' },
-                { color: 'bg-orange-500', label: 'High (5–7.4)'    },
-                { color: 'bg-green-500',  label: 'Low–Med (<5)'    },
+                { color: 'bg-red-500',    label: 'קריטי (≥7.5)'      },
+                { color: 'bg-orange-500', label: 'גבוה (5–7.4)'     },
+                { color: 'bg-green-500',  label: 'נמוך–בינוני (<5)' },
               ].map(({ color, label }) => (
                 <div key={label} className="flex items-center gap-1.5">
                   <div className={`w-3 h-3 rounded-full ${color}`} />
@@ -131,8 +131,8 @@ export const OperatorDashboard: React.FC = () => {
         </Card>
 
         <Card
-          title="Events"
-          subtitle={`${orgEvents.length} events in your organization · sorted by priority`}
+          title="אירועים"
+          subtitle={`${orgEvents.length} אירועים בארגון שלך · ממוינים לפי עדיפות`}
           noPadding
         >
           <EventTable
@@ -151,7 +151,7 @@ export const OperatorDashboard: React.FC = () => {
       <Modal
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
-        title={selectedEvent?.name ?? 'Event Detail'}
+        title={selectedEvent?.name ?? 'פרטי אירוע'}
         size="lg"
       >
         {selectedEvent && <EventDetailView event={selectedEvent} />}
