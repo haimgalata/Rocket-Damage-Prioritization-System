@@ -97,6 +97,7 @@ async def create_event_route(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except SupabaseStorageError as e:
+        logger.exception("Image upload failed")
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         logger.exception("Event creation failed")
