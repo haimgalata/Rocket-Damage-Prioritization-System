@@ -101,7 +101,7 @@ def build_llm_explanation(
 
         client = Groq(api_key=api_key)
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="openai/gpt-oss-20b",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user",   "content": user_message},
