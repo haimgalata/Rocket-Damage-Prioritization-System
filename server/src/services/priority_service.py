@@ -1,7 +1,11 @@
 ﻿"""Priority service layer — wraps priority_logic and builds score explanations."""
 
+import logging
 import os
+
 from server.src.core.priority_logic import get_final_priority_score
+
+logger = logging.getLogger(__name__)
 
 
 def compute_priority(damage_score: int, gis_features: dict) -> tuple[float, float]:
@@ -69,17 +73,19 @@ def build_llm_explanation(
     density  = int(gis_features.get("population_density", 0))
 
     system_prompt = (
-        "אתה אנליסט חירום עירוני מקצועי במערכת PrioritAI, המתעדפת שיקום מבנים שנפגעו בישראל. "
-        "תפקידך לכתוב הסבר תמציתי, מקצועי ומבוסס-נתונים על מדוע קיבל הבניין את ציון העדיפות שקיבל."
-        "\n\n"
-        "כללים מחייבים:\n"
-        "- התבסס אך ורק על הנתונים שסופקו בהודעת המשתמש. אל תמציא, תניח או תהלוצין על מרחקים, "
-        "נתוני אוכלוסיה או פרטי נזק שלא ניתנו.\n"
-        '- אם מתקן (בית חולים, בית ספר וכד\') מופיע כ"לא נמצא בטווח 15 ק"מ", התייחס אליו כאל נעדר מחישוב הקרבה.\n'
-        "- כתוב 3-4 משפטים לכל היותר. היה ישיר ומקצועי.\n"
-        "- אל תשתמש בנקודות קליעה או כותרות — פרוזה בלבד.\n"
-        "- סיים עם ציון העדיפות הסופי ורמת החומרה שלו.\n"
-        "- כתוב בעברית תקנית, ברורה ומתאימה להנהלת חירום."
+        "אתה אנליסט חירום עירוני במערכת PrioritAI.\n\n"
+
+        "המטרה שלך היא להסביר בצורה קצרה וברורה "
+        "מה הגורמים המרכזיים שהשפיעו על ציון העדיפות של המבנה.\n\n"
+
+        "כללים:\n"
+        "- כתוב 2-3 משפטים בלבד\n"
+        "- השתמש בעברית פשוטה, ברורה ומקצועית\n"
+        "- התמקד בגורמים שהעלו או הורידו את העדיפות\n"
+        "- אל תשתמש בשפה גבוהה, בירוקרטית או חוזרת על עצמה\n"
+        "- אל תמציא מידע שלא סופק\n"
+        '- אם מתקן מופיע כ"לא נמצא בטווח 15 ק"מ", התעלם ממנו\n'
+        "- סיים עם ציון העדיפות הסופי ורמת העדיפות\n"
     )
 
     user_message = (
@@ -101,14 +107,23 @@ def build_llm_explanation(
 
         client = Groq(api_key=api_key)
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user",   "content": user_message},
             ],
-            temperature=0.3,
-            max_tokens=256,
+            temperature=0.15,
+            max_tokens=350,
+            timeout=15,
         )
-        return response.choices[0].message.content.strip()
-    except Exception:
+        if not response.choices:
+            logger.warning("[LLM] Groq returned empty choices list; using static fallback")
+            return build_explanation(classification, damage_score, gis_features, final_score, multiplier)
+        content = response.choices[0].message.content
+        if not content:
+            logger.warning("[LLM] Groq returned empty content; using static fallback")
+            return build_explanation(classification, damage_score, gis_features, final_score, multiplier)
+        return content.strip()
+    except Exception as exc:
+        logger.warning("[LLM] Groq call failed (%s: %s); using static fallback", type(exc).__name__, exc)
         return build_explanation(classification, damage_score, gis_features, final_score, multiplier)
