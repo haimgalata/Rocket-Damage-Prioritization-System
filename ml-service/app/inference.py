@@ -20,6 +20,7 @@ IMG_SIZE = (224, 224)
 CLASS_MAP: dict[int, tuple[str, int]] = {
     0: ("Heavy", 7),
     1: ("Light", 3),
+    2: ("Medium", 5),  # index order follows alphabetical folder convention (H < L < M)
 }
 
 _model = None
