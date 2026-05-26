@@ -1,0 +1,12 @@
+{
+  "q_hat": 1.0,
+  "alpha": 0.15,
+  "n_calibration": 600,
+  "class_names": [
+    "light",
+    "medium",
+    "heavy"
+  ],
+  "model_path": "/content/drive/MyDrive/Project/rocket_damage_resnet50_v2.keras",
+  "date_saved": "2026-05-26T09:27:22Z"
+}
