@@ -110,7 +110,7 @@ def predict_conformal_aps(
 
     for idx in sorted_indices:
         prediction_set.append(class_names[int(idx)])
-        cumulative_prob += float(probs[idx])
+        cumulative_prob += probs[idx]   # keep numpy dtype (float32) to match notebook arithmetic
         if cumulative_prob >= q_hat:
             break
 
