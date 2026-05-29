@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # ── Model path ────────────────────────────────────────────────────────────────
 MODEL_PATH = os.environ.get(
     "MODEL_PATH",
-    os.path.join(os.path.dirname(__file__), "..", "model", "rocket_damage_resnet50_v2.keras"),
+    os.path.join(os.path.dirname(__file__), "..", "model", "ResNet50_3class_real_ft_s2_20260528_1753.keras"),
 )
 MODEL_PATH = os.path.abspath(MODEL_PATH)
 
@@ -27,15 +27,15 @@ Q_HAT_PATH = os.path.abspath(Q_HAT_PATH)
 
 IMG_SIZE = (224, 224)
 
-# Class ordering confirmed by APS calibration notebook (CLASS_NAMES = ["light", "medium", "heavy"]):
-#   model output index 0 → Light, 1 → Medium, 2 → Heavy
+# Stage2 FT model was trained with CLASS_NAMES = sorted(["heavy","light","medium"])
+# → ["heavy","light","medium"]. Model output indices:  0=Heavy  1=Light  2=Medium
 CLASS_MAP: dict[int, tuple[str, int]] = {
-    0: ("Light", 3),
-    1: ("Medium", 5),
-    2: ("Heavy", 7),
+    0: ("Heavy", 7),
+    1: ("Light", 3),
+    2: ("Medium", 5),
 }
 CLASS_NAMES: list[str] = [CLASS_MAP[i][0] for i in sorted(CLASS_MAP.keys())]
-# → ["Light", "Medium", "Heavy"]
+# → ["Heavy", "Light", "Medium"]
 
 _model = None
 _q_hat: float | None = None
@@ -57,6 +57,15 @@ def _load_q_hat() -> float | None:
         payload.get("alpha"),
         payload.get("n_calibration"),
     )
+    expected_class_names = ["heavy", "light", "medium"]
+    stored_class_names = [n.lower() for n in payload.get("class_names", [])]
+    if stored_class_names != expected_class_names:
+        logger.warning(
+            "q_hat.json class_names mismatch: file has %s but Stage2 FT expects %s — "
+            "APS prediction sets may be wrong. Regenerate q_hat with the updated notebook.",
+            stored_class_names,
+            expected_class_names,
+        )
     return value
 
 

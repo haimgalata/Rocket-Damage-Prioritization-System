@@ -1,12 +1,12 @@
 {
-  "q_hat": 1.0,
+  "q_hat": 0.9957638382911682,
   "alpha": 0.15,
-  "n_calibration": 600,
+  "n_calibration": 404,
   "class_names": [
+    "heavy",
     "light",
-    "medium",
-    "heavy"
+    "medium"
   ],
-  "model_path": "/content/drive/MyDrive/Project/rocket_damage_resnet50_v2.keras",
-  "date_saved": "2026-05-26T09:27:22Z"
+  "model_path": "/content/drive/MyDrive/Project/Haim_Workspace/outputs/models/ResNet50_3class_real_ft_s2_20260528_1753.keras",
+  "date_saved": "2026-05-29T16:46:09Z"
 }
