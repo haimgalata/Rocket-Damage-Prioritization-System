@@ -25,12 +25,11 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-function simulateAIClassification(): { classification: 'Light' | 'Heavy'; damageScore: number } {
-  const isHeavy = Math.random() > 0.4;
-  return {
-    classification: isHeavy ? 'Heavy' : 'Light',
-    damageScore: isHeavy ? 7 : 3,
-  };
+function simulateAIClassification(): { classification: 'Light' | 'Medium' | 'Heavy'; damageScore: number } {
+  const roll = Math.random();
+  if (roll < 0.40) return { classification: 'Heavy', damageScore: 7 };
+  if (roll < 0.65) return { classification: 'Medium', damageScore: 5 };
+  return { classification: 'Light', damageScore: 3 };
 }
 
 function simulateGISMultiplier(lat: number, lng: number): GisDetails {
@@ -297,10 +296,12 @@ export const NewEventForm: React.FC = () => {
       const finalScore = Math.min(10, Math.max(0.1, Math.round(damageScore * gisDetails.geoMultiplier * 10) / 10));
       const eventId = Date.now();
 
-      const damageLabel = classification === 'Heavy' ? 'כבד' : 'קל';
+      const damageLabel = classification === 'Heavy' ? 'כבד' : classification === 'Medium' ? 'בינוני' : 'קל';
       const llmExplanation = `זוהה נזק ${damageLabel} על ידי מודל ראייה ממוחשבת. ${
         classification === 'Heavy'
           ? 'נמצאו סימנים לפגיעה מבנית משמעותית — מומלץ הערכה מיידית.'
+          : classification === 'Medium'
+          ? 'נמצאו סימנים לפגיעה מבנית מתונה — נדרשת הערכה לפני חידוש הפעילות.'
           : 'נמצאה פגיעה מינורית — תיקון רגיל מתאים.'
       } צפיפות אוכלוסין: ${gisDetails.populationDensity.toLocaleString('he-IL')} נפש/קמ"ר, בית חולים קרוב ${
         gisDetails.distHospitalM >= 1000
@@ -445,7 +446,7 @@ export const NewEventForm: React.FC = () => {
                 onClick={() => loadTemplate(tpl.id)}
                 className="px-3 py-1.5 text-xs font-medium rounded-md bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 transition"
               >
-                {tpl.expected.aiClassification === 'Heavy' ? '🔴' : '🟡'} {tpl.city}
+                {tpl.expected.aiClassification === 'Heavy' ? '🔴' : tpl.expected.aiClassification === 'Medium' ? '🟠' : '🟡'} {tpl.city}
               </button>
             ))}
           </div>

@@ -7,13 +7,15 @@ import random
 
 logger = logging.getLogger(__name__)
 
-_CLASS_WEIGHT_HEAVY = 0.6
-
-
 def fallback_classification_result() -> dict:
-    """Return a random classification (60 % Heavy) when ML inference is unavailable."""
-    is_heavy = random.random() < _CLASS_WEIGHT_HEAVY
-    label, score = ("Heavy", 7) if is_heavy else ("Light", 3)
+    """Return a random classification across 3 classes when ML inference is unavailable."""
+    roll = random.random()
+    if roll < 0.40:
+        label, score = "Heavy", 7
+    elif roll < 0.65:
+        label, score = "Medium", 5
+    else:
+        label, score = "Light", 3
     logger.warning("[AI Inference] Fallback active — returning %s (%s)", label, score)
     return {
         "classification": label,

@@ -59,6 +59,7 @@ export const getPriorityLabel = (score: number): string => {
 
 export const getDamageLabel = (cls: string): string => {
   if (cls === 'Heavy') return 'נזק כבד';
+  if (cls === 'Medium') return 'נזק בינוני';
   if (cls === 'Light') return 'נזק קל';
   return cls;
 };

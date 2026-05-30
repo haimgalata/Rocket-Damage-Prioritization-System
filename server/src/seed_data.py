@@ -29,6 +29,7 @@ SEED_JSON    = os.path.join(_REPO_ROOT, "server", "seed_events.json")
 
 _RAW_EVENTS = [
 
+    # ── Tel Aviv (org-1) ──────────────────────────────────────────────────────
     dict(
         name="פגיעה במרכז דיזנגוף",
         description=(
@@ -39,7 +40,7 @@ _RAW_EVENTS = [
         lat=32.0785, lon=34.7740,
         organizationId="org-1", createdBy="user-op-1",
         damageClassification="Heavy", damageScore=7,
-        imageFilename="tel_aviv_heavy_1.jpg",
+        imageFilename="tel_aviv_heavy_1.png",
         tags=["structural", "evacuation", "commercial"],
         status="in_progress", createdAt_offset_days=-1,
     ),
@@ -53,23 +54,23 @@ _RAW_EVENTS = [
         lat=32.0627, lon=34.7739,
         organizationId="org-1", createdBy="user-op-1",
         damageClassification="Heavy", damageScore=7,
-        imageFilename="tel_aviv_heavy_2.jpg",
+        imageFilename="tel_aviv_heavy_2.png",
         tags=["gas-leak", "heritage", "residential"],
-        status="pending", createdAt_offset_days=0,
+        status="in_progress", createdAt_offset_days=0,
     ),
     dict(
-        name="שריפה במחסן נמל יפו",
+        name="פגיעה בינונית בבניין מסחרי בנווה צדק",
         description=(
-            "פגיעת טיל הצתה מחסן בחוף נמל יפו. "
-            "האש התפשטה לשתי יחידות אחסון סמוכות המכילות חומרים דליקים. "
-            "פעילות הנמל הושעתה. כבאות וצוות חומ\"ס פרוסים. "
-            "מבנים היסטוריים של העיר העתיקה בטווח 200 מ' בסיכון לנזק חום."
+            "פגיעת רסיס ישירה בקומה ב' של בניין מסחרי-מגורים בן 4 קומות בנווה צדק. "
+            "שני קירות פנימיים נושאי עומס ניזוקו; תקרת הקומה מציגה סדקי משיכה. "
+            "הקומות 3-4 פונו עד להשלמת הערכה מבנית. "
+            "הגישה לאורך רחוב רוקח מוגבלת חלקית. מבנים סמוכים לא ניזוקו."
         ),
-        lat=32.0530, lon=34.7510,
+        lat=32.0570, lon=34.7580,
         organizationId="org-1", createdBy="user-op-1",
-        damageClassification="Heavy", damageScore=7,
-        imageFilename="tel_aviv_heavy_3.jpg",
-        tags=["fire", "hazmat", "port", "heritage"],
+        damageClassification="Medium", damageScore=5,
+        imageFilename="tel_aviv_medium_1.jpg",
+        tags=["structural", "mixed-use", "evacuation"],
         status="in_progress", createdAt_offset_days=-2,
     ),
     dict(
@@ -82,7 +83,7 @@ _RAW_EVENTS = [
         lat=32.0555, lon=34.7660,
         organizationId="org-1", createdBy="user-op-1",
         damageClassification="Light", damageScore=3,
-        imageFilename="tel_aviv_light_1.jpg",
+        imageFilename="tel_aviv_light_1.webp",
         tags=["roof", "power-outage"],
         status="completed", createdAt_offset_days=-3,
     ),
@@ -96,7 +97,7 @@ _RAW_EVENTS = [
         lat=32.1100, lon=34.8050,
         organizationId="org-1", createdBy="user-op-1",
         damageClassification="Light", damageScore=3,
-        imageFilename="tel_aviv_light_2.jpg",
+        imageFilename="tel_aviv_light_2.jpeg",
         tags=["shrapnel", "residential", "windows"],
         status="completed", createdAt_offset_days=-4,
     ),
@@ -113,8 +114,10 @@ _RAW_EVENTS = [
         damageClassification="Light", damageScore=3,
         imageFilename="tel_aviv_light_3.jpg",
         tags=["infrastructure", "park", "electrical"],
-        status="pending", createdAt_offset_days=0,
+        status="in_progress", createdAt_offset_days=0,
     ),
+
+    # ── South (org-2) ─────────────────────────────────────────────────────────
     dict(
         name="פגיעה בתחנה המרכזית באר שבע",
         description=(
@@ -141,24 +144,39 @@ _RAW_EVENTS = [
         lat=31.0676, lon=35.0333,
         organizationId="org-2", createdBy="user-admin-2",
         damageClassification="Heavy", damageScore=7,
-        imageFilename="south_heavy_2.jpg",
+        imageFilename="south_heavy_2.png",
         tags=["industrial", "hazmat", "structural"],
-        status="pending", createdAt_offset_days=0,
+        status="in_progress", createdAt_offset_days=0,
     ),
     dict(
-        name="פגיעה ברובע המגורים קיבוץ ניר עוז",
+        name="נזק בינוני לבניין מגורים בשדרות",
         description=(
-            "מספר פגיעות טיל ברובע המגורים של קיבוץ ניר עוז. "
-            "ארבעה בתים ספגו פגיעות ישירות עם קריסת גג וקירות. "
-            "חדר האוכל הקהילתי הושמד חלקית. קהילה של כ-400 תושבים פונתה. "
-            "גישה בכביש 232 פנויה. בית החולים הקרוב בשדרות (8 ק\"מ)."
+            "טיל פגע ישירות בקומה שלישית של בניין מגורים בן 5 קומות בשדרות. "
+            "קיר חיצוני מזרחי נפרץ ברוחב 5 מ'; שני חדרים אינם ראויים למגורים. "
+            "שלד הבניין יציב אך מצריך הערכה מבנית. 14 דיירים פונו. "
+            "גישה בכביש 34 פנויה. בית חולים ברזילי במרחק 1.8 ק\"מ."
         ),
-        lat=31.3667, lon=34.4333,
+        lat=31.5240, lon=34.6010,
         organizationId="org-2", createdBy="user-admin-2",
-        damageClassification="Heavy", damageScore=7,
-        imageFilename="south_heavy_3.jpg",
-        tags=["residential", "evacuation", "kibbutz"],
-        status="in_progress", createdAt_offset_days=-2,
+        damageClassification="Medium", damageScore=5,
+        imageFilename="south_medium_1.png",
+        tags=["residential", "structural", "evacuation"],
+        status="in_progress", createdAt_offset_days=-1,
+    ),
+    dict(
+        name="פגיעה בינונית בבית ספר תיכון בקריית גת",
+        description=(
+            "פגיעה ישירה באגף המעבדות של בית ספר תיכון בקריית גת. "
+            "קיר הצד המזרחי התמוטט חלקית; ריצוף שתי כיתות ניזוק. "
+            "שאר הבניין תקין. המוסד נסגר לשבועיים לצורך תיקון. "
+            "חצר החנייה נחסמה על ידי הריסות. אין נפגעים — בית הספר פונה לפני הפגיעה."
+        ),
+        lat=31.6070, lon=34.7700,
+        organizationId="org-2", createdBy="user-admin-2",
+        damageClassification="Medium", damageScore=5,
+        imageFilename="south_medium_2.png",
+        tags=["school", "structural", "debris"],
+        status="in_progress", createdAt_offset_days=0,
     ),
     dict(
         name="נזק להיקף בית ספר באופקים",
@@ -176,51 +194,37 @@ _RAW_EVENTS = [
         status="completed", createdAt_offset_days=-3,
     ),
     dict(
-        name="גדר היקף קיבוץ רביבים",
+        name="נזק קל למרכז קהילתי בנתיבות",
         description=(
-            "טיל פגע בהיקף החקלאי של קיבוץ רביבים בנגב המרכזי. "
-            "קו הגדר נהרס לאורך 80 מ'; תחנת משאבות השקיה נפגעה. "
-            "אין נפגעים. קיבוץ קטן (~350 תושבים) באזור מדברי מבודד. "
-            "כביש סלול קרוב 4 ק\"מ; בית חולים קרוב מעל 40 ק\"מ (באר שבע)."
+            "שרפרל מטיל מיורט פגע בגג רעף של מרכז קהילתי בנתיבות. "
+            "12 רעפים הוסרו; מספר צינורות ניקוז נפגמו. "
+            "חדירת מים קלה לאולם הכניסה. אין נזק מבני. "
+            "המרכז שב לפעילות לאחר 24 שעות. אין נפגעים."
         ),
-        lat=31.0000, lon=34.8833,
+        lat=31.4230, lon=34.5910,
         organizationId="org-2", createdBy="user-admin-2",
         damageClassification="Light", damageScore=3,
-        imageFilename="south_isolated_light_1.jpg",
-        tags=["isolated", "agricultural", "fence"],
-        status="pending", createdAt_offset_days=0,
+        imageFilename="south_light_2.jpeg",
+        tags=["community", "roof", "shrapnel"],
+        status="completed", createdAt_offset_days=-4,
     ),
     dict(
-        name="פגיעה במרכז המבקרים מצפה רמון",
+        name="נזק קל לבית ספר יסודי בערד",
         description=(
-            "טיל פגע בחניון מרכז המבקרים מכתש רמון במצפה רמון. "
-            "פני האספלט נפגעו; רכב אחד הושמד. חזית הזכוכית של מרכז המבקרים נסדקה. "
-            "מיקום מרוחק — 25 ק\"מ מבית החולים הקרוב בירוחם. "
-            "צפיפות אוכלוסין כמעט אפס. גישה בכביש 40 בלבד."
+            "גל הדף מטיל מיורט שבר חלונות ב-4 כיתות בבית ספר יסודי בערד. "
+            "דלתות מתכת עיוותו קלות ואינן נסגרות כהלכה. "
+            "אין נזק מבני. בית הספר שב לפעילות לאחר החלפת חלונות. "
+            "אין נפגעים — בית הספר פונה לפני הפגיעה."
         ),
-        lat=30.6100, lon=34.8010,
+        lat=31.2550, lon=35.2120,
         organizationId="org-2", createdBy="user-admin-2",
         damageClassification="Light", damageScore=3,
-        imageFilename="south_isolated_light_2.jpg",
-        tags=["isolated", "tourism", "remote"],
-        status="completed", createdAt_offset_days=-5,
+        imageFilename="south_light_3.webp",
+        tags=["school", "windows", "shrapnel"],
+        status="completed", createdAt_offset_days=-3,
     ),
-    dict(
-        name="נזק לתחנת המחקר שדה בוקר",
-        description=(
-            "שרפרל מטיל מיורט פגע בחממת מחקר בקמפוס שדה בוקר "
-            "(מחקר מדבר של אוניברסיטת בן גוריון). "
-            "שלושה לוחות חממה הושמדו; גידולים ניסיוניים אבדו. "
-            "תשתית מינימלית — אין כבישים במרחק 3 ק\"מ, בית חולים קרוב 35 ק\"מ. "
-            "הצוות פונה בשלום."
-        ),
-        lat=30.8517, lon=34.7861,
-        organizationId="org-2", createdBy="user-admin-2",
-        damageClassification="Light", damageScore=3,
-        imageFilename="south_isolated_light_3.jpg",
-        tags=["isolated", "academic", "greenhouse", "remote"],
-        status="pending", createdAt_offset_days=-1,
-    ),
+
+    # ── Jerusalem (org-3) ─────────────────────────────────────────────────────
     dict(
         name="פגיעה ישירה בשוק מחנה יהודה",
         description=(
@@ -247,9 +251,9 @@ _RAW_EVENTS = [
         lat=31.7950, lon=35.1872,
         organizationId="org-3", createdBy="user-admin-3",
         damageClassification="Heavy", damageScore=7,
-        imageFilename="jerusalem_heavy_2.jpg",
+        imageFilename="jerusalem_heavy_2.png",
         tags=["residential", "high-rise", "structural", "evacuation"],
-        status="pending", createdAt_offset_days=0,
+        status="in_progress", createdAt_offset_days=0,
     ),
     dict(
         name="קריסת מבנה תעשייתי בתלפיות",
@@ -262,7 +266,7 @@ _RAW_EVENTS = [
         lat=31.7483, lon=35.2236,
         organizationId="org-3", createdBy="user-admin-3",
         damageClassification="Heavy", damageScore=7,
-        imageFilename="jerusalem_heavy_3.jpg",
+        imageFilename="jerusalem_heavy_3.png",
         tags=["industrial", "power-outage", "structural", "collapse"],
         status="in_progress", createdAt_offset_days=-2,
     ),
@@ -277,9 +281,24 @@ _RAW_EVENTS = [
         lat=31.8391, lon=35.2369,
         organizationId="org-3", createdBy="user-admin-3",
         damageClassification="Heavy", damageScore=7,
-        imageFilename="jerusalem_heavy_4.jpg",
+        imageFilename="jerusalem_heavy_4.png",
         tags=["residential", "gas-leak", "suburban", "evacuation"],
-        status="pending", createdAt_offset_days=0,
+        status="in_progress", createdAt_offset_days=0,
+    ),
+    dict(
+        name="פגיעה בינונית בבניין מגורים בקטמון",
+        description=(
+            "פגיעת רסיס ישירה בקומות 4-5 של בניין מגורים בן 6 קומות בשכונת קטמון. "
+            "שני קירות חיצוניים נפגעו; שלד הבניין מציג סדקי משיכה בעמודי קומה ד'. "
+            "10 דיירים פונו. קווי חשמל נותקו לשתי קומות. "
+            "בית חולים שערי צדק במרחק 2.1 ק\"מ. גישה ברחוב בית לחם פנויה."
+        ),
+        lat=31.7620, lon=35.2150,
+        organizationId="org-3", createdBy="user-admin-3",
+        damageClassification="Medium", damageScore=5,
+        imageFilename="jerusalem_medium_1.png",
+        tags=["residential", "structural", "evacuation"],
+        status="in_progress", createdAt_offset_days=0,
     ),
     dict(
         name="נזק לגדר גינה במושבה הגרמנית",
@@ -292,7 +311,7 @@ _RAW_EVENTS = [
         lat=31.7624, lon=35.2181,
         organizationId="org-3", createdBy="user-admin-3",
         damageClassification="Light", damageScore=3,
-        imageFilename="jerusalem_light_1.jpg",
+        imageFilename="jerusalem_light_1.jpeg",
         tags=["residential", "shrapnel", "low-severity"],
         status="completed", createdAt_offset_days=-4,
     ),
@@ -307,24 +326,9 @@ _RAW_EVENTS = [
         lat=31.7936, lon=35.2453,
         organizationId="org-3", createdBy="user-admin-3",
         damageClassification="Light", damageScore=3,
-        imageFilename="jerusalem_light_2.jpg",
+        imageFilename="jerusalem_light_2.png",
         tags=["hospital-perimeter", "shrapnel", "vehicles"],
         status="completed", createdAt_offset_days=-3,
-    ),
-    dict(
-        name="פיזור שרפרל — רמות מגורים",
-        description=(
-            "הריסות טיל מיורט פוזרו ברחוב מגורים ברמות אלון. "
-            "חלונות ומעקות מרפסות ב-6 דירות ניזוקו. "
-            "יחידה אחת בקומת הקרקע ספגה חדירת קיר קלה. "
-            "אין נפגעים. תשתיות תקינות. גישה ראשית בשדרות גולדה מאיר זמינה."
-        ),
-        lat=31.8289, lon=35.1946,
-        organizationId="org-3", createdBy="user-admin-3",
-        damageClassification="Light", damageScore=3,
-        imageFilename="jerusalem_light_3.jpg",
-        tags=["residential", "shrapnel", "windows"],
-        status="pending", createdAt_offset_days=-1,
     ),
 ]
 

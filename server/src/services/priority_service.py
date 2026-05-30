@@ -27,10 +27,17 @@ def build_explanation(
             return 'לא נמצא בטווח 15 ק"מ'
         return f'{v / 1000:.1f} ק"מ' if v >= 1000 else f"{int(v)} מ'"
 
-    damage_label = "כבד" if classification == "Heavy" else "קל"
+    if classification == "Heavy":
+        damage_label = "כבד"
+        assessment_note = "מומלץ הערכה מבנית מיידית."
+    elif classification == "Medium":
+        damage_label = "בינוני"
+        assessment_note = "נדרשת הערכה מבנית לפני חידוש הפעילות."
+    else:
+        damage_label = "קל"
+        assessment_note = "תיקון רגיל מתאים לנזק מסוג זה."
     severity = "קריטי" if final_score >= 7.5 else "גבוה" if final_score >= 5.0 else "בינוני"
     density  = int(gis_features.get("population_density", 0))
-    assessment_note = "מומלץ הערכה מבנית מיידית." if classification == "Heavy" else "תיקון רגיל מתאים לנזק מסוג זה."
 
     return (
         f"זוהה נזק {damage_label} על ידי מודל ראייה ממוחשבת. "
@@ -68,7 +75,12 @@ def build_llm_explanation(
             return 'לא נמצא בטווח 15 ק"מ'
         return f'{v / 1000:.1f} ק"מ' if v >= 1000 else f"{int(v)} מ'"
 
-    damage_label = "כבד" if classification == "Heavy" else "קל"
+    if classification == "Heavy":
+        damage_label = "כבד"
+    elif classification == "Medium":
+        damage_label = "בינוני"
+    else:
+        damage_label = "קל"
     severity = "קריטי" if final_score >= 7.5 else "גבוה" if final_score >= 5.0 else "בינוני"
     density  = int(gis_features.get("population_density", 0))
 
