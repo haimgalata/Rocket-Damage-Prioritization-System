@@ -437,7 +437,7 @@ export const NewEventForm: React.FC = () => {
                 onClick={() => loadTemplate(tpl.id)}
                 className="px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-gray-700 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition"
               >
-                {tpl.expected.aiClassification === 'Heavy' ? '🔴' : tpl.expected.aiClassification === 'Medium' ? '🟠' : '🟡'} {tpl.city}
+                {tpl.expected.aiClassification === 'Heavy' ? '🔴' : tpl.expected.aiClassification === 'Medium' ? '🟡' : '🟢'} {tpl.city}
               </button>
             ))}
           </div>

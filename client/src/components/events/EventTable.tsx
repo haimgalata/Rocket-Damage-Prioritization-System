@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowUpDown, ArrowUp, ArrowDown,
-  Eye, EyeOff, MapPin, Calendar, Pencil, Search, Loader2,
+  Eye, EyeOff, MapPin, Calendar, Pencil, Search, Loader2, Trash2,
 } from 'lucide-react';
 import type { DamageEvent } from '../../types';
 import { EventStatus, UserRole } from '../../types';
@@ -25,6 +25,7 @@ interface EventTableProps {
   onEditEvent?:    (event: DamageEvent) => void;
   onToggleHide?:   (id: number) => void;
   onUpdateStatus?: (id: number, status: EventStatus) => void;
+  onDeleteEvent?:  (event: DamageEvent) => void;
   selectedEventId?: number;
   compact?:        boolean;
   currentUserId?:  number;
@@ -52,6 +53,7 @@ export const EventTable: React.FC<EventTableProps> = ({
   onEditEvent,
   onToggleHide,
   onUpdateStatus,
+  onDeleteEvent,
   selectedEventId,
   compact       = false,
   currentUserId,
@@ -62,6 +64,7 @@ export const EventTable: React.FC<EventTableProps> = ({
   const [sortField, setSortField] = useState<SortField>('priorityScore');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [searchTerm, setSearchTerm] = useState('');
+  const [pendingDeleteEvent, setPendingDeleteEvent] = useState<DamageEvent | null>(null);
 
   const handleSort = (field: SortField) => {
     setSortField(field);
@@ -96,8 +99,9 @@ export const EventTable: React.FC<EventTableProps> = ({
     return 0;
   });
 
-  const isAdmin    = currentUserRole === UserRole.ADMIN || currentUserRole === UserRole.SUPER_ADMIN;
-  const isOperator = currentUserRole === UserRole.OPERATOR;
+  const isAdmin      = currentUserRole === UserRole.ADMIN || currentUserRole === UserRole.SUPER_ADMIN;
+  const isSuperAdmin = currentUserRole === UserRole.SUPER_ADMIN;
+  const isOperator   = currentUserRole === UserRole.OPERATOR;
 
   const SortIcon: React.FC<{ field: SortField }> = ({ field }) => {
     if (sortField !== field) return <ArrowUpDown className="w-3.5 h-3.5 mr-1 text-gray-400 inline" />;
@@ -332,6 +336,16 @@ export const EventTable: React.FC<EventTableProps> = ({
                           {isHidden ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                         </button>
                       )}
+
+                      {isSuperAdmin && onDeleteEvent && (
+                        <button
+                          onClick={() => setPendingDeleteEvent(event)}
+                          title="מחק אירוע"
+                          className="p-1 rounded transition cursor-pointer text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -340,6 +354,33 @@ export const EventTable: React.FC<EventTableProps> = ({
           </tbody>
         </table>
       </div>
+
+      {pendingDeleteEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" dir="rtl">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 max-w-sm w-full mx-4">
+            <p className="text-gray-800 dark:text-gray-200 font-medium text-center text-base">
+              אתה בטוח שברצונך למחוק אירוע זה?
+            </p>
+            <div className="flex gap-3 mt-5 justify-center">
+              <button
+                onClick={() => {
+                  onDeleteEvent?.(pendingDeleteEvent);
+                  setPendingDeleteEvent(null);
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition cursor-pointer"
+              >
+                כן, מחק
+              </button>
+              <button
+                onClick={() => setPendingDeleteEvent(null)}
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-500 transition cursor-pointer"
+              >
+                ביטול
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
