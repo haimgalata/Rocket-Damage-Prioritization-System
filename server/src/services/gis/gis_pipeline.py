@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
 
 logger = logging.getLogger(__name__)
 
-_GIS_TIMEOUT_S = 35
+_GIS_TIMEOUT_S = 15
 
 _gis_cache: dict[tuple[float, float], dict] = {}
 
