@@ -32,23 +32,25 @@ interface StatCardProps {
 const StatCard: React.FC<StatCardProps> = ({ label, value, icon, iconBg, delta, deltaPositive, onClick }) => (
   <div
     onClick={onClick}
-    className={`bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer hover:border-blue-300' : ''}`}
+    className={`bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3 md:p-5 shadow-sm hover:shadow-md transition-shadow ${onClick ? 'cursor-pointer hover:border-blue-300 dark:hover:border-blue-500' : ''}`}
   >
     <div className="flex items-center justify-between mb-3">
-      <p className="text-sm font-medium text-gray-500">{label}</p>
+      <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${iconBg}`}>
         {icon}
       </div>
     </div>
-    <p className="text-3xl font-bold text-gray-900">{value}</p>
-    {delta && (
-      <p className={`text-xs mt-1.5 flex items-center gap-1 ${deltaPositive ? 'text-green-600' : 'text-red-500'}`}>
-        <TrendingUp className="w-3.5 h-3.5" />
-        {delta}
-      </p>
-    )}
+    <p className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">{value}</p>
+    <div className="h-4 mt-1.5">
+      {delta && (
+        <p className={`text-xs flex items-center gap-1 ${deltaPositive ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+          <TrendingUp className="w-3.5 h-3.5" />
+          {delta}
+        </p>
+      )}
+    </div>
     {onClick && (
-      <p className="text-xs mt-1.5 text-blue-500 flex items-center gap-0.5">
+      <p className="text-xs text-blue-500 dark:text-blue-400 flex items-center gap-0.5">
         הצג אירועים <ChevronRight className="w-3 h-3 scale-x-[-1]" />
       </p>
     )}
@@ -143,28 +145,28 @@ export const Dashboard: React.FC = () => {
   ];
 
   return (
-    <PageContainer title="לוח בקרה מבצעי">
-      <div className="space-y-6 max-w-[1400px] mx-auto">
+    <PageContainer title="לוח בקרה">
+      <div className="space-y-4 md:space-y-6 max-w-[1400px] mx-auto">
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <StatCard label="סה״כ אירועים" value={total}
-            icon={<Activity className="w-5 h-5 text-blue-600" />} iconBg="bg-blue-100"
+            icon={<Activity className="w-5 h-5 text-blue-600" />} iconBg="bg-blue-100 dark:bg-blue-900/40"
             onClick={() => setStatusModal({ label: 'כל האירועים', events: orgEvents })} />
           <StatCard label="חדש" value={pending}
-            icon={<Clock className="w-5 h-5 text-yellow-600" />} iconBg="bg-yellow-100"
+            icon={<Clock className="w-5 h-5 text-yellow-600" />} iconBg="bg-yellow-100 dark:bg-yellow-900/40"
             delta={criticalCount > 0 ? `${criticalCount} קריטי` : undefined} deltaPositive={false}
             onClick={() => setStatusModal({ label: getStatusLabel(EventStatus.NEW), events: orgEvents.filter(e => e.status === EventStatus.NEW) })} />
           <StatCard label="בטיפול" value={inProgress}
-            icon={<RefreshCw className="w-5 h-5 text-indigo-600" />} iconBg="bg-indigo-100"
+            icon={<RefreshCw className="w-5 h-5 text-indigo-600" />} iconBg="bg-indigo-100 dark:bg-indigo-900/40"
             onClick={() => setStatusModal({ label: getStatusLabel(EventStatus.IN_PROGRESS), events: orgEvents.filter(e => e.status === EventStatus.IN_PROGRESS) })} />
           <StatCard label="הושלם" value={completed}
-            icon={<CheckCircle2 className="w-5 h-5 text-green-600" />} iconBg="bg-green-100"
+            icon={<CheckCircle2 className="w-5 h-5 text-green-600" />} iconBg="bg-green-100 dark:bg-green-900/40"
             delta={total > 0 ? `${Math.round((completed / total) * 100)}% שיעור סגירה` : undefined}
             deltaPositive
             onClick={() => setStatusModal({ label: getStatusLabel(EventStatus.DONE), events: orgEvents.filter(e => e.status === EventStatus.DONE) })} />
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-5 text-white shadow-sm">
             <p className="text-blue-200 text-sm mb-1">ציון עדיפות ממוצע</p>
             <p className="text-4xl font-bold">{avgPriority.toFixed(1)}</p>
@@ -179,9 +181,6 @@ export const Dashboard: React.FC = () => {
           >
             <p className="text-red-100 text-sm mb-1">אירועים קריטיים (≥7.5)</p>
             <p className="text-4xl font-bold">{criticalCount}</p>
-            <p className="text-red-200 text-xs mt-2 flex items-center gap-1">
-              <AlertTriangle className="w-3.5 h-3.5" /> לחץ לצפייה באירועים
-            </p>
           </button>
           <div className="bg-gradient-to-br from-slate-700 to-slate-900 rounded-xl p-5 text-white shadow-sm flex flex-col justify-between">
             <button
@@ -190,7 +189,6 @@ export const Dashboard: React.FC = () => {
             >
               <p className="text-slate-400 text-sm mb-1">אירועים מוסתרים</p>
               <p className="text-4xl font-bold">{hiddenCount}</p>
-              <p className="text-slate-400 text-xs mt-1">{hiddenCount > 0 ? 'לחץ לצפייה' : 'מוסנן מהתצוגה'}</p>
             </button>
             {hiddenCount > 0 && (
               <button onClick={() => setShowHidden((v) => !v)}
@@ -204,7 +202,7 @@ export const Dashboard: React.FC = () => {
 
         <Card
           title="מפת אירועים"
-          subtitle={mapMode === 'pins' ? 'לחץ על שורה לזום · צבעוני לפי עדיפות' : 'מפת צפיפות נזקים'}
+          subtitle={mapMode === 'pins' ? 'לחץ על הנעץ לפרטים' : 'מפת צפיפות נזקים'}
           noPadding
           headerRight={
             <div className="flex items-center gap-2">
@@ -237,14 +235,16 @@ export const Dashboard: React.FC = () => {
             </div>
           }
         >
-          <div className="p-4">
-            <EventMap
-              events={mapEvents}
-              height="420px"
-              onEventClick={handleSelectEvent}
-              mode={mapMode}
-              focusEvent={mapFocusEvent}
-            />
+          <div className="p-2 sm:p-4">
+            <div className="h-[220px] sm:h-[300px] lg:h-[420px]">
+              <EventMap
+                events={mapEvents}
+                height="100%"
+                onEventClick={handleSelectEvent}
+                mode={mapMode}
+                focusEvent={mapFocusEvent}
+              />
+            </div>
             {mapMode === 'pins' && (
               <div className="flex items-center gap-4 mt-3 px-1">
                 <span className="text-xs text-gray-500 font-medium">מקרא:</span>
@@ -265,7 +265,6 @@ export const Dashboard: React.FC = () => {
 
         <Card
           title="אירועי נזק"
-          subtitle={`${displayEvents.length} רשומות · ממוינות לפי עדיפות`}
           noPadding
           headerRight={
             <div className="flex items-center gap-2">
@@ -275,16 +274,16 @@ export const Dashboard: React.FC = () => {
                   <X className="w-3.5 h-3.5" /> נקה
                 </button>
               )}
-              <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+              <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                 {filterButtons.map((btn) => (
                   <button key={btn.value} onClick={() => setFilterStatus(btn.value)}
                     className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
                       filterStatus === btn.value
-                        ? 'bg-white text-gray-900 shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white'
                     }`}>
                     {btn.label}
-                    <span className={`mr-1 text-xs ${filterStatus === btn.value ? 'text-blue-500' : 'text-gray-400'}`}>
+                    <span className={`mr-1 text-xs ${filterStatus === btn.value ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'}`}>
                       {btn.count}
                     </span>
                   </button>
@@ -347,19 +346,19 @@ export const Dashboard: React.FC = () => {
                   key={ev.id}
                   to={`/events/${ev.id}`}
                   onClick={() => setStatusModal(null)}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-blue-50 transition group"
+                  className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition group"
                 >
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 group-hover:text-blue-700">
-                      {ev.name ?? `Event #${String(ev.id).slice(-4)}`}
-                    </p>
-                    <p className="text-xs text-gray-500">{ev.location.address}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-blue-500" />
                     <span className={`text-xs font-semibold ${ev.priorityScore >= 7.5 ? 'text-red-600' : ev.priorityScore >= 5 ? 'text-orange-500' : 'text-green-600'}`}>
                       {ev.priorityScore.toFixed(1)}
                     </span>
-                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-blue-500 scale-x-[-1]" />
+                  </div>
+                  <div className="flex-1 min-w-0 text-right">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-400 truncate">
+                      {ev.name ?? `Event #${String(ev.id).slice(-4)}`}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{ev.location.address}</p>
                   </div>
                 </Link>
               ))

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 .leaflet-container {
   height: 100%;
@@ -9,6 +10,16 @@
 
 button, a, [role="button"], select, label[for] {
   cursor: pointer;
+}
+
+/* Touch-friendly minimum tap target size on mobile */
+@media (max-width: 768px) {
+  button, [role="button"] {
+    min-height: 36px;
+  }
+  input, select, textarea {
+    font-size: 16px; /* prevents iOS zoom on focus */
+  }
 }
 
 ::-webkit-scrollbar {

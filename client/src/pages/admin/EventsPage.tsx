@@ -9,13 +9,15 @@ import { EditEventModal } from '../../components/events/EditEventModal';
 import { EventMap } from '../../components/maps/MapContainer';
 import { EventDetailView } from '../../components/events/EventDetailView';
 import { useEventStore } from '../../store/eventStore';
+import { useNotificationStore } from '../../store/authStore';
 import { patchEventApi } from '../../api/events';
 import { useAuth } from '../../hooks';
 import { fetchOrganizations } from '../../api/organizations';
 import { fetchUsers } from '../../api/auth';
-import { EventStatus } from '../../types';
+import { EventStatus, UserRole } from '../../types';
 import type { DamageEvent } from '../../types';
 import { fetchEvents } from '../../api/events';
+import { getStatusLabel } from '../../utils/helpers';
 
 type MapMode    = 'pins' | 'heatmap';
 type FilterStatus = 'all' | EventStatus;
@@ -23,6 +25,7 @@ type FilterStatus = 'all' | EventStatus;
 export const EventsPage: React.FC = () => {
   const { user } = useAuth();
   const { events, setEvents, updateEvent } = useEventStore();
+  const { addNotification } = useNotificationStore();
   const [searchParams] = useSearchParams();
   const orgFilter = searchParams.get('org');
 
@@ -93,6 +96,18 @@ export const EventsPage: React.FC = () => {
     if (selectedEvent?.id === id) {
       setSelectedEvent((prev) => prev ? { ...prev, ...updates } : prev);
     }
+    if (user?.role === UserRole.ADMIN || user?.role === UserRole.SUPER_ADMIN) {
+      const ev = events.find((e) => e.id === id);
+      addNotification({
+        id: `edit-${Date.now()}`,
+        title: 'פרטי אירוע עודכנו',
+        message: `אירוע "${ev?.name ?? `#${id}`}" עודכן בהצלחה.`,
+        type: 'info',
+        read: false,
+        createdAt: new Date(),
+        eventId: id,
+      });
+    }
   };
 
   const handleToggleHide = async (id: number) => {
@@ -119,7 +134,7 @@ export const EventsPage: React.FC = () => {
       <div className="max-w-[1400px] mx-auto space-y-6">
 
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-sm">
+          <div className="flex items-center gap-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-1 shadow-sm">
             {filterButtons.map((btn) => (
               <button
                 key={btn.value}
@@ -127,11 +142,11 @@ export const EventsPage: React.FC = () => {
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
                   filterStatus === btn.value
                     ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
               >
                 {btn.label}
-                <span className={`mr-1.5 text-xs ${filterStatus === btn.value ? 'text-blue-200' : 'text-gray-400'}`}>
+                <span className={`mr-1.5 text-xs ${filterStatus === btn.value ? 'text-blue-200' : 'text-gray-400 dark:text-gray-500'}`}>
                   {btn.count}
                 </span>
               </button>
@@ -149,7 +164,7 @@ export const EventsPage: React.FC = () => {
 
         <Card
           title="תצוגת מפה"
-          subtitle={mapMode === 'pins' ? 'צבעוני לפי עדיפות' : 'מפת חום נזקים'}
+          subtitle={mapMode === 'pins' ? '' : 'מפת חום נזקים'}
           noPadding
           headerRight={
             <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
@@ -168,14 +183,16 @@ export const EventsPage: React.FC = () => {
             </div>
           }
         >
-          <div className="p-4">
-            <EventMap
-              events={orgEvents.filter((e) => !e.hidden)}
-              height="460px"
-              onEventClick={handleSelectEvent}
-              mode={mapMode}
-              focusEvent={mapFocusEvent}
-            />
+          <div className="p-2 sm:p-4">
+            <div className="h-[220px] sm:h-[320px] lg:h-[460px]">
+              <EventMap
+                events={orgEvents.filter((e) => !e.hidden)}
+                height="100%"
+                onEventClick={handleSelectEvent}
+                mode={mapMode}
+                focusEvent={mapFocusEvent}
+              />
+            </div>
             {mapMode === 'pins' && (
               <div className="flex items-center gap-4 mt-3">
                 {[
@@ -185,7 +202,7 @@ export const EventsPage: React.FC = () => {
                 ].map(({ color, label }) => (
                   <div key={label} className="flex items-center gap-1.5">
                     <div className={`w-3 h-3 rounded-full ${color}`} />
-                    <span className="text-xs text-gray-500">{label}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
                   </div>
                 ))}
               </div>
@@ -195,12 +212,11 @@ export const EventsPage: React.FC = () => {
 
         <Card
           title="רשימת אירועים"
-          subtitle={`${displayEvents.length} רשומות · ממוינות לפי עדיפות`}
           noPadding
           headerRight={
             <button
               onClick={() => setShowHidden((v) => !v)}
-              className="text-xs text-gray-500 hover:text-gray-700 underline cursor-pointer"
+              className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline cursor-pointer"
             >
               {showHidden ? 'הסתר מוסתרים' : 'הצג מוסתרים'}
             </button>
@@ -216,6 +232,17 @@ export const EventsPage: React.FC = () => {
                 const updated = await patchEventApi(id, { status });
                 updateEvent(id, updated);
                 if (selectedEvent?.id === id) setSelectedEvent(updated);
+                if (user?.role === UserRole.ADMIN || user?.role === UserRole.SUPER_ADMIN) {
+                  addNotification({
+                    id: `status-${Date.now()}`,
+                    title: 'סטטוס אירוע השתנה',
+                    message: `אירוע "${updated.name ?? `#${id}`}" הועבר לסטטוס: ${getStatusLabel(status)}.`,
+                    type: 'info',
+                    read: false,
+                    createdAt: new Date(),
+                    eventId: id,
+                  });
+                }
               } catch {
                 /* server rejected */
               }

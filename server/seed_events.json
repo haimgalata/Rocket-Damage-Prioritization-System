@@ -12,7 +12,7 @@
       "address": "פגיעה במרכז דיזנגוף",
       "city": "תל אביב"
     },
-    "imageUrl": "/uploads/tel_aviv_heavy_1.jpg",
+    "imageUrl": "/uploads/tel_aviv_heavy_1.png",
     "damageClassification": "Heavy",
     "damageScore": 7,
     "priorityScore": 10.0,
@@ -49,7 +49,7 @@
       "address": "קריסת מבנה בשדרות רוטשילד",
       "city": "תל אביב"
     },
-    "imageUrl": "/uploads/tel_aviv_heavy_2.jpg",
+    "imageUrl": "/uploads/tel_aviv_heavy_2.png",
     "damageClassification": "Heavy",
     "damageScore": 7,
     "priorityScore": 10.0,
@@ -74,40 +74,39 @@
     "createdAt": "2026-05-23T17:58:44Z"
   },
   {
-    "id": "seed-8226b373",
+    "id": "seed-c4e19f05",
     "seedKey": "prioritai-seed-03",
     "organizationId": "org-1",
     "createdBy": "user-op-1",
-    "name": "שריפה במחסן נמל יפו",
-    "description": "פגיעת טיל הצתה מחסן בחוף נמל יפו. האש התפשטה לשתי יחידות אחסון סמוכות המכילות חומרים דליקים. פעילות הנמל הושעתה. כבאות וצוות חומ\"ס פרוסים. מבנים היסטוריים של העיר העתיקה בטווח 200 מ' בסיכון לנזק חום.",
+    "name": "פגיעה בינונית בבניין מסחרי בנווה צדק",
+    "description": "פגיעת רסיס ישירה בקומה ב' של בניין מסחרי-מגורים בן 4 קומות בנווה צדק. שני קירות פנימיים נושאי עומס ניזוקו; תקרת הקומה מציגה סדקי משיכה. הקומות 3-4 פונו עד להשלמת הערכה מבנית. הגישה לאורך רחוב רוקח מוגבלת חלקית. מבנים סמוכים לא ניזוקו.",
     "location": {
-      "lat": 32.053,
-      "lng": 34.751,
-      "address": "שריפה במחסן נמל יפו",
+      "lat": 32.057,
+      "lng": 34.758,
+      "address": "פגיעה בינונית בבניין מסחרי בנווה צדק",
       "city": "תל אביב"
     },
-    "imageUrl": "/uploads/tel_aviv_heavy_3.jpg",
-    "damageClassification": "Heavy",
-    "damageScore": 7,
-    "priorityScore": 10.0,
+    "imageUrl": "/uploads/tel_aviv_medium_1.jpg",
+    "damageClassification": "Medium",
+    "damageScore": 5,
+    "priorityScore": 8.59,
     "gisDetails": {
-      "distHospitalM": 2448.0,
-      "distSchoolM": 264.0,
-      "distRoadM": 20.0,
-      "distStrategicM": 607.0,
+      "distHospitalM": 2100.0,
+      "distSchoolM": 280.0,
+      "distRoadM": 25.0,
+      "distStrategicM": 900.0,
       "populationDensity": 9545.35,
-      "geoMultiplier": 1.774
+      "geoMultiplier": 1.718
     },
     "gisStatus": "done",
     "status": "IN_PROGRESS",
     "hidden": false,
-    "llmExplanation": "זוהה נזק כבד על ידי מודל ראייה ממוחשבת. המאפיינים המבניים עקביים עם דפוסי נזק כבד — מומלץ הערכה מבנית מיידית. הקשר גיאוגרפי: בית חולים קרוב 2.4 ק\"מ, בית ספר קרוב 264 מ', כביש קרוב 20 מ', אתר אסטרטגי קרוב 607 מ', צפיפות אוכלוסין 9,545 נפש/קמ\"ר. מכפיל גיאוגרפי: ×1.77. ציון עדיפות סופי: 10.0/10 (עדיפות קריטי). נוסחת ניקוד: נזק(7) × מכפיל_גיאוגרפי(1.77) = 10.0.",
+    "llmExplanation": "זוהה נזק בינוני על ידי מודל ראייה ממוחשבת. המאפיינים המבניים עקביים עם דפוסי נזק בינוני — נדרשת הערכה מבנית לפני חידוש הפעילות. הקשר גיאוגרפי: בית חולים קרוב 2.1 ק\"מ, בית ספר קרוב 280 מ', כביש קרוב 25 מ', אתר אסטרטגי קרוב 900 מ', צפיפות אוכלוסין 9,545 נפש/קמ\"ר. מכפיל גיאוגרפי: ×1.72. ציון עדיפות סופי: 8.6/10 (עדיפות קריטי). נוסחת ניקוד: נזק(5) × מכפיל_גיאוגרפי(1.72) = 8.6.",
     "aiModel": "PrioritAI-v2.1",
     "tags": [
-      "fire",
-      "hazmat",
-      "port",
-      "heritage"
+      "structural",
+      "mixed-use",
+      "evacuation"
     ],
     "createdAt": "2026-05-21T17:58:44Z"
   },
@@ -124,7 +123,7 @@
       "address": "נזק גג בבית מלאכה פלורנטין",
       "city": "תל אביב"
     },
-    "imageUrl": "/uploads/tel_aviv_light_1.jpg",
+    "imageUrl": "/uploads/tel_aviv_light_1.webp",
     "damageClassification": "Light",
     "damageScore": 3,
     "priorityScore": 5.25,
@@ -160,7 +159,7 @@
       "address": "שרפרל ברמת אביב — מגורים",
       "city": "תל אביב"
     },
-    "imageUrl": "/uploads/tel_aviv_light_2.jpg",
+    "imageUrl": "/uploads/tel_aviv_light_2.jpeg",
     "damageClassification": "Light",
     "damageScore": 3,
     "priorityScore": 5.09,
@@ -271,7 +270,7 @@
       "address": "פגיעה באזור התעשייה דימונה",
       "city": "דרום"
     },
-    "imageUrl": "/uploads/south_heavy_2.jpg",
+    "imageUrl": "/uploads/south_heavy_2.png",
     "damageClassification": "Heavy",
     "damageScore": 7,
     "priorityScore": 10.0,
@@ -296,45 +295,82 @@
     "createdAt": "2026-05-23T17:58:44Z"
   },
   {
-    "id": "seed-897c2b08",
+    "id": "seed-3a8fd162",
     "seedKey": "prioritai-seed-09",
     "organizationId": "org-2",
     "createdBy": "user-admin-2",
-    "name": "פגיעה ברובע המגורים קיבוץ ניר עוז",
-    "description": "מספר פגיעות טיל ברובע המגורים של קיבוץ ניר עוז. ארבעה בתים ספגו פגיעות ישירות עם קריסת גג וקירות. חדר האוכל הקהילתי הושמד חלקית. קהילה של כ-400 תושבים פונתה. גישה בכביש 232 פנויה. בית החולים הקרוב בשדרות (8 ק\"מ).",
+    "name": "נזק בינוני לבניין מגורים בשדרות",
+    "description": "טיל פגע ישירות בקומה שלישית של בניין מגורים בן 5 קומות בשדרות. קיר חיצוני מזרחי נפרץ ברוחב 5 מ'; שני חדרים אינם ראויים למגורים. שלד הבניין יציב אך מצריך הערכה מבנית. 14 דיירים פונו. גישה בכביש 34 פנויה. בית חולים ברזילי במרחק 1.8 ק\"מ.",
     "location": {
-      "lat": 31.3667,
-      "lng": 34.4333,
-      "address": "פגיעה ברובע המגורים קיבוץ ניר עוז",
+      "lat": 31.524,
+      "lng": 34.601,
+      "address": "נזק בינוני לבניין מגורים בשדרות",
       "city": "דרום"
     },
-    "imageUrl": "/uploads/south_heavy_3.jpg",
-    "damageClassification": "Heavy",
-    "damageScore": 7,
-    "priorityScore": 7.64,
+    "imageUrl": "/uploads/south_medium_1.png",
+    "damageClassification": "Medium",
+    "damageScore": 5,
+    "priorityScore": 7.86,
     "gisDetails": {
-      "distHospitalM": 9182.0,
-      "distSchoolM": 7784.0,
-      "distRoadM": 1356.0,
-      "distStrategicM": 1342.0,
-      "populationDensity": 0.0,
-      "geoMultiplier": 1.092
+      "distHospitalM": 1820.0,
+      "distSchoolM": 380.0,
+      "distRoadM": 12.0,
+      "distStrategicM": 720.0,
+      "populationDensity": 3114.0,
+      "geoMultiplier": 1.571
     },
     "gisStatus": "done",
     "status": "IN_PROGRESS",
     "hidden": false,
-    "llmExplanation": "זוהה נזק כבד על ידי מודל ראייה ממוחשבת. המאפיינים המבניים עקביים עם דפוסי נזק כבד — מומלץ הערכה מבנית מיידית. הקשר גיאוגרפי: בית חולים קרוב 9.2 ק\"מ, בית ספר קרוב 7.8 ק\"מ, כביש קרוב 1.4 ק\"מ, אתר אסטרטגי קרוב 1.3 ק\"מ, צפיפות אוכלוסין 0 נפש/קמ\"ר. מכפיל גיאוגרפי: ×1.09. ציון עדיפות סופי: 7.6/10 (עדיפות קריטי). נוסחת ניקוד: נזק(7) × מכפיל_גיאוגרפי(1.09) = 7.6.",
+    "llmExplanation": "זוהה נזק בינוני על ידי מודל ראייה ממוחשבת. המאפיינים המבניים עקביים עם דפוסי נזק בינוני — נדרשת הערכה מבנית לפני חידוש הפעילות. הקשר גיאוגרפי: בית חולים קרוב 1.8 ק\"מ, בית ספר קרוב 380 מ', כביש קרוב 12 מ', אתר אסטרטגי קרוב 720 מ', צפיפות אוכלוסין 3,114 נפש/קמ\"ר. מכפיל גיאוגרפי: ×1.57. ציון עדיפות סופי: 7.9/10 (עדיפות קריטי). נוסחת ניקוד: נזק(5) × מכפיל_גיאוגרפי(1.57) = 7.9.",
     "aiModel": "PrioritAI-v2.1",
     "tags": [
       "residential",
-      "evacuation",
-      "kibbutz"
+      "structural",
+      "evacuation"
     ],
-    "createdAt": "2026-05-21T17:58:44Z"
+    "createdAt": "2026-05-22T17:58:44Z"
+  },
+  {
+    "id": "seed-7b2c4e9a",
+    "seedKey": "prioritai-seed-10",
+    "organizationId": "org-2",
+    "createdBy": "user-admin-2",
+    "name": "פגיעה בינונית בבית ספר תיכון בקריית גת",
+    "description": "פגיעה ישירה באגף המעבדות של בית ספר תיכון בקריית גת. קיר הצד המזרחי התמוטט חלקית; ריצוף שתי כיתות ניזוק. שאר הבניין תקין. המוסד נסגר לשבועיים לצורך תיקון. חצר החנייה נחסמה על ידי הריסות. אין נפגעים — בית הספר פונה לפני הפגיעה.",
+    "location": {
+      "lat": 31.607,
+      "lng": 34.77,
+      "address": "פגיעה בינונית בבית ספר תיכון בקריית גת",
+      "city": "דרום"
+    },
+    "imageUrl": "/uploads/south_medium_2.png",
+    "damageClassification": "Medium",
+    "damageScore": 5,
+    "priorityScore": 7.19,
+    "gisDetails": {
+      "distHospitalM": 2840.0,
+      "distSchoolM": 165.0,
+      "distRoadM": 22.0,
+      "distStrategicM": 1820.0,
+      "populationDensity": 2516.0,
+      "geoMultiplier": 1.437
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "זוהה נזק בינוני על ידי מודל ראייה ממוחשבת. המאפיינים המבניים עקביים עם דפוסי נזק בינוני — נדרשת הערכה מבנית לפני חידוש הפעילות. הקשר גיאוגרפי: בית חולים קרוב 2.8 ק\"מ, בית ספר קרוב 165 מ', כביש קרוב 22 מ', אתר אסטרטגי קרוב 1.8 ק\"מ, צפיפות אוכלוסין 2,516 נפש/קמ\"ר. מכפיל גיאוגרפי: ×1.44. ציון עדיפות סופי: 7.2/10 (עדיפות גבוה). נוסחת ניקוד: נזק(5) × מכפיל_גיאוגרפי(1.44) = 7.2.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "school",
+      "structural",
+      "debris"
+    ],
+    "createdAt": "2026-05-23T17:58:44Z"
   },
   {
     "id": "seed-1d04f18c",
-    "seedKey": "prioritai-seed-10",
+    "seedKey": "prioritai-seed-11",
     "organizationId": "org-2",
     "createdBy": "user-admin-2",
     "name": "נזק להיקף בית ספר באופקים",
@@ -370,116 +406,78 @@
     "createdAt": "2026-05-20T17:58:44Z"
   },
   {
-    "id": "seed-b43a3a78",
-    "seedKey": "prioritai-seed-11",
-    "organizationId": "org-2",
-    "createdBy": "user-admin-2",
-    "name": "גדר היקף קיבוץ רביבים",
-    "description": "טיל פגע בהיקף החקלאי של קיבוץ רביבים בנגב המרכזי. קו הגדר נהרס לאורך 80 מ'; תחנת משאבות השקיה נפגעה. אין נפגעים. קיבוץ קטן (~350 תושבים) באזור מדברי מבודד. כביש סלול קרוב 4 ק\"מ; בית חולים קרוב מעל 40 ק\"מ (באר שבע).",
-    "location": {
-      "lat": 31.0,
-      "lng": 34.8833,
-      "address": "גדר היקף קיבוץ רביבים",
-      "city": "דרום"
-    },
-    "imageUrl": "/uploads/south_isolated_light_1.jpg",
-    "damageClassification": "Light",
-    "damageScore": 3,
-    "priorityScore": 2.65,
-    "gisDetails": {
-      "distHospitalM": 19207.0,
-      "distSchoolM": 5031.0,
-      "distRoadM": 1674.0,
-      "distStrategicM": 0.0,
-      "populationDensity": 197.55,
-      "geoMultiplier": 0.883
-    },
-    "gisStatus": "done",
-    "status": "IN_PROGRESS",
-    "hidden": false,
-    "llmExplanation": "זוהה נזק קל על ידי מודל ראייה ממוחשבת. המאפיינים המבניים עקביים עם דפוסי נזק קל — תיקון רגיל מתאים לנזק מסוג זה. הקשר גיאוגרפי: בית חולים קרוב 19.2 ק\"מ, בית ספר קרוב 5.0 ק\"מ, כביש קרוב 1.7 ק\"מ, אתר אסטרטגי קרוב 0 מ', צפיפות אוכלוסין 197 נפש/קמ\"ר. מכפיל גיאוגרפי: ×0.88. ציון עדיפות סופי: 2.6/10 (עדיפות בינוני). נוסחת ניקוד: נזק(3) × מכפיל_גיאוגרפי(0.88) = 2.6.",
-    "aiModel": "PrioritAI-v2.1",
-    "tags": [
-      "isolated",
-      "agricultural",
-      "fence"
-    ],
-    "createdAt": "2026-05-23T17:58:44Z"
-  },
-  {
-    "id": "seed-2f59e678",
+    "id": "seed-5e6d8c31",
     "seedKey": "prioritai-seed-12",
     "organizationId": "org-2",
     "createdBy": "user-admin-2",
-    "name": "פגיעה במרכז המבקרים מצפה רמון",
-    "description": "טיל פגע בחניון מרכז המבקרים מכתש רמון במצפה רמון. פני האספלט נפגעו; רכב אחד הושמד. חזית הזכוכית של מרכז המבקרים נסדקה. מיקום מרוחק — 25 ק\"מ מבית החולים הקרוב בירוחם. צפיפות אוכלוסין כמעט אפס. גישה בכביש 40 בלבד.",
+    "name": "נזק קל למרכז קהילתי בנתיבות",
+    "description": "שרפרל מטיל מיורט פגע בגג רעף של מרכז קהילתי בנתיבות. 12 רעפים הוסרו; מספר צינורות ניקוז נפגמו. חדירת מים קלה לאולם הכניסה. אין נזק מבני. המרכז שב לפעילות לאחר 24 שעות. אין נפגעים.",
     "location": {
-      "lat": 30.61,
-      "lng": 34.801,
-      "address": "פגיעה במרכז המבקרים מצפה רמון",
+      "lat": 31.423,
+      "lng": 34.591,
+      "address": "נזק קל למרכז קהילתי בנתיבות",
       "city": "דרום"
     },
-    "imageUrl": "/uploads/south_isolated_light_2.jpg",
+    "imageUrl": "/uploads/south_light_2.jpeg",
     "damageClassification": "Light",
     "damageScore": 3,
-    "priorityScore": 3.07,
+    "priorityScore": 4.24,
     "gisDetails": {
-      "distHospitalM": -1.0,
-      "distSchoolM": 304.0,
-      "distRoadM": 0.0,
-      "distStrategicM": 1686.0,
-      "populationDensity": 74.77,
-      "geoMultiplier": 1.023
+      "distHospitalM": 3150.0,
+      "distSchoolM": 420.0,
+      "distRoadM": 35.0,
+      "distStrategicM": 2600.0,
+      "populationDensity": 2438.0,
+      "geoMultiplier": 1.412
     },
     "gisStatus": "done",
     "status": "COMPLETED",
     "hidden": false,
-    "llmExplanation": "זוהה נזק קל על ידי מודל ראייה ממוחשבת. המאפיינים המבניים עקביים עם דפוסי נזק קל — תיקון רגיל מתאים לנזק מסוג זה. הקשר גיאוגרפי: בית חולים קרוב לא נמצא בטווח 15 ק\"מ, בית ספר קרוב 304 מ', כביש קרוב 0 מ', אתר אסטרטגי קרוב 1.7 ק\"מ, צפיפות אוכלוסין 74 נפש/קמ\"ר. מכפיל גיאוגרפי: ×1.02. ציון עדיפות סופי: 3.1/10 (עדיפות בינוני). נוסחת ניקוד: נזק(3) × מכפיל_גיאוגרפי(1.02) = 3.1.",
+    "llmExplanation": "זוהה נזק קל על ידי מודל ראייה ממוחשבת. המאפיינים המבניים עקביים עם דפוסי נזק קל — תיקון רגיל מתאים לנזק מסוג זה. הקשר גיאוגרפי: בית חולים קרוב 3.2 ק\"מ, בית ספר קרוב 420 מ', כביש קרוב 35 מ', אתר אסטרטגי קרוב 2.6 ק\"מ, צפיפות אוכלוסין 2,438 נפש/קמ\"ר. מכפיל גיאוגרפי: ×1.41. ציון עדיפות סופי: 4.2/10 (עדיפות בינוני). נוסחת ניקוד: נזק(3) × מכפיל_גיאוגרפי(1.41) = 4.2.",
     "aiModel": "PrioritAI-v2.1",
     "tags": [
-      "isolated",
-      "tourism",
-      "remote"
+      "community",
+      "roof",
+      "shrapnel"
     ],
-    "createdAt": "2026-05-18T17:58:44Z"
+    "createdAt": "2026-05-19T17:58:44Z"
   },
   {
-    "id": "seed-6907b7aa",
+    "id": "seed-9f0a2b47",
     "seedKey": "prioritai-seed-13",
     "organizationId": "org-2",
     "createdBy": "user-admin-2",
-    "name": "נזק לתחנת המחקר שדה בוקר",
-    "description": "שרפרל מטיל מיורט פגע בחממת מחקר בקמפוס שדה בוקר (מחקר מדבר של אוניברסיטת בן גוריון). שלושה לוחות חממה הושמדו; גידולים ניסיוניים אבדו. תשתית מינימלית — אין כבישים במרחק 3 ק\"מ, בית חולים קרוב 35 ק\"מ. הצוות פונה בשלום.",
+    "name": "נזק קל לבית ספר יסודי בערד",
+    "description": "גל הדף מטיל מיורט שבר חלונות ב-4 כיתות בבית ספר יסודי בערד. דלתות מתכת עיוותו קלות ואינן נסגרות כהלכה. אין נזק מבני. בית הספר שב לפעילות לאחר החלפת חלונות. אין נפגעים — בית הספר פונה לפני הפגיעה.",
     "location": {
-      "lat": 30.8517,
-      "lng": 34.7861,
-      "address": "נזק לתחנת המחקר שדה בוקר",
+      "lat": 31.255,
+      "lng": 35.212,
+      "address": "נזק קל לבית ספר יסודי בערד",
       "city": "דרום"
     },
-    "imageUrl": "/uploads/south_isolated_light_3.jpg",
+    "imageUrl": "/uploads/south_light_3.webp",
     "damageClassification": "Light",
     "damageScore": 3,
-    "priorityScore": 3.44,
+    "priorityScore": 4.18,
     "gisDetails": {
-      "distHospitalM": -1.0,
-      "distSchoolM": 21.0,
-      "distRoadM": 16.0,
-      "distStrategicM": 844.0,
-      "populationDensity": 900.99,
-      "geoMultiplier": 1.145
+      "distHospitalM": 780.0,
+      "distSchoolM": 190.0,
+      "distRoadM": 18.0,
+      "distStrategicM": 4100.0,
+      "populationDensity": 1482.0,
+      "geoMultiplier": 1.394
     },
     "gisStatus": "done",
-    "status": "IN_PROGRESS",
+    "status": "COMPLETED",
     "hidden": false,
-    "llmExplanation": "זוהה נזק קל על ידי מודל ראייה ממוחשבת. המאפיינים המבניים עקביים עם דפוסי נזק קל — תיקון רגיל מתאים לנזק מסוג זה. הקשר גיאוגרפי: בית חולים קרוב לא נמצא בטווח 15 ק\"מ, בית ספר קרוב 21 מ', כביש קרוב 16 מ', אתר אסטרטגי קרוב 844 מ', צפיפות אוכלוסין 900 נפש/קמ\"ר. מכפיל גיאוגרפי: ×1.15. ציון עדיפות סופי: 3.4/10 (עדיפות בינוני). נוסחת ניקוד: נזק(3) × מכפיל_גיאוגרפי(1.15) = 3.4.",
+    "llmExplanation": "זוהה נזק קל על ידי מודל ראייה ממוחשבת. המאפיינים המבניים עקביים עם דפוסי נזק קל — תיקון רגיל מתאים לנזק מסוג זה. הקשר גיאוגרפי: בית חולים קרוב 780 מ', בית ספר קרוב 190 מ', כביש קרוב 18 מ', אתר אסטרטגי קרוב 4.1 ק\"מ, צפיפות אוכלוסין 1,482 נפש/קמ\"ר. מכפיל גיאוגרפי: ×1.39. ציון עדיפות סופי: 4.2/10 (עדיפות בינוני). נוסחת ניקוד: נזק(3) × מכפיל_גיאוגרפי(1.39) = 4.2.",
     "aiModel": "PrioritAI-v2.1",
     "tags": [
-      "isolated",
-      "academic",
-      "greenhouse",
-      "remote"
+      "school",
+      "windows",
+      "shrapnel"
     ],
-    "createdAt": "2026-05-22T17:58:44Z"
+    "createdAt": "2026-05-20T17:58:44Z"
   },
   {
     "id": "seed-a678a905",
@@ -532,7 +530,7 @@
       "address": "מגדל מגורים גבעת שאול",
       "city": "ירושלים"
     },
-    "imageUrl": "/uploads/jerusalem_heavy_2.jpg",
+    "imageUrl": "/uploads/jerusalem_heavy_2.png",
     "damageClassification": "Heavy",
     "damageScore": 7,
     "priorityScore": 10.0,
@@ -570,7 +568,7 @@
       "address": "קריסת מבנה תעשייתי בתלפיות",
       "city": "ירושלים"
     },
-    "imageUrl": "/uploads/jerusalem_heavy_3.jpg",
+    "imageUrl": "/uploads/jerusalem_heavy_3.png",
     "damageClassification": "Heavy",
     "damageScore": 7,
     "priorityScore": 10.0,
@@ -608,7 +606,7 @@
       "address": "פגיעה במגדל הצפוני פסגת זאב",
       "city": "ירושלים"
     },
-    "imageUrl": "/uploads/jerusalem_heavy_4.jpg",
+    "imageUrl": "/uploads/jerusalem_heavy_4.png",
     "damageClassification": "Heavy",
     "damageScore": 7,
     "priorityScore": 10.0,
@@ -634,8 +632,45 @@
     "createdAt": "2026-05-23T17:58:44Z"
   },
   {
-    "id": "seed-8b7f09be",
+    "id": "seed-d3e5f780",
     "seedKey": "prioritai-seed-18",
+    "organizationId": "org-3",
+    "createdBy": "user-admin-3",
+    "name": "פגיעה בינונית בבניין מגורים בקטמון",
+    "description": "פגיעת רסיס ישירה בקומות 4-5 של בניין מגורים בן 6 קומות בשכונת קטמון. שני קירות חיצוניים נפגעו; שלד הבניין מציג סדקי משיכה בעמודי קומה ד'. 10 דיירים פונו. קווי חשמל נותקו לשתי קומות. בית חולים שערי צדק במרחק 2.1 ק\"מ. גישה ברחוב בית לחם פנויה.",
+    "location": {
+      "lat": 31.762,
+      "lng": 35.215,
+      "address": "פגיעה בינונית בבניין מגורים בקטמון",
+      "city": "ירושלים"
+    },
+    "imageUrl": "/uploads/jerusalem_medium_1.png",
+    "damageClassification": "Medium",
+    "damageScore": 5,
+    "priorityScore": 8.82,
+    "gisDetails": {
+      "distHospitalM": 2140.0,
+      "distSchoolM": 210.0,
+      "distRoadM": 8.0,
+      "distStrategicM": 1640.0,
+      "populationDensity": 8171.02,
+      "geoMultiplier": 1.763
+    },
+    "gisStatus": "done",
+    "status": "IN_PROGRESS",
+    "hidden": false,
+    "llmExplanation": "זוהה נזק בינוני על ידי מודל ראייה ממוחשבת. המאפיינים המבניים עקביים עם דפוסי נזק בינוני — נדרשת הערכה מבנית לפני חידוש הפעילות. הקשר גיאוגרפי: בית חולים קרוב 2.1 ק\"מ, בית ספר קרוב 210 מ', כביש קרוב 8 מ', אתר אסטרטגי קרוב 1.6 ק\"מ, צפיפות אוכלוסין 8,171 נפש/קמ\"ר. מכפיל גיאוגרפי: ×1.76. ציון עדיפות סופי: 8.8/10 (עדיפות קריטי). נוסחת ניקוד: נזק(5) × מכפיל_גיאוגרפי(1.76) = 8.8.",
+    "aiModel": "PrioritAI-v2.1",
+    "tags": [
+      "residential",
+      "structural",
+      "evacuation"
+    ],
+    "createdAt": "2026-05-23T17:58:44Z"
+  },
+  {
+    "id": "seed-8b7f09be",
+    "seedKey": "prioritai-seed-19",
     "organizationId": "org-3",
     "createdBy": "user-admin-3",
     "name": "נזק לגדר גינה במושבה הגרמנית",
@@ -646,7 +681,7 @@
       "address": "נזק לגדר גינה במושבה הגרמנית",
       "city": "ירושלים"
     },
-    "imageUrl": "/uploads/jerusalem_light_1.jpg",
+    "imageUrl": "/uploads/jerusalem_light_1.jpeg",
     "damageClassification": "Light",
     "damageScore": 3,
     "priorityScore": 5.22,
@@ -672,7 +707,7 @@
   },
   {
     "id": "seed-9825b175",
-    "seedKey": "prioritai-seed-19",
+    "seedKey": "prioritai-seed-20",
     "organizationId": "org-3",
     "createdBy": "user-admin-3",
     "name": "היקף הדסה הר הצופים",
@@ -683,7 +718,7 @@
       "address": "היקף הדסה הר הצופים",
       "city": "ירושלים"
     },
-    "imageUrl": "/uploads/jerusalem_light_2.jpg",
+    "imageUrl": "/uploads/jerusalem_light_2.png",
     "damageClassification": "Light",
     "damageScore": 3,
     "priorityScore": 5.54,
@@ -706,42 +741,5 @@
       "vehicles"
     ],
     "createdAt": "2026-05-20T17:58:44Z"
-  },
-  {
-    "id": "seed-cbea1324",
-    "seedKey": "prioritai-seed-20",
-    "organizationId": "org-3",
-    "createdBy": "user-admin-3",
-    "name": "פיזור שרפרל — רמות מגורים",
-    "description": "הריסות טיל מיורט פוזרו ברחוב מגורים ברמות אלון. חלונות ומעקות מרפסות ב-6 דירות ניזוקו. יחידה אחת בקומת הקרקע ספגה חדירת קיר קלה. אין נפגעים. תשתיות תקינות. גישה ראשית בשדרות גולדה מאיר זמינה.",
-    "location": {
-      "lat": 31.8289,
-      "lng": 35.1946,
-      "address": "פיזור שרפרל — רמות מגורים",
-      "city": "ירושלים"
-    },
-    "imageUrl": "/uploads/jerusalem_light_3.jpg",
-    "damageClassification": "Light",
-    "damageScore": 3,
-    "priorityScore": 4.0,
-    "gisDetails": {
-      "distHospitalM": 1361.0,
-      "distSchoolM": 465.0,
-      "distRoadM": 452.0,
-      "distStrategicM": 4164.0,
-      "populationDensity": 0.0,
-      "geoMultiplier": 1.333
-    },
-    "gisStatus": "done",
-    "status": "IN_PROGRESS",
-    "hidden": false,
-    "llmExplanation": "זוהה נזק קל על ידי מודל ראייה ממוחשבת. המאפיינים המבניים עקביים עם דפוסי נזק קל — תיקון רגיל מתאים לנזק מסוג זה. הקשר גיאוגרפי: בית חולים קרוב 1.4 ק\"מ, בית ספר קרוב 465 מ', כביש קרוב 452 מ', אתר אסטרטגי קרוב 4.2 ק\"מ, צפיפות אוכלוסין 0 נפש/קמ\"ר. מכפיל גיאוגרפי: ×1.33. ציון עדיפות סופי: 4.0/10 (עדיפות בינוני). נוסחת ניקוד: נזק(3) × מכפיל_גיאוגרפי(1.33) = 4.0.",
-    "aiModel": "PrioritAI-v2.1",
-    "tags": [
-      "residential",
-      "shrapnel",
-      "windows"
-    ],
-    "createdAt": "2026-05-22T17:58:44Z"
   }
 ]

@@ -76,45 +76,47 @@ export const OperatorDashboard: React.FC = () => {
   };
 
   return (
-    <PageContainer title="הארגון שלי — לוח בקרה">
+    <PageContainer title="הארגון שלי - לוח בקרה">
       <div className="max-w-[1200px] mx-auto space-y-6">
 
         {critical > 0 && (
-          <div className="bg-red-50 border border-red-200 rounded-xl px-5 py-3 flex items-center gap-3">
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-5 py-3 flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0" />
-            <p className="text-sm text-red-700">
+            <p className="text-sm text-red-700 dark:text-red-400">
               <span className="font-semibold">{critical} {critical !== 1 ? 'אירועים קריטיים' : 'אירוע קריטי'}</span>
               {' '}דורשים תשומת לב מיידית באזורך.
             </p>
           </div>
         )}
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {[
-            { label: 'סה"כ אירועים', value: total,      icon: <Activity className="w-5 h-5 text-blue-600" />,       bg: 'bg-blue-100'   },
-            { label: 'חדשים',         value: pending,    icon: <Clock className="w-5 h-5 text-yellow-600" />,       bg: 'bg-yellow-100' },
-            { label: 'בטיפול',        value: inProgress, icon: <Activity className="w-5 h-5 text-indigo-600" />,    bg: 'bg-indigo-100' },
-            { label: 'בוצע',          value: completed,  icon: <CheckCircle2 className="w-5 h-5 text-green-600" />, bg: 'bg-green-100'  },
+            { label: 'סה"כ אירועים', value: total,      icon: <Activity className="w-5 h-5 text-blue-600" />,       bg: 'bg-blue-100 dark:bg-blue-900/40'   },
+            { label: 'חדשים',         value: pending,    icon: <Clock className="w-5 h-5 text-yellow-600" />,       bg: 'bg-yellow-100 dark:bg-yellow-900/40' },
+            { label: 'בטיפול',        value: inProgress, icon: <Activity className="w-5 h-5 text-indigo-600" />,    bg: 'bg-indigo-100 dark:bg-indigo-900/40' },
+            { label: 'בוצע',          value: completed,  icon: <CheckCircle2 className="w-5 h-5 text-green-600" />, bg: 'bg-green-100 dark:bg-green-900/40'  },
           ].map(({ label, value, icon, bg }) => (
-            <div key={label} className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div key={label} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-medium text-gray-500">{label}</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}</p>
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${bg}`}>{icon}</div>
               </div>
-              <p className="text-3xl font-bold text-gray-900">{value}</p>
+              <p className="text-3xl font-bold text-gray-900 dark:text-white">{value}</p>
             </div>
           ))}
         </div>
 
         <Card title="מפת אירועים" subtitle="מקודד צבעים לפי עדיפות · לחץ על סמן לפרטים" noPadding>
-          <div className="p-4">
-            <EventMap
-              events={orgEvents}
-              height="420px"
-              onEventClick={handleSelectEvent}
-              mode="pins"
-              focusEvent={mapFocusEvent}
-            />
+          <div className="p-2 sm:p-4">
+            <div className="h-[220px] sm:h-[300px] lg:h-[420px]">
+              <EventMap
+                events={orgEvents}
+                height="100%"
+                onEventClick={handleSelectEvent}
+                mode="pins"
+                focusEvent={mapFocusEvent}
+              />
+            </div>
             <div className="flex items-center gap-4 mt-3">
               {[
                 { color: 'bg-red-500',    label: 'קריטי (≥7.5)'      },
@@ -123,7 +125,7 @@ export const OperatorDashboard: React.FC = () => {
               ].map(({ color, label }) => (
                 <div key={label} className="flex items-center gap-1.5">
                   <div className={`w-3 h-3 rounded-full ${color}`} />
-                  <span className="text-xs text-gray-500">{label}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
                 </div>
               ))}
             </div>

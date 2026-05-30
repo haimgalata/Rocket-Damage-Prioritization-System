@@ -7,7 +7,6 @@ import { EventsPage } from '../pages/admin/EventsPage';
 import { UserManagement } from '../pages/admin/UserManagement';
 import { ModelRunner } from '../pages/admin/ModelRunner';
 import { NewEventForm } from '../pages/operator/NewEventForm';
-import { FieldMapView } from '../pages/operator/FieldMapView';
 import { OperatorDashboard } from '../pages/operator/OperatorDashboard';
 import { OrgManagement } from '../pages/super-admin/OrgManagement';
 import { SuperAdminDashboard } from '../pages/super-admin/SuperAdminDashboard';
@@ -30,7 +29,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
 };
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="flex h-screen overflow-hidden bg-gray-50">
+  <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
     <Sidebar />
     <div className="flex-1 flex flex-col min-w-0 overflow-hidden">{children}</div>
   </div>
@@ -97,16 +96,7 @@ const AppRoutes: React.FC = () => (
         </ProtectedRoute>
       }
     />
-    <Route
-      path="/settings"
-      element={
-        <ProtectedRoute>
-          <AppLayout>
-            <UserProfile />
-          </AppLayout>
-        </ProtectedRoute>
-      }
-    />
+
 
     <Route
       path="/super-admin/dashboard"
@@ -210,17 +200,6 @@ const AppRoutes: React.FC = () => (
         </ProtectedRoute>
       }
     />
-    <Route
-      path="/operator/map"
-      element={
-        <ProtectedRoute allowedRoles={[UserRole.OPERATOR, UserRole.ADMIN, UserRole.SUPER_ADMIN]}>
-          <AppLayout>
-            <FieldMapView />
-          </AppLayout>
-        </ProtectedRoute>
-      }
-    />
-
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );

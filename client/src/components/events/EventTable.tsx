@@ -74,7 +74,11 @@ export const EventTable: React.FC<EventTableProps> = ({
         (e) =>
           (e.name ?? '').toLowerCase().includes(term) ||
           e.location.address.toLowerCase().includes(term) ||
-          e.location.city?.toLowerCase().includes(term)
+          e.location.city?.toLowerCase().includes(term) ||
+          e.description.toLowerCase().includes(term) ||
+          String(e.id).includes(term) ||
+          (e.tags ?? []).some((t) => t.toLowerCase().includes(term)) ||
+          (e.llmExplanation ?? '').toLowerCase().includes(term)
       )
     : events;
 
@@ -102,29 +106,29 @@ export const EventTable: React.FC<EventTableProps> = ({
       : <ArrowDown className="w-3.5 h-3.5 mr-1 text-blue-500 inline" />;
   };
 
-  const thClass = 'px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 select-none';
-  const tdClass = 'px-4 py-3 text-sm text-gray-700 align-middle';
+  const thClass = 'px-3 md:px-4 py-2.5 md:py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider bg-gray-50 dark:bg-gray-700 select-none';
+  const tdClass = 'px-3 md:px-4 py-2.5 md:py-3 text-sm text-gray-700 dark:text-gray-300 align-middle';
 
   return (
-    <div>
-      <div className="px-4 py-3 border-b border-gray-100">
-        <div className="relative max-w-sm">
+    <div className="dark:bg-gray-800">
+      <div className="px-3 md:px-4 py-2.5 md:py-3 border-b border-gray-100 dark:border-gray-700">
+        <div className="relative w-full max-w-sm">
           <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           <input
             type="text"
-            placeholder="חיפוש לפי שם או כתובת…"
+            placeholder="חיפוש לפי שם, קוד, תגיות, תיאור…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pr-8 pl-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white
-              focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-text placeholder-gray-400"
+            className="w-full pr-8 pl-3 py-1.5 text-sm border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700
+              text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300 cursor-text placeholder-gray-400 dark:placeholder-gray-500 text-right"
           />
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
+      <div className="overflow-x-auto -webkit-overflow-scrolling-touch">
+        <table className="w-full border-collapse min-w-[540px]">
           <thead>
-            <tr className="border-b border-gray-200">
+            <tr className="border-b border-gray-200 dark:border-gray-700">
               <th className={thClass}>אירוע</th>
               {!compact && <th className={thClass}>תיאור</th>}
               <th className={`${thClass} cursor-pointer hover:bg-gray-100`} onClick={() => handleSort('priorityScore')}>
@@ -176,8 +180,8 @@ export const EventTable: React.FC<EventTableProps> = ({
               return (
                 <tr
                   key={event.id}
-                  className={`border-b border-gray-100 transition-colors ${
-                    isHidden ? 'opacity-50 bg-gray-50' : isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'
+                  className={`border-b border-gray-100 dark:border-gray-700 transition-colors ${
+                    isHidden ? 'opacity-50 bg-gray-50 dark:bg-gray-900' : isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
                   }`}
                 >
                   <td className={tdClass}>
@@ -186,11 +190,11 @@ export const EventTable: React.FC<EventTableProps> = ({
                       <div>
                         <button
                           onClick={() => onSelectEvent?.(event)}
-                          className="font-medium text-blue-700 hover:text-blue-900 hover:underline text-xs cursor-pointer transition"
+                          className="font-medium text-blue-700 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 hover:underline text-xs cursor-pointer transition text-right block w-full"
                         >
                           {event.name || event.location.address || `Event #${String(event.id).slice(-3)}`}
                         </button>
-                        <p className="text-gray-500 text-xs">{event.location.address}</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-xs">{event.location.address}</p>
                         {orgMap[event.organizationId] && (
                           <p className="text-xs text-purple-600 font-medium">{orgMap[event.organizationId]}</p>
                         )}
@@ -210,7 +214,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                       <GisSpinner />
                     ) : (
                       <div className="flex items-center gap-1.5">
-                        <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="w-16 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full ${
                               event.priorityScore >= 7.5 ? 'bg-red-500'
@@ -235,13 +239,15 @@ export const EventTable: React.FC<EventTableProps> = ({
                   </td>
 
                   <td className={tdClass}>
-                    <span className="text-xs font-medium text-gray-700">
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
                       {event.damageScore}/10
                       {event.damageClassification && (
                         <span className={`mr-1 text-xs px-1 py-0.5 rounded ${
                           event.damageClassification === 'Heavy'
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-yellow-100 text-yellow-700'
+                            ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400'
+                            : event.damageClassification === 'Medium'
+                            ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400'
+                            : 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400'
                         }`}>
                           {getDamageLabel(event.damageClassification ?? '')}
                         </span>
@@ -258,10 +264,10 @@ export const EventTable: React.FC<EventTableProps> = ({
                         className={`text-xs font-medium rounded-full px-2 py-1 border cursor-pointer
                           focus:outline-none focus:ring-1 focus:ring-blue-400 ${
                           event.status === EventStatus.NEW
-                            ? 'bg-yellow-100 text-yellow-800 border-yellow-300'
+                            ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 border-yellow-300 dark:border-yellow-700'
                             : event.status === EventStatus.IN_PROGRESS
-                            ? 'bg-blue-100 text-blue-800 border-blue-300'
-                            : 'bg-green-100 text-green-800 border-green-300'
+                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 border-blue-300 dark:border-blue-700'
+                            : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border-green-300 dark:border-green-700'
                         }`}
                       >
                         <option value={EventStatus.NEW}>חדש</option>
@@ -277,7 +283,7 @@ export const EventTable: React.FC<EventTableProps> = ({
 
                   {!compact && (
                     <td className={tdClass}>
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
                         <Calendar className="w-3.5 h-3.5" />
                         {formatDate(event.createdAt)}
                       </div>
@@ -289,7 +295,7 @@ export const EventTable: React.FC<EventTableProps> = ({
                       <button
                         type="button"
                         onClick={() => onSelectEvent?.(event)}
-                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 font-medium transition cursor-pointer"
+                        className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         תצוגה מהירה

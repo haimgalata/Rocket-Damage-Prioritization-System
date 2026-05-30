@@ -23,6 +23,7 @@ export interface EventStatusHistoryEntry {
 
 export const DamageClassification = {
   LIGHT: 'Light',
+  MEDIUM: 'Medium',
   HEAVY: 'Heavy',
 } as const;
 export type DamageClassification = (typeof DamageClassification)[keyof typeof DamageClassification];

@@ -9,8 +9,8 @@ export interface TestTemplate {
   city: string;
   imagePath: string;
   expected: {
-    aiClassification: 'Heavy' | 'Light';
-    damageScore: 7 | 3;
+    aiClassification: 'Heavy' | 'Medium' | 'Light';
+    damageScore: 7 | 5 | 3;
     note: string;
   };
 }
@@ -110,6 +110,26 @@ export const TEST_TEMPLATES: TestTemplate[] = [
       aiClassification: 'Light',
       damageScore: 3,
       note: 'Maximum isolation — all GIS distances beyond 15 km → multiplier minimum → lowest possible priority',
+    },
+  },
+  {
+    id: 'tpl-medium-tlv',
+    name: 'תל אביב — נזק בינוני לבניין',
+    description:
+      '[TEST] Moderate structural damage to a 4-story mixed-use building in Neve Tzedek. ' +
+      'Two internal load-bearing walls cracked, upper floors evacuated for assessment. ' +
+      'No full collapse but building uninhabitable pending structural review. ' +
+      '| EXPECTED → AI: Medium (score 5) | GIS: dense urban → multiplier ~1.7 | Final priority ≈ 7.5–9.0',
+    tags: 'structural, medium, test',
+    lat: 32.05700,
+    lng: 34.75800,
+    address: 'שכונת נווה צדק, תל אביב',
+    city: 'תל אביב',
+    imagePath: '/test-images/medium_01.jpg',
+    expected: {
+      aiClassification: 'Medium',
+      damageScore: 5,
+      note: 'Dense urban Tel Aviv — medium damage with high GIS multiplier → critical-range priority',
     },
   },
   {

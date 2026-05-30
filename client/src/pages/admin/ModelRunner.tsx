@@ -81,7 +81,7 @@ export const ModelRunner: React.FC = () => {
   };
 
   return (
-    <PageContainer title="מריץ מודל AI">
+    <PageContainer title="מודל AI">
       <div className="max-w-4xl mx-auto space-y-6">
         <Card>
           <div className="flex items-start gap-5">
@@ -90,25 +90,24 @@ export const ModelRunner: React.FC = () => {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
-                <h3 className="text-lg font-bold text-gray-900">PrioritAI-v2.1</h3>
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">פעיל</span>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">PrioritAI-v2.1</h3>
+                <span className="text-xs bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full font-medium">פעיל</span>
               </div>
-              <p className="text-sm text-gray-500 mb-4">
-                מודל הערכת נזקים ותיעדוף, אומן על 50,000+ אירועי נזק בניינים.
-                משלב ניתוח חזותי עם גורמי מיקום והקשר.
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                מודל הערכת נזקים ע"י עיבוד תמונה.
               </p>
               <div className="grid grid-cols-3 gap-4 text-center">
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-gray-900">94.7%</p>
-                  <p className="text-xs text-gray-500 mt-0.5">דיוק</p>
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">76%</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">דיוק</p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-gray-900">~0.4s</p>
-                  <p className="text-xs text-gray-500 mt-0.5">לאירוע</p>
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">~0.4s</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">לאירוע</p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-gray-900">v2.1</p>
-                  <p className="text-xs text-gray-500 mt-0.5">גרסה</p>
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">v2.1</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">גרסה</p>
                 </div>
               </div>
             </div>
@@ -119,19 +118,19 @@ export const ModelRunner: React.FC = () => {
           {isRunning ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between text-sm mb-1">
-                <span className="text-gray-600 flex items-center gap-2">
+                <span className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
                   <Cpu className="w-4 h-4 animate-pulse text-blue-500" />
                   מעבד אירועים...
                 </span>
-                <span className="font-semibold text-blue-600">{progress}%</span>
+                <span className="font-semibold text-blue-600 dark:text-blue-400">{progress}%</span>
               </div>
-              <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
                 הוערכו {Math.round((progress / 100) * pendingEvents.length)} מתוך {pendingEvents.length} אירועים
               </p>
             </div>
@@ -146,7 +145,7 @@ export const ModelRunner: React.FC = () => {
                 {pendingEvents.length === 0 ? 'אין אירועים בסטטוס חדש' : `הפעל על ${pendingEvents.length} אירועים`}
               </Button>
               {pendingEvents.length === 0 && (
-                <p className="text-sm text-gray-500 flex items-center gap-1.5">
+                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
                   <CheckCircle className="w-4 h-4 text-green-500" />
                   כל האירועים קיבלו ציון
                 </p>
@@ -159,26 +158,26 @@ export const ModelRunner: React.FC = () => {
           <Card title="היסטוריית הרצות" subtitle="הרצות מודל קודמות">
             <div className="space-y-3">
               {runs.map((run) => (
-                <div key={run.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                  <div className="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Zap className="w-4 h-4 text-green-600" />
+                <div key={run.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-100 dark:border-gray-600">
+                  <div className="w-9 h-9 bg-green-100 dark:bg-green-900/40 rounded-lg flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-green-600 dark:text-green-400" />
                   </div>
                   <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                     <div>
-                      <p className="text-xs text-gray-500">חותמת זמן</p>
-                      <p className="font-medium text-gray-900">{run.timestamp.toLocaleTimeString()}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">חותמת זמן</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">{run.timestamp.toLocaleTimeString()}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">אירועים</p>
-                      <p className="font-medium text-gray-900">{run.eventsProcessed} הוערכו</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">אירועים</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">{run.eventsProcessed} הוערכו</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">משך</p>
-                      <p className="font-medium text-gray-900">{run.duration}s</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">משך</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">{run.duration}s</p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">עדיפות ממוצעת</p>
-                      <p className="font-medium text-gray-900">{run.avgPriorityBefore} → {run.avgPriorityAfter}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">עדיפות ממוצעת</p>
+                      <p className="font-medium text-gray-900 dark:text-gray-100">{run.avgPriorityBefore} → {run.avgPriorityAfter}</p>
                     </div>
                   </div>
                   <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
