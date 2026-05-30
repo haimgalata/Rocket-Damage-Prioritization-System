@@ -60,15 +60,18 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({ event, isOpen, o
         />
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700">תיאור</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">תיאור</label>
           <textarea
             {...register('description')}
             rows={4}
             className={`w-full text-sm border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none
-              ${errors.description ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white hover:border-gray-400'}`}
+              text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+              ${errors.description
+                ? 'border-red-400 bg-red-50 dark:bg-red-900/20 dark:border-red-700'
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500'}`}
           />
           {errors.description && (
-            <p className="text-xs text-red-600">{errors.description.message}</p>
+            <p className="text-xs text-red-600 dark:text-red-400">{errors.description.message}</p>
           )}
         </div>
 
@@ -78,7 +81,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({ event, isOpen, o
           {...register('tags')}
         />
 
-        <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
+        <div className="flex justify-end gap-3 pt-2 border-t border-gray-100 dark:border-gray-700">
           <Button type="button" variant="ghost" onClick={onClose}>
             ביטול
           </Button>

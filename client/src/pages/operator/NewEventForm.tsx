@@ -338,27 +338,22 @@ export const NewEventForm: React.FC = () => {
 
     const score = newEvent.priorityScore;
     const eventId = newEvent.id;
-    if (score >= 7.5) {
-      addNotification({
-        id: `notif-${Date.now()}`,
-        title: 'אירוע קריטי זוהה',
-        message: `אירוע חדש ב-${loc.address} קיבל ציון ${score.toFixed(1)}/10. נדרשת תגובה מיידית.`,
-        type: 'critical',
-        read: false,
-        createdAt: new Date(),
-        eventId,
-      });
-    } else if (score >= 5.0) {
-      addNotification({
-        id: `notif-${Date.now()}`,
-        title: 'אירוע בעדיפות גבוהה',
-        message: `אירוע חדש ב-${loc.address} הוערך בעדיפות ${score.toFixed(1)}/10.`,
-        type: 'warning',
-        read: false,
-        createdAt: new Date(),
-        eventId,
-      });
-    }
+    const notifType = score >= 7.5 ? 'critical' : score >= 5.0 ? 'warning' : 'success';
+    const notifTitle = score >= 7.5 ? 'אירוע קריטי זוהה' : score >= 5.0 ? 'אירוע בעדיפות גבוהה' : 'אירוע חדש נוצר';
+    const notifMsg = score >= 7.5
+      ? `אירוע חדש ב-${loc.address} קיבל ציון ${score.toFixed(1)}/10. נדרשת תגובה מיידית.`
+      : score >= 5.0
+      ? `אירוע חדש ב-${loc.address} הוערך בעדיפות ${score.toFixed(1)}/10.`
+      : `אירוע "${data.name}" נוצר ונוקד ${score.toFixed(1)}/10.`;
+    addNotification({
+      id: `notif-${Date.now()}`,
+      title: notifTitle,
+      message: notifMsg,
+      type: notifType,
+      read: false,
+      createdAt: new Date(),
+      eventId,
+    });
 
     if (usedFallback) {
       addNotification({
@@ -393,12 +388,8 @@ export const NewEventForm: React.FC = () => {
           <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">מודל AI פועל</h2>
-          <p className="text-gray-500 mb-1">שולח לשרת · מסווג נזק · מחשב ציון עדיפות GIS...</p>
-          <div className="flex items-center justify-center gap-2 mt-4">
-            <Brain className="w-4 h-4 text-blue-500 animate-pulse" />
-            <span className="text-sm text-blue-600 font-medium">Vision AI → ניתוח GIS → ציון סופי</span>
-          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">מודל AI פועל</h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-1">שולח לשרת · מסווג נזק · מחשב ציון עדיפות GIS...</p>
           {apiError && (
             <div className="mt-6 flex items-center gap-2 justify-center text-amber-600 text-sm">
               <WifiOff className="w-4 h-4" /> {apiError}
@@ -416,8 +407,8 @@ export const NewEventForm: React.FC = () => {
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">האירוע נשלח ונוקד</h2>
-          <p className="text-gray-500">הדוח נותח על ידי AI והוסף לתור העדיפויות.</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">האירוע נשלח ונוקד</h2>
+          <p className="text-gray-500 dark:text-gray-400">הדוח נותח על ידי AI והוסף לתור העדיפויות.</p>
         </div>
       </PageContainer>
     );
@@ -426,17 +417,17 @@ export const NewEventForm: React.FC = () => {
   return (
     <PageContainer title="דיווח על אירוע נזק חדש">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-4 flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5">
+        <div className="mb-4 flex items-center gap-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg px-4 py-2.5">
           <Brain className="w-4 h-4 text-blue-500 flex-shrink-0" />
-          <p className="text-xs text-blue-700">
+          <p className="text-xs text-blue-700 dark:text-blue-400">
             עם שליחה, מודל ה-AI יסווג את הנזק ויחשב את ציון העדיפות באמצעות נתוני GIS.
           </p>
         </div>
 
-        <div className="mb-4 border border-amber-200 bg-amber-50 rounded-lg p-3">
+        <div className="mb-4 border border-amber-200 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3">
           <div className="flex items-center gap-2 mb-2">
-            <FlaskConical className="w-4 h-4 text-amber-600 flex-shrink-0" />
-            <span className="text-sm font-semibold text-amber-800">טעינה מהירה של תבנית בדיקה</span>
+            <FlaskConical className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <span className="text-sm font-semibold text-amber-800 dark:text-amber-400">טעינה מהירה של תבנית בדיקה</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {TEST_TEMPLATES.map((tpl) => (
@@ -444,17 +435,17 @@ export const NewEventForm: React.FC = () => {
                 key={tpl.id}
                 type="button"
                 onClick={() => loadTemplate(tpl.id)}
-                className="px-3 py-1.5 text-xs font-medium rounded-md bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 transition"
+                className="px-3 py-1.5 text-xs font-medium rounded-md bg-white dark:bg-gray-700 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition"
               >
                 {tpl.expected.aiClassification === 'Heavy' ? '🔴' : tpl.expected.aiClassification === 'Medium' ? '🟠' : '🟡'} {tpl.city}
               </button>
             ))}
           </div>
           {templateImagePath && (
-            <div className="mt-2 p-2 bg-white border border-amber-300 rounded text-xs text-amber-700">
+            <div className="mt-2 p-2 bg-white dark:bg-gray-700 border border-amber-300 dark:border-amber-700 rounded text-xs text-amber-700 dark:text-amber-400">
               <strong>📂 נדרשת תמונה ידנית:</strong> אנא לחץ על אזור העלאת התמונה ובחר:
               <br />
-              <code className="bg-amber-100 px-1 rounded">{templateImagePath.replace('/test-images/', 'client/public/test-images/')}</code>
+              <code className="bg-amber-100 dark:bg-amber-900/30 px-1 rounded">{templateImagePath.replace('/test-images/', 'client/public/test-images/')}</code>
             </div>
           )}
         </div>
@@ -464,27 +455,27 @@ export const NewEventForm: React.FC = () => {
           <Card title="תיאור האירוע">
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
                   שם האירוע <span className="text-red-500">*</span>
                 </label>
                 <input
                   {...register('name')}
                   placeholder="לדוגמה: קריסת חזית דיזנגוף"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 {errors.name && (
                   <p className="text-xs text-red-600 mt-1">{errors.name.message}</p>
                 )}
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
                   תיאור הנזק <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   {...register('description')}
                   rows={4}
-                  placeholder="תאר את הנזק — סוג, אזור מושפע, סכנות גלויות, היקף משוער..."
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  placeholder="תאר את הנזק- סוג, אזור מושפע, סכנות גלויות, היקף משוער..."
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
                 {errors.description && (
                   <p className="text-xs text-red-600 mt-1">{errors.description.message}</p>
@@ -501,13 +492,13 @@ export const NewEventForm: React.FC = () => {
           {user?.role === UserRole.SUPER_ADMIN && (
             <Card title="ארגון">
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">
                   ארגון עבור אירוע זה <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={superAdminOrgId}
                   onChange={(e) => setSuperAdminOrgId(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
                   <option value="">בחר ארגון…</option>
@@ -528,7 +519,7 @@ export const NewEventForm: React.FC = () => {
           <Card title="מיקום">
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-700 block mb-1">כתובת</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300 block mb-1">כתובת</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -536,13 +527,13 @@ export const NewEventForm: React.FC = () => {
                     onChange={(e) => setAddressInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddressSearch(); } }}
                     placeholder="הקלד כתובת ולחץ חיפוש..."
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <button
                     type="button"
                     onClick={handleAddressSearch}
                     disabled={addressSearching}
-                    className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition disabled:opacity-60"
+                    className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg transition disabled:opacity-60"
                   >
                     {addressSearching
                       ? <Loader2 className="w-4 h-4 animate-spin" />
@@ -556,7 +547,7 @@ export const NewEventForm: React.FC = () => {
                 type="button"
                 onClick={handleGeolocation}
                 disabled={geoLoading}
-                className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-blue-300 hover:border-blue-500 hover:bg-blue-50 text-blue-600 rounded-lg text-sm font-medium transition disabled:opacity-60"
+                className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-blue-300 dark:border-blue-700 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-medium transition disabled:opacity-60"
               >
                 <Navigation className={`w-4 h-4 ${geoLoading ? 'animate-pulse' : ''}`} />
                 {geoLoading ? 'מאתר מיקומך...' : 'השתמש במיקום הנוכחי'}
@@ -573,7 +564,7 @@ export const NewEventForm: React.FC = () => {
             </div>
           </Card>
 
-          <Card title="עדות צילומית">
+          <Card title="תיעוד">
             {imagePreview ? (
               <div className="relative">
                 <img
@@ -596,16 +587,16 @@ export const NewEventForm: React.FC = () => {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-gray-200 hover:border-blue-400 rounded-xl p-10 text-center bg-gray-50 hover:bg-blue-50 transition group"
+                className="w-full border-2 border-dashed border-gray-200 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 rounded-xl p-10 text-center bg-gray-50 dark:bg-gray-700/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition group"
               >
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 bg-gray-100 group-hover:bg-blue-100 rounded-full flex items-center justify-center transition">
-                    <ImageIcon className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition" />
+                  <div className="w-12 h-12 bg-gray-100 dark:bg-gray-600 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/40 rounded-full flex items-center justify-center transition">
+                    <ImageIcon className="w-6 h-6 text-gray-400 dark:text-gray-400 group-hover:text-blue-500 transition" />
                   </div>
-                  <p className="text-sm font-medium text-gray-600 group-hover:text-blue-600">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                     לחץ להעלאת תמונה
                   </p>
-                  <p className="text-xs text-gray-400">PNG, JPG, WEBP</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">PNG, JPG, WEBP</p>
                 </div>
               </button>
             )}

@@ -104,7 +104,7 @@ export const UserProfile: React.FC = () => {
             </div>
           </div>
           <div className="ml-auto text-right text-xs text-blue-300">
-            <p>חבר מאז</p>
+            <p>נוצר בתאריך</p>
             <p className="font-semibold text-white">{formatDate(user.createdAt)}</p>
           </div>
         </div>

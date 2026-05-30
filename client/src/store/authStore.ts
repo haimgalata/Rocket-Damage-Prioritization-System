@@ -139,6 +139,18 @@ export const useAuthStore = create<AuthStoreState>()(
   )
 );
 
+interface SidebarStoreState {
+  mobileOpen: boolean;
+  toggleMobile: () => void;
+  closeMobile: () => void;
+}
+
+export const useSidebarStore = create<SidebarStoreState>()((set) => ({
+  mobileOpen: false,
+  toggleMobile: () => set((s) => ({ mobileOpen: !s.mobileOpen })),
+  closeMobile: () => set({ mobileOpen: false }),
+}));
+
 export const useNotificationStore = create<NotificationStoreState>()(
   devtools(
     (set, get) => ({
