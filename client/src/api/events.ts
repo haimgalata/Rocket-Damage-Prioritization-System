@@ -20,6 +20,15 @@ export async function fetchEventById(
   return parseDamageEvent(data as Record<string, unknown>);
 }
 
+export async function deleteEventApi(id: number): Promise<void> {
+  const res = await apiFetch(`/events/${id}`, { method: 'DELETE' });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    const detail = (data as { detail?: string }).detail;
+    throw new Error(typeof detail === 'string' ? detail : `Delete failed (${res.status})`);
+  }
+}
+
 export async function patchEventApi(
   id: number,
   body: { status?: EventStatus; hidden?: boolean }

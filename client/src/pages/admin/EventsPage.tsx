@@ -10,7 +10,7 @@ import { EventMap } from '../../components/maps/MapContainer';
 import { EventDetailView } from '../../components/events/EventDetailView';
 import { useEventStore } from '../../store/eventStore';
 import { useNotificationStore } from '../../store/authStore';
-import { patchEventApi } from '../../api/events';
+import { patchEventApi, deleteEventApi } from '../../api/events';
 import { useAuth } from '../../hooks';
 import { fetchOrganizations } from '../../api/organizations';
 import { fetchUsers } from '../../api/auth';
@@ -24,7 +24,7 @@ type FilterStatus = 'all' | EventStatus;
 
 export const EventsPage: React.FC = () => {
   const { user } = useAuth();
-  const { events, setEvents, updateEvent } = useEventStore();
+  const { events, setEvents, updateEvent, deleteEvent } = useEventStore();
   const { addNotification } = useNotificationStore();
   const [searchParams] = useSearchParams();
   const orgFilter = searchParams.get('org');
@@ -107,6 +107,28 @@ export const EventsPage: React.FC = () => {
         createdAt: new Date(),
         eventId: id,
       });
+    }
+  };
+
+  const handleDeleteEvent = async (event: DamageEvent) => {
+    try {
+      await deleteEventApi(event.id);
+      deleteEvent(event.id);
+      if (selectedEvent?.id === event.id) {
+        setSelectedEvent(null);
+        setIsDetailOpen(false);
+      }
+      addNotification({
+        id: `delete-${Date.now()}`,
+        title: 'אירוע נמחק',
+        message: `אירוע "${event.name ?? `#${event.id}`}" נמחק בהצלחה.`,
+        type: 'info',
+        read: false,
+        createdAt: new Date(),
+        eventId: event.id,
+      });
+    } catch {
+      /* forbidden or network */
     }
   };
 
@@ -227,6 +249,7 @@ export const EventsPage: React.FC = () => {
             onSelectEvent={handleSelectEvent}
             onEditEvent={handleEditEvent}
             onToggleHide={handleToggleHide}
+            onDeleteEvent={handleDeleteEvent}
             onUpdateStatus={async (id, status) => {
               try {
                 const updated = await patchEventApi(id, { status });

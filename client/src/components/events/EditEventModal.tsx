@@ -50,7 +50,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({ event, isOpen, o
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`עריכת אירוע — #${String(event.id).slice(-3)}`} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={`עריכת אירוע- #${String(event.id).slice(-3)}`} size="md">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
         <Input

@@ -137,9 +137,9 @@ async def delete_event_route(
     event_id: str,
     current: Annotated[User, Depends(get_current_user)],
 ) -> None:
-    """Delete event and all its children. Admin and super_admin only."""
-    if not _can_change_status(current):
-        raise HTTPException(status_code=403, detail="Only admins can delete events")
+    """Delete event and all its children. Super admin only."""
+    if _role_name(current) != "super_admin":
+        raise HTTPException(status_code=403, detail="Only super admins can delete events")
     existing = get_event(event_id)
     if existing is None:
         raise HTTPException(status_code=404, detail="Event not found")
