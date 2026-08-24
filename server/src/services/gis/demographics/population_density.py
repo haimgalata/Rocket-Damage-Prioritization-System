@@ -3,12 +3,14 @@ import pandas as pd
 from shapely.geometry import Point
 import os
 import logging
+import threading
 
 logger = logging.getLogger(__name__)
 
 _gdf = None
 _df_pop = None
 _pop_col = None
+_load_lock = threading.Lock()
 
 
 def _get_data_path() -> tuple[str, str]:
@@ -22,58 +24,71 @@ def _get_data_path() -> tuple[str, str]:
 
 
 def preload_population_data() -> None:
-    """Load CBS shapefile and population Excel into memory once at startup."""
+    """Load CBS shapefile and population Excel into memory once at startup.
+
+    Thread-safe via double-checked locking: concurrent first-callers (e.g. from the
+    GIS pipeline's thread pool, before main.py's startup preload has had a chance to
+    run) will block on `_load_lock` rather than racing into duplicate/overlapping
+    loads of the same files.
+    """
     global _gdf, _df_pop, _pop_col
 
-    shapefile_path, excel_path = _get_data_path()
-    if not os.path.exists(shapefile_path) or not os.path.exists(excel_path):
-        logger.warning("[CBS] Data files not found — population density will return 0.0")
+    if _gdf is not None:
         return
 
-    try:
-        logger.info("[CBS] Loading shapefile...")
-        _gdf = gpd.read_file(shapefile_path)
+    with _load_lock:
+        if _gdf is not None:
+            return
 
-        def to_8_digit(val):
-            try:
-                if pd.isna(val) or str(val).strip() == "":
+        shapefile_path, excel_path = _get_data_path()
+        if not os.path.exists(shapefile_path) or not os.path.exists(excel_path):
+            logger.warning("[CBS] Data files not found — population density will return 0.0")
+            return
+
+        try:
+            logger.info("[CBS] Loading shapefile...")
+            _gdf = gpd.read_file(shapefile_path)
+
+            def to_8_digit(val):
+                try:
+                    if pd.isna(val) or str(val).strip() == "":
+                        return None
+                    return str(int(float(str(val).replace('"', '').strip()))).zfill(8)
+                except Exception:
                     return None
-                return str(int(float(str(val).replace('"', '').strip()))).zfill(8)
-            except Exception:
-                return None
 
-        _gdf['JOIN_KEY'] = _gdf['YISHUV_STA'].apply(to_8_digit)
+            _gdf['JOIN_KEY'] = _gdf['YISHUV_STA'].apply(to_8_digit)
 
-        logger.info("[CBS] Loading population Excel...")
-        xls = pd.ExcelFile(excel_path)
-        sheet = xls.sheet_names[1] if len(xls.sheet_names) > 1 else xls.sheet_names[0]
-        _df_pop = xls.parse(sheet, skiprows=6)
-        _df_pop.columns = [str(c).strip().upper() for c in _df_pop.columns]
+            logger.info("[CBS] Loading population Excel...")
+            xls = pd.ExcelFile(excel_path)
+            sheet = xls.sheet_names[1] if len(xls.sheet_names) > 1 else xls.sheet_names[0]
+            _df_pop = xls.parse(sheet, skiprows=6)
+            _df_pop.columns = [str(c).strip().upper() for c in _df_pop.columns]
 
-        _pop_col = next(
-            (c for c in _df_pop.columns if 'POPULATION' in c or 'אוכלוסייה' in c),
-            None,
-        )
+            _pop_col = next(
+                (c for c in _df_pop.columns if 'POPULATION' in c or 'אוכלוסייה' in c),
+                None,
+            )
 
-        def create_excel_neighborhood_key(row):
-            try:
-                yishuv = str(int(float(row['CODE']))).zfill(4)
-                se_val = str(row.get('SE', '')).strip().replace('"', '')
-                if any(x in se_val for x in ["סה", "SA", "nan", ""]) or se_val == "0":
-                    se_code = "0000"
-                else:
-                    se_code = str(int(float(se_val))).zfill(4)
-                return yishuv + se_code
-            except Exception:
-                return None
+            def create_excel_neighborhood_key(row):
+                try:
+                    yishuv = str(int(float(row['CODE']))).zfill(4)
+                    se_val = str(row.get('SE', '')).strip().replace('"', '')
+                    if any(x in se_val for x in ["סה", "SA", "nan", ""]) or se_val == "0":
+                        se_code = "0000"
+                    else:
+                        se_code = str(int(float(se_val))).zfill(4)
+                    return yishuv + se_code
+                except Exception:
+                    return None
 
-        _df_pop['JOIN_KEY'] = _df_pop.apply(create_excel_neighborhood_key, axis=1)
-        logger.info("[CBS] Population data preloaded successfully.")
-    except Exception as exc:
-        logger.error(f"[CBS] Preload failed: {exc}")
-        _gdf = None
-        _df_pop = None
-        _pop_col = None
+            _df_pop['JOIN_KEY'] = _df_pop.apply(create_excel_neighborhood_key, axis=1)
+            logger.info("[CBS] Population data preloaded successfully.")
+        except Exception as exc:
+            logger.error(f"[CBS] Preload failed: {exc}")
+            _gdf = None
+            _df_pop = None
+            _pop_col = None
 
 
 def get_cbs_population_density(lat: float, lon: float) -> float:
