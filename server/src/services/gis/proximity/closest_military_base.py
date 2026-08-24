@@ -1,23 +1,25 @@
 """Nearest strategic-site proximity service (military bases and helipads)."""
 
 import logging
+import time
 
 import geopandas as gpd
-import osmnx as ox
-import pandas as pd
 from shapely.geometry import Point
 from osmnx._errors import InsufficientResponseError
 from server.src.services.gis.proximity.osm_query import features_from_point as osm_features_from_point
 
-ox.settings.timeout = 25
-ox.settings.use_cache = True
 logger = logging.getLogger(__name__)
 
 
-def distance_to_closest_military_or_helipad(lat: float, lon: float):
+def distance_to_closest_military_or_helipad(lat: float, lon: float, deadline: float | None = None):
     """Compute the straight-line distance to the nearest strategic site.
 
-    Returns (distance_m, found_lat, found_lon) or -1 if not found within 15 km.
+    `deadline` is an absolute `time.monotonic()` timestamp; once reached, no further
+    search radius is attempted (see osm_query.features_from_point for how a single
+    radius's own network attempts are bounded by the same deadline).
+
+    Returns (distance_m, found_lat, found_lon) or -1 if not found within 15 km, or
+    if the deadline was reached before a match could be confirmed.
     """
     search_radii = [5000, 10000, 15000]
 
@@ -27,11 +29,15 @@ def distance_to_closest_military_or_helipad(lat: float, lon: float):
     }
 
     for radius in search_radii:
+        if deadline is not None and time.monotonic() >= deadline:
+            logger.warning(f"[GIS:military] Deadline reached before radius={radius}m for ({lat},{lon})")
+            break
         try:
             combined_gdf = osm_features_from_point(
                 (lat, lon),
                 tags=tags,
-                dist=radius
+                dist=radius,
+                deadline=deadline,
             )
         except InsufficientResponseError:
             logger.debug(f"[GIS:military] No features at radius={radius}m for ({lat},{lon})")

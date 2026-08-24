@@ -21,6 +21,7 @@ import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from starlette.concurrency import run_in_threadpool
 
 from server.src.api.deps import get_current_user
 from server.src.db.models import User
@@ -85,7 +86,11 @@ async def analyze(
         image_bytes = await image.read()
 
         ai_result    = run_classification(image_bytes)
-        gis_features = get_gis_features(lat, lon)
+        # Offloaded to a worker thread: get_gis_features() is a blocking, synchronous
+        # call (network I/O to Overpass); running it inline on this async endpoint
+        # would stall the whole event loop — and every other concurrent request on
+        # this server — for the GIS pipeline's full duration.
+        gis_features = await run_in_threadpool(get_gis_features, lat, lon)
         final_score, multiplier = compute_priority(ai_result["damage_score"], gis_features)
         explanation  = build_explanation(
             ai_result["classification"], ai_result["damage_score"],
